@@ -12,7 +12,7 @@ int __cxa_atexit(void (*)(void *), void *, void *)
 void __cxa_pure_virtual()
 {
         while (true)
-                cpu::assembly::hlt();
+                cpu::hlt();
 }
 
 void *__dso_handle;

@@ -4,8 +4,6 @@ namespace kernel {
 
 namespace lib {
 
-namespace typing {
-
 // signed types
 using i8                = signed char;
 using i16               = signed short;
@@ -22,7 +20,11 @@ using u64               = unsigned long long;
 using usize             = u64;
 using uptr              = u64;
 
-} /* namespace typing */
+// Status type
+enum class Status {
+        Err,
+        Ok
+};
 
 } /* namespace lib */
 

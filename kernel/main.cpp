@@ -1,9 +1,9 @@
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
+#include <drivers/serial.hpp>
 #include <lib/typing.hpp>
 
 using namespace kernel;
-using namespace kernel::lib::typing;
 
 namespace {
 
@@ -27,14 +27,22 @@ extern void (*__init_array_end[])();
 
 extern "C" void kernel_main()
 {
-        if (limine_base_revision.is_supported()) {
+        if (!limine_base_revision.is_supported()) {
                 while (true)
-                        cpu::assembly::hlt();
+                        cpu::hlt();
         }
 
-        for (u64 i = 0; &__init_array[i] != __init_array_end; i++)
+        for (lib::u64 i = 0; &__init_array[i] != __init_array_end; i++)
                 __init_array[i]();
 
+        if (drivers::serial::init_port(drivers::serial::Port::COM1) != lib::Status::Ok)
+                cpu::hlt();     // no display device
+        
+        drivers::serial::send_byte(drivers::serial::Port::COM1, 'C');
+        drivers::serial::send_byte(drivers::serial::Port::COM1, 'O');
+        drivers::serial::send_byte(drivers::serial::Port::COM1, 'M');
+        drivers::serial::send_byte(drivers::serial::Port::COM1, '1');
+
         while (true)
-                cpu::assembly::hlt();
+                cpu::hlt();
 }

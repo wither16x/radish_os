@@ -2,7 +2,7 @@
 
 namespace kernel {
 
-namespace memory {
+namespace lib {
 
 extern "C" {
 
@@ -54,6 +54,6 @@ int memcmp(const void *s1, const void *s2, usize n) {
 
 } /* extern "C" */
 
-} /* namespace memory */
+} /* namespace lib */
 
 } /* namespace kernel */

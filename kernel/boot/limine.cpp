@@ -7,14 +7,14 @@ namespace boot {
 
 namespace limine {
 
-revision base_revision(u64 n)
+revision base_revision(lib::u64 n)
 {
         return LIMINE_BASE_REVISION(n);
 }
 
 bool revision::is_supported(this volatile revision& self)
 {
-        u64 _rev[] = {self.magic0, self.magic1, self.rev};
+        lib::u64 _rev[] = {self.magic0, self.magic1, self.rev};
         return LIMINE_BASE_REVISION_SUPPORTED(_rev);
 }
 
