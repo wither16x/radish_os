@@ -4,6 +4,8 @@
 
 namespace kernel {
 
+namespace boot {
+
 namespace limine {
 
 struct revision {
@@ -31,5 +33,7 @@ start_marker requests_start_marker();
 end_marker requests_end_marker();
 
 } /* namespace limine */
+
+} /* namespace boot */
 
 } /* namespace kernel */

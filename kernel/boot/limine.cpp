@@ -3,6 +3,8 @@
 
 namespace kernel {
 
+namespace boot {
+
 namespace limine {
 
 revision base_revision(u64 n)
@@ -27,5 +29,7 @@ end_marker requests_end_marker()
 }
 
 } /* namespace limine */
+
+} /* namespace boot */
 
 } /* namespace kernel */

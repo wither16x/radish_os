@@ -1,3 +1,7 @@
+#include <cpu/asm.hpp>
+
+using namespace kernel;
+
 extern "C" {
 
 int __cxa_atexit(void (*)(void *), void *, void *)
@@ -8,7 +12,7 @@ int __cxa_atexit(void (*)(void *), void *, void *)
 void __cxa_pure_virtual()
 {
         while (true)
-                __asm__("hlt");
+                cpu::assembly::hlt();
 }
 
 void *__dso_handle;
