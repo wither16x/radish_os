@@ -41,7 +41,14 @@ extern "C" void kernel_main()
                 cpu::hlt();     // no display device
         
         const char *name = "Wither__";
+        int age = 15;
+
         lib::println("Hello! My name is %s and its first letter is %c.", name, name[0]);
+        lib::println("I am %d years old.", age);
+        lib::println("My age in other notations:");
+        lib::println("* Binary: 0b%b", age);
+        lib::println("* Octal: 0o%o", age);
+        lib::println("* Hexadecimal: 0x%x", age);
 
         while (true)
                 cpu::hlt();

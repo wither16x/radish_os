@@ -38,6 +38,7 @@ COMMON_FLAGS := \
 	-Wextra \
 	-nostdlib \
 	-nostdinc \
+	-mcmodel=kernel \
 	-I.
 
 CXXFLAGS := $(COMMON_FLAGS) \

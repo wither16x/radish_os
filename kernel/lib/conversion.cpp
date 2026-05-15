@@ -1,0 +1,81 @@
+#include <lib/conversion.hpp>
+
+namespace kernel {
+
+namespace lib {
+
+char* itoa(isize n, int base)
+{
+        static char str[65];
+
+        if (base < 2 || base > 36) {
+                str[0] = '\0';
+                return str;
+        }
+
+        usize u;
+
+        bool neg = (n < 0) && (base == 10);
+
+        if (n < 0)
+                u = (usize)(-(n + 1)) + 1;
+        else
+                u = (usize)n;
+
+        char* p = str;
+
+        do {
+                *p++ = "0123456789abcdefghijklmnopqrstuvwxyz"[u % base];
+                u /= base;
+        } while (u);
+
+        if (neg)
+                *p++ = '-';
+
+        *p = '\0';
+
+        char* start = str;
+        char* end = p - 1;
+
+        while (start < end) {
+                char tmp = *start;
+                *start++ = *end;
+                *end-- = tmp;
+        }
+
+        return str;
+}
+
+char* utoa(usize n, int base)
+{
+        static char str[65];
+
+        if (base < 2 || base > 36) {
+                str[0] = '\0';
+                return str;
+        }
+
+        char* p = str;
+
+        do {
+                *p++ = "0123456789abcdefghijklmnopqrstuvwxyz"[n % base];
+                n /= base;
+        } while (n);
+
+        *p = '\0';
+
+        char* start = str;
+        char* end = p - 1;
+
+        while (start < end) {
+                char tmp = *start;
+                *start++ = *end;
+                *end-- = tmp;
+        }
+
+        return str;
+}
+
+} /* namespace lib */
+
+} /* namespace kernel */

@@ -1,4 +1,5 @@
 #include <drivers/serial.hpp>
+#include <lib/conversion.hpp>
 #include <lib/print.hpp>
 
 namespace kernel {
@@ -33,6 +34,41 @@ void vprintf(const char *fmt, va_list args)
                         break;
                 }
 
+                case 'b': {
+                        usize n = va_arg(args, usize);
+                        char *s = utoa(n, 2);
+                        print_string(s);
+                        break;
+                }
+
+                case 'o': {
+                        usize n = va_arg(args, usize);
+                        char *s = utoa(n, 8);
+                        print_string(s);
+                        break;
+                }
+
+                case 'd': {
+                        isize n = va_arg(args, isize);
+                        char *s = itoa(n, 10);
+                        print_string(s);
+                        break;
+                }
+
+                case 'u': {
+                        usize n = va_arg(args, usize);
+                        char *s = utoa(n, 10);
+                        print_string(s);
+                        break;
+                }
+
+                case 'x': {
+                        usize n = va_arg(args, usize);
+                        char *s = utoa(n, 16);
+                        print_string(s);
+                        break;
+                }
+
                 case 's': {
                         const char *s = va_arg(args, const char *);
                         print_string(s);
@@ -62,6 +98,7 @@ void println(const char *fmt, ...)
         va_start(args, fmt);
         vprintf(fmt, args);
         va_end(args);
+        print_string("\r\n");
 }
 
 } /* namespace lib */
