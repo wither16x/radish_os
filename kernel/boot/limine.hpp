@@ -8,6 +8,7 @@ namespace boot {
 
 namespace limine {
 
+// Limine base revision
 struct revision {
         u64 magic0;
         u64 magic1;
@@ -16,6 +17,7 @@ struct revision {
         bool is_supported(this volatile revision& self);
 };
 
+// Limine requests start marker
 struct start_marker {
         u64 magic0;
         u64 magic1;
@@ -23,6 +25,7 @@ struct start_marker {
         u64 magic3;
 };
 
+// Limine requests end marker
 struct end_marker {
         u64 magic0;
         u64 magic1;
