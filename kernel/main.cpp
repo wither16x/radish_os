@@ -1,8 +1,9 @@
 #include <boot/limine.hpp>
-#include <cpu/asm.hpp>
+#include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
 
 using namespace kernel;
+using namespace kernel::typing;
 
 namespace {
 

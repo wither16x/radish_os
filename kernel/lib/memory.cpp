@@ -2,6 +2,8 @@
 
 namespace kernel {
 
+namespace memory {
+
 extern "C" {
 
 void *memcpy(void *__restrict dest, const void *__restrict src, usize n) {
@@ -51,5 +53,7 @@ int memcmp(const void *s1, const void *s2, usize n) {
 }
 
 } /* extern "C" */
+
+} /* namespace memory */
 
 } /* namespace kernel */

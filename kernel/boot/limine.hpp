@@ -2,6 +2,8 @@
 
 #include <lib/typing.hpp>
 
+using namespace kernel::typing;
+
 namespace kernel {
 
 namespace boot {

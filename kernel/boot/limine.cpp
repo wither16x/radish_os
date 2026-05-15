@@ -1,6 +1,8 @@
 #include <boot/limine.hpp>
 #include <limine.h>
 
+using namespace kernel::typing;
+
 namespace kernel {
 
 namespace boot {

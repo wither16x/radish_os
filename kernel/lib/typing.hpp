@@ -2,6 +2,8 @@
 
 namespace kernel {
 
+namespace typing {
+
 // signed types
 using i8                = signed char;
 using i16               = signed short;
@@ -17,5 +19,7 @@ using u32               = unsigned int;
 using u64               = unsigned long long;
 using usize             = u64;
 using uptr              = u64;
+
+} /* namespace typing */
 
 } /* namespace kernel */

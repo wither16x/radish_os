@@ -2,7 +2,11 @@
 
 #include <lib/typing.hpp>
 
+using namespace kernel::typing;
+
 namespace kernel {
+
+namespace memory {
 
 extern "C" {
 
@@ -12,5 +16,7 @@ void *memmove(void *dest, const void *src, usize n);
 int memcmp(const void *s1, const void *s2, usize n);
 
 }
+
+} /* namespace memory */
 
 } /* namespace kernel */
