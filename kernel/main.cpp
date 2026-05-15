@@ -28,37 +28,23 @@ volatile unsigned long long limine_requests_end_marker[] = LIMINE_REQUESTS_END_M
 
 }
 
-namespace {
-
-void hcf()
-{
-        for (;;)
-                asm ("hlt");
-}
-
-}
-
-extern "C" {
-
-int __cxa_atexit(void (*)(void *), void *, void *) { return 0; }
-void __cxa_pure_virtual() { hcf(); }
-void *__dso_handle;
-
-}
-
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
 
 extern "C" void kernel_main()
 {
-        if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false)
-                hcf();
+        if (LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false) {
+                while (true)
+                        __asm__("hlt");
+        }
 
         for (unsigned long long i = 0; &__init_array[i] != __init_array_end; i++)
                 __init_array[i]();
 
-        if (framebuffer_request.response == nullptr || framebuffer_request.response->framebuffer_count < 1)
-                hcf();
+        if (framebuffer_request.response == nullptr || framebuffer_request.response->framebuffer_count < 1) {
+                while (true)
+                        __asm__("hlt");
+        }
 
         limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
@@ -71,5 +57,6 @@ extern "C" void kernel_main()
                 }
         }
 
-        hcf();
+        while (true)
+                __asm__("hlt");
 }
