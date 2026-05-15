@@ -2,6 +2,8 @@
 
 namespace kernel {
 
+namespace lib {
+
 namespace typing {
 
 // signed types
@@ -21,5 +23,7 @@ using usize             = u64;
 using uptr              = u64;
 
 } /* namespace typing */
+
+} /* namespace lib */
 
 } /* namespace kernel */

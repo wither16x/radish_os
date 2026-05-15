@@ -3,7 +3,7 @@
 #include <lib/typing.hpp>
 
 using namespace kernel;
-using namespace kernel::typing;
+using namespace kernel::lib::typing;
 
 namespace {
 
