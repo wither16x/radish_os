@@ -1,6 +1,7 @@
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <drivers/serial.hpp>
+#include <lib/print.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 
@@ -39,10 +40,7 @@ extern "C" void kernel_main()
         if (drivers::serial::init_port(drivers::serial::Port::COM1) != lib::Status::Ok)
                 cpu::hlt();     // no display device
         
-        drivers::serial::send_byte(drivers::serial::Port::COM1, 'C');
-        drivers::serial::send_byte(drivers::serial::Port::COM1, 'O');
-        drivers::serial::send_byte(drivers::serial::Port::COM1, 'M');
-        drivers::serial::send_byte(drivers::serial::Port::COM1, '1');
+        lib::print_string("Hello from COM1!\r\n");
 
         while (true)
                 cpu::hlt();
