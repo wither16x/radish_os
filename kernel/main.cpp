@@ -1,19 +1,20 @@
+#include <lib/typing.hpp>
 #include <limine.h>
 
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests")]]
-volatile unsigned long long limine_base_revision[] = LIMINE_BASE_REVISION(6);
+volatile kernel::u64 limine_base_revision[] = LIMINE_BASE_REVISION(6);
 
 }
 
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests_start")]]
-volatile unsigned long long limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
+volatile kernel::u64 limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
 
 [[gnu::used, gnu::section(".limine_requests_end")]]
-volatile unsigned long long limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
+volatile kernel::u64 limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
 }
 
@@ -27,7 +28,7 @@ extern "C" void kernel_main()
                         __asm__("hlt");
         }
 
-        for (unsigned long long i = 0; &__init_array[i] != __init_array_end; i++)
+        for (kernel::u64 i = 0; &__init_array[i] != __init_array_end; i++)
                 __init_array[i]();
 
         while (true)
