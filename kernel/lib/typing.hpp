@@ -20,12 +20,6 @@ using u64               = unsigned long long;
 using usize             = u64;
 using uptr              = u64;
 
-// Status type
-enum class Status {
-        Err,
-        Ok
-};
-
 } /* namespace lib */
 
 } /* namespace kernel */

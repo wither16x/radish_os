@@ -1,6 +1,7 @@
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <drivers/serial.hpp>
+#include <lib/status.hpp>
 #include <lib/typing.hpp>
 
 using namespace kernel;

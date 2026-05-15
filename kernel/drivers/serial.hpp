@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lib/status.hpp>
 #include <lib/typing.hpp>
 
 namespace kernel {
