@@ -40,7 +40,8 @@ extern "C" void kernel_main()
         if (drivers::serial::init_port(drivers::serial::Port::COM1) != lib::Status::Ok)
                 cpu::hlt();     // no display device
         
-        lib::print_string("Hello from COM1!\r\n");
+        const char *name = "Wither__";
+        lib::println("Hello! My name is %s and its first letter is %c.", name, name[0]);
 
         while (true)
                 cpu::hlt();
