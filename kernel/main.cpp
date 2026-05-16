@@ -5,6 +5,7 @@
 #include <drivers/serial.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
+#include <panic.hpp>
 
 using namespace kernel;
 
@@ -30,16 +31,14 @@ extern void (*__init_array_end[])();
 
 extern "C" void kernel_main()
 {
-        if (!limine_base_revision.is_supported()) {
-                while (true)
-                        cpu::hlt();
-        }
+        if (!limine_base_revision.is_supported())
+                panic("limine base revision not supported"); // unprintable message
 
         for (lib::u64 i = 0; &__init_array[i] != __init_array_end; i++)
                 __init_array[i]();
 
         if (drivers::serial::init_port(drivers::serial::Port::COM1) != lib::Status::Ok)
-                cpu::hlt();     // no display device
+                panic("no display device"); // so the message cannot be printed lol
 
         cpu::GDT gdt;
         gdt.load();
@@ -47,6 +46,8 @@ extern "C" void kernel_main()
         cpu::IDT idt;
         idt.load();
 
-        while (true)
-                cpu::hlt();
+        // test exception handler
+        //__asm__ volatile ("int $3");
+
+        panic("nothing to do");
 }
