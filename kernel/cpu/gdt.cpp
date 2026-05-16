@@ -1,4 +1,5 @@
 #include <cpu/gdt.hpp>
+#include <lib/logging.hpp>
 
 using namespace kernel::lib;
 
@@ -33,6 +34,8 @@ gdtr gdtptr;
 
 GDT::GDT()
 {
+        log::status("initializing gdt");
+
         gdtptr = {
                 .size = sizeof(gdt) * MaxDescriptors - 1,
                 .offset = reinterpret_cast<u64>(&gdt)
@@ -41,11 +44,17 @@ GDT::GDT()
         this->set_descriptor(0, 0, 0, 0, 0);
         this->set_descriptor(1, 0, 0, 0x9a, 0xa0);
         this->set_descriptor(2, 0, 0, 0x92, 0);
+
+        log::ok();
 }
 
 void GDT::load()
 {
+        log::status("loading gdt");
+
         gdt_flush(reinterpret_cast<u64>(&gdtptr));
+
+        log::ok();
 }
 
 void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)

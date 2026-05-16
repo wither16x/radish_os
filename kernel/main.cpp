@@ -2,7 +2,6 @@
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <drivers/serial.hpp>
-#include <lib/print.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 
@@ -43,7 +42,6 @@ extern "C" void kernel_main()
 
         cpu::GDT gdt;
         gdt.load();
-        lib::println("initialized gdt");
 
         while (true)
                 cpu::hlt();
