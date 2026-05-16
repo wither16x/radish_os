@@ -4,14 +4,14 @@
 
 namespace kernel::cpu {
 
-class GDT {
+class IDT {
 public:
-        GDT();
-        
+        IDT();
+
         void load();
 
 private:
-        void set_descriptor(int n, lib::u32 base, lib::u32 limit, lib::u8 access, lib::u8 flags);
+        void set_gate(int vector, void (*isr)(), lib::u8 flags); // TODO: add other parameters
 };
 
 } /* namespace kernel::cpu */

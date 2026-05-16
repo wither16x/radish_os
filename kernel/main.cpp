@@ -1,6 +1,7 @@
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
+#include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
@@ -42,6 +43,9 @@ extern "C" void kernel_main()
 
         cpu::GDT gdt;
         gdt.load();
+
+        cpu::IDT idt;
+        idt.load();
 
         while (true)
                 cpu::hlt();

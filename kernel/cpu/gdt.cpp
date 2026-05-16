@@ -35,7 +35,7 @@ GDT::GDT()
         log::status("initializing gdt");
 
         gdtptr = {
-                .size = sizeof(gdt) * MaxDescriptors - 1,
+                .size = sizeof(gdt) - 1,
                 .offset = reinterpret_cast<u64>(&gdt)
         };
 
