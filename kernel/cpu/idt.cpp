@@ -14,6 +14,7 @@ constexpr u16 SegmentSelector   = 0x08;
 extern "C" void idt_flush(u64 *idtr);
 
 extern "C" void __isr_stub3();
+extern "C" void __isr_stub14();
 
 struct [[gnu::packed]] idt_entry {
         u16 isr_low;
@@ -45,6 +46,7 @@ IDT::IDT()
         };
 
         this->set_gate(3, __isr_stub3, 0x8e);
+        this->set_gate(14, __isr_stub14, 0x8e);
 
         log::ok();
 }

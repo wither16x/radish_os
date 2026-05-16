@@ -52,6 +52,14 @@ extern "C" void kernel_main()
         lib::println("Recovered boot info:");
         lib::println("* Bootloader: %s version %s", bootinfo.bootloader.name, bootinfo.bootloader.version);
         lib::println("* Firmware: %s", bootinfo.firmware_type.str);
+        lib::println("* Memory map: %u entries", bootinfo.memmap.entry_count);
+        for (lib::u64 i = 0; i < bootinfo.memmap.entry_count; i++) {
+                lib::println("\t* Entry %d: base=0x%x, end=0x%x, type=%s", i,
+                        bootinfo.memmap.entries[i].base,
+                        bootinfo.memmap.entries[i].base + bootinfo.memmap.entries[i].length,
+                        bootinfo.memmap.entries[i].str
+                );
+        }
 
         panic("nothing to do");
 }

@@ -20,6 +20,7 @@ section .text
 extern exception_handler
 
 isr_no_error_stub       3               ; breakpoint
+isr_error_stub          14              ; page fault
 
 ; stack before jump:
 ; - error code
