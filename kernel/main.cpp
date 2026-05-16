@@ -51,6 +51,7 @@ extern "C" void kernel_main()
         boot::boot_info bootinfo;
         lib::println("Recovered boot info:");
         lib::println("* Bootloader: %s version %s", bootinfo.bootloader.name, bootinfo.bootloader.version);
+        lib::println("* Firmware: %s", bootinfo.firmware_type.str);
 
         panic("nothing to do");
 }
