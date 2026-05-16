@@ -46,7 +46,7 @@ GDT::GDT()
         log::ok();
 }
 
-void GDT::load()
+void GDT::load() const
 {
         log::status("loading gdt");
 
@@ -55,7 +55,7 @@ void GDT::load()
         log::ok();
 }
 
-void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)
+void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags) const
 {
         gdt[n].limit_low        = limit & 0xffff;
         gdt[n].base_low         = base & 0xffff;

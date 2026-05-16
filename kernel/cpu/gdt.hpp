@@ -8,10 +8,10 @@ class GDT {
 public:
         GDT();
         
-        void load();
+        void load() const;
 
 private:
-        void set_descriptor(int n, lib::u32 base, lib::u32 limit, lib::u8 access, lib::u8 flags);
+        void set_descriptor(int n, lib::u32 base, lib::u32 limit, lib::u8 access, lib::u8 flags) const;
 };
 
 } /* namespace kernel::cpu */

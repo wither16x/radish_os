@@ -1,4 +1,4 @@
-#include <cpu/assembly.hpp>
+#include <panic.hpp>
 
 using namespace kernel;
 
@@ -11,8 +11,7 @@ int __cxa_atexit(void (*)(void *), void *, void *)
 
 void __cxa_pure_virtual()
 {
-        while (true)
-                cpu::hlt();
+        panic("call to pure virtual method");
 }
 
 void *__dso_handle;
