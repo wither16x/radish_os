@@ -10,7 +10,7 @@ namespace kernel {
 
 void panic(const char *fmt, ...)
 {
-        println("==================== KERNEL PANIC ====================");
+        println("\r\n==================== KERNEL PANIC ====================");
         va_list args;
         va_start(args, fmt);
         vprintf(fmt, args);
