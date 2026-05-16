@@ -46,8 +46,5 @@ extern "C" void kernel_main()
         cpu::IDT idt;
         idt.load();
 
-        // test exception handler
-        //__asm__ volatile ("int $3");
-
         panic("nothing to do");
 }
