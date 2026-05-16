@@ -1,14 +1,10 @@
 #pragma once
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 enum class Status : int {
         Err,
         Ok
 };
 
-}
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

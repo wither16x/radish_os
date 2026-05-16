@@ -3,11 +3,7 @@
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel {
-
-namespace drivers {
-
-namespace serial {
+namespace kernel::drivers::serial {
 
 enum class Port : lib::u16 {
         COM1            = 0x3f8,
@@ -20,8 +16,4 @@ enum class Port : lib::u16 {
 lib::Status init_port(Port port);
 void send_byte(Port port, lib::u8 byte);
 
-} /* namespace serial */
-
-} /* namespace drivers */
-
-} /* namespace drivers */
+} /* namespace kernel::drivers::serial */

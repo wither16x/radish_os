@@ -1,8 +1,6 @@
 #pragma once
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 // signed types
 using i8                = signed char;
@@ -20,6 +18,4 @@ using u64               = unsigned long long;
 using usize             = u64;
 using uptr              = u64;
 
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

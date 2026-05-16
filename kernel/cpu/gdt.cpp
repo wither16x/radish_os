@@ -3,9 +3,7 @@
 
 using namespace kernel::lib;
 
-namespace kernel {
-
-namespace cpu {
+namespace kernel::cpu {
 
 namespace {
 
@@ -67,6 +65,4 @@ void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)
         gdt[n].base_high        = base >> 16;
 }
 
-} /* namespace cpu */
-
-} /* namespace kernel */
+} /* namespace kernel::cpu */

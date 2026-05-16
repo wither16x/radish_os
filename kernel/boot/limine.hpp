@@ -2,11 +2,7 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel {
-
-namespace boot {
-
-namespace limine {
+namespace kernel::boot::limine {
 
 // Limine base revision
 struct revision {
@@ -35,8 +31,4 @@ revision base_revision(lib::u64 revision);
 start_marker requests_start_marker();
 end_marker requests_end_marker();
 
-} /* namespace limine */
-
-} /* namespace boot */
-
-} /* namespace kernel */
+} /* namespace kernel::boot::limine */

@@ -2,9 +2,7 @@
 #include <lib/conversion.hpp>
 #include <lib/print.hpp>
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 void putchar(int ch)
 {
@@ -101,6 +99,4 @@ void println(const char *fmt, ...)
         print_string("\r\n");
 }
 
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

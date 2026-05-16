@@ -2,11 +2,7 @@
 #include <drivers/serial.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel {
-
-namespace drivers {
-
-namespace serial {
+namespace kernel::drivers::serial {
 
 namespace {
 
@@ -52,8 +48,4 @@ void send_byte(Port port, lib::u8 byte)
         outb_to_port(port, byte);
 }
 
-} /* namespace serial */
-
-} /* namespace drivers */
-
-} /* namespace kernel */
+} /* namespace kernel::drivers::serial */

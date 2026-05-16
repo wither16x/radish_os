@@ -2,9 +2,7 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 extern "C" {
 
@@ -15,6 +13,4 @@ int memcmp(const void *s1, const void *s2, usize n);
 
 }
 
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

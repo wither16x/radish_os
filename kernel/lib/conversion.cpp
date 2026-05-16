@@ -1,8 +1,6 @@
 #include <lib/conversion.hpp>
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 char* itoa(isize n, int base)
 {
@@ -76,6 +74,4 @@ char* utoa(usize n, int base)
         return str;
 }
 
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

@@ -2,9 +2,7 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel {
-
-namespace cpu {
+namespace kernel::cpu {
 
 inline void hlt()
 {
@@ -23,6 +21,4 @@ inline lib::u8 inb(lib::u16 port)
         return byte;
 }
 
-} /* namespace cpu */
-
-} /* namespace kernel */
+} /* namespace kernel::cpu */

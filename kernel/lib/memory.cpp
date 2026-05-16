@@ -1,8 +1,6 @@
 #include <lib/memory.hpp>
 
-namespace kernel {
-
-namespace lib {
+namespace kernel::lib {
 
 extern "C" {
 
@@ -54,6 +52,4 @@ int memcmp(const void *s1, const void *s2, usize n) {
 
 } /* extern "C" */
 
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib */

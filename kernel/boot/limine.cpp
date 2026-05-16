@@ -1,11 +1,7 @@
 #include <boot/limine.hpp>
 #include <limine.h>
 
-namespace kernel {
-
-namespace boot {
-
-namespace limine {
+namespace kernel::boot::limine {
 
 revision base_revision(lib::u64 n)
 {
@@ -28,8 +24,4 @@ end_marker requests_end_marker()
         return LIMINE_REQUESTS_END_MARKER;
 }
 
-} /* namespace limine */
-
-} /* namespace boot */
-
-} /* namespace kernel */
+} /* namespace kernel::boot::limine */

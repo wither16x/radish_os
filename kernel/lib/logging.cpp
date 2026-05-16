@@ -2,11 +2,7 @@
 #include <lib/logging.hpp>
 #include <lib/print.hpp>
 
-namespace kernel {
-
-namespace lib {
-
-namespace log {
+namespace kernel::lib::log {
 
 void status(const char *fmt, ...)
 {
@@ -27,8 +23,4 @@ void failed()
         println(" failed");
 }
 
-} /* namespace log */
-
-} /* namespace lib */
-
-} /* namespace kernel */
+} /* namespace kernel::lib::log */
