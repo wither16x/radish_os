@@ -1,8 +1,10 @@
+#include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
+#include <lib/print.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <panic.hpp>
@@ -45,6 +47,10 @@ extern "C" void kernel_main()
 
         cpu::IDT idt;
         idt.load();
+
+        boot::boot_info bootinfo;
+        lib::println("Recovered boot info:");
+        lib::println("* Bootloader: %s version %s", bootinfo.bootloader.name, bootinfo.bootloader.version);
 
         panic("nothing to do");
 }
