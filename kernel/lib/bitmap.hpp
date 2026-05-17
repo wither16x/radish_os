@@ -31,14 +31,19 @@ public:
 
         void set_all()
         {
-                for (usize i = 0; i < N * (sizeof(u64) * 8); i++)
+                for (usize i = 0; i < N; i++)
                         this->set(i);
         }
 
         void clear_all()
         {
-                for (usize i = 0; i < N * (sizeof(u64) * 8); i++)
+                for (usize i = 0; i < N; i++)
                         this->clear(i);
+        }
+
+        usize size() const
+        {
+                return N;
         }
 
 private:

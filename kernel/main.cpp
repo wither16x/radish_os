@@ -6,6 +6,7 @@
 #include <drivers/serial.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
+#include <mem/pmm.hpp>
 #include <panic.hpp>
 
 using namespace kernel;
@@ -48,6 +49,8 @@ extern "C" void kernel_main()
         idt.load();
 
         boot::boot_info bootinfo;
+
+        mem::PMM pmm(bootinfo.memmap);
 
         panic("nothing to do");
 }
