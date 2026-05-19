@@ -14,17 +14,17 @@ using namespace kernel;
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests")]]
-volatile boot::limine::revision limine_base_revision = boot::limine::base_revision(6);
+volatile boot::limine::Revision limine_base_revision = boot::limine::base_revision(6);
 
 }
 
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests_start")]]
-volatile boot::limine::start_marker limine_requests_start_marker = boot::limine::requests_start_marker();
+volatile boot::limine::StartMarker limine_requests_start_marker = boot::limine::requests_start_marker();
 
 [[gnu::used, gnu::section(".limine_requests_end")]]
-volatile boot::limine::end_marker limine_requests_end_marker = boot::limine::requests_end_marker();
+volatile boot::limine::EndMarker limine_requests_end_marker = boot::limine::requests_end_marker();
 
 }
 
@@ -48,11 +48,9 @@ extern "C" void kernel_main()
         cpu::IDT idt;
         idt.load();
 
-        boot::boot_info bootinfo;
+        boot::BootInfo bootinfo;
 
         mem::pmm.init(bootinfo.memmap);
-        lib::u64 f0 = mem::pmm.allocate_frame();
-        lib::println("f0 = 0x%x", f0);
-
+        
         panic("nothing to do");
 }

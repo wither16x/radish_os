@@ -7,7 +7,7 @@ using namespace kernel::lib;
 
 namespace kernel::mem {
 
-void PMM::init(boot::boot_info::memmap_info &memmap)
+void PMM::init(boot::BootInfo::MemmapInfo &memmap)
 {
         log::status("initializing pmm");
 

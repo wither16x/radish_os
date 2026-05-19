@@ -9,7 +9,7 @@ namespace {
 
 // Registers and values pushed by the CPU before calling
 // `exception_handler()`
-struct [[gnu::packed]] cpu_frame {
+struct [[gnu::packed]] CPUFrame {
 	u64 cr2;
 	u64 cr3;
 	u64 rax;
@@ -38,7 +38,7 @@ struct [[gnu::packed]] cpu_frame {
 
 } /* anonymous namespace */
 
-extern "C" [[gnu::noreturn]] void exception_handler(cpu_frame *f)
+extern "C" [[gnu::noreturn]] void exception_handler(CPUFrame *f)
 {
         panic(
                 "CPU exception #%u with error code %u\r\n"

@@ -5,16 +5,16 @@
 namespace kernel::boot::limine {
 
 // Limine base revision
-struct revision {
+struct Revision {
         lib::u64 magic0;
         lib::u64 magic1;
         lib::u64 rev;
 
-        bool is_supported(this volatile revision& self);
+        bool is_supported(this volatile Revision& self);
 };
 
 // Limine requests start marker
-struct start_marker {
+struct StartMarker {
         lib::u64 magic0;
         lib::u64 magic1;
         lib::u64 magic2;
@@ -22,13 +22,13 @@ struct start_marker {
 };
 
 // Limine requests end marker
-struct end_marker {
+struct EndMarker {
         lib::u64 magic0;
         lib::u64 magic1;
 };
 
-revision base_revision(lib::u64 revision);
-start_marker requests_start_marker();
-end_marker requests_end_marker();
+Revision base_revision(lib::u64 revision);
+StartMarker requests_start_marker();
+EndMarker requests_end_marker();
 
 } /* namespace kernel::boot::limine */

@@ -11,7 +11,7 @@ extern "C" void gdt_flush(u64 gdtr);
 
 constexpr int MaxDescriptors = 3;
 
-struct [[gnu::packed]] gdt_descriptor {
+struct [[gnu::packed]] GDTDescriptor {
         u16 limit_low;
         u16 base_low;
         u8  base_middle;
@@ -20,13 +20,13 @@ struct [[gnu::packed]] gdt_descriptor {
         u8  base_high;
 };
 
-struct [[gnu::packed]] gdtr {
+struct [[gnu::packed]] GDTR {
         u16 size;
         u64 offset;
 };
 
-gdt_descriptor gdt[MaxDescriptors];
-gdtr gdtptr;
+GDTDescriptor gdt[MaxDescriptors];
+GDTR gdtptr;
 
 } /* anonymous namespace */
 

@@ -33,30 +33,31 @@ struct memmap_entry {
 // To avoid the kernel to depend on the boot protocol everywhere,
 // it has its own structs filled using the informations provided
 // by the boot protocol.
-struct boot_info {
+struct BootInfo {
 
-struct bootloader_info {
+struct BootloaderInfo {
         const char *name;
         const char *version;
 };
 
-struct firmware_type_info {
+struct FirmwareTypeInfo {
         FirmwareType type;
         const char *str;
 };
 
-struct memmap_info {
+struct MemmapInfo {
         static constexpr int MaxEntries = 64;
 
         lib::u64 entry_count;
         memmap_entry entries[MaxEntries];
 };
 
-bootloader_info         bootloader;
-firmware_type_info      firmware_type;
-memmap_info             memmap;
+BootloaderInfo         bootloader;
+FirmwareTypeInfo      firmware_type;
+MemmapInfo             memmap;
 
-boot_info();
+BootInfo();
+
 };
 
 } /* namespace kernel::boot */

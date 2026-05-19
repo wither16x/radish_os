@@ -16,7 +16,7 @@ extern "C" void idt_flush(u64 *idtr);
 extern "C" void __isr_stub3();
 extern "C" void __isr_stub14();
 
-struct [[gnu::packed]] idt_entry {
+struct [[gnu::packed]] IDTEntry {
         u16 isr_low;
         u16 selector;
         u8  ist;        // 3 bits for the IST and the 5 other bits are reserved
@@ -26,13 +26,13 @@ struct [[gnu::packed]] idt_entry {
         u32 __reserved;
 };
 
-struct [[gnu::packed]] idtr {
+struct [[gnu::packed]] IDTR {
         u16 size;
         u64 offset;
 };
 
-idt_entry idt[MaxGates];
-idtr idtptr;
+IDTEntry idt[MaxGates];
+IDTR idtptr;
 
 } /* anonymous namespace */
 

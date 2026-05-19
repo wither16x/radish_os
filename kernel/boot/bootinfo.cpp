@@ -48,7 +48,7 @@ const char *memmap_type_str[] = {
 
 } /* anonymous namespace */
 
-boot_info::boot_info()
+BootInfo::BootInfo()
 {
         log::status("recovering boot info");
 
