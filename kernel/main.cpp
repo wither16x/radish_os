@@ -16,7 +16,7 @@ namespace {
 [[gnu::used, gnu::section(".limine_requests")]]
 volatile boot::limine::Revision limine_base_revision = boot::limine::base_revision(6);
 
-}
+} /* anonymous namespace */
 
 namespace {
 
@@ -26,7 +26,7 @@ volatile boot::limine::StartMarker limine_requests_start_marker = boot::limine::
 [[gnu::used, gnu::section(".limine_requests_end")]]
 volatile boot::limine::EndMarker limine_requests_end_marker = boot::limine::requests_end_marker();
 
-}
+} /* anonymous namespace */
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
