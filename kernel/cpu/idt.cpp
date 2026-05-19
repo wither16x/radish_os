@@ -51,7 +51,7 @@ IDT::IDT()
         log::ok();
 }
 
-void IDT::load() const
+void IDT::load()
 {
         log::status("loading idt");
 
@@ -60,7 +60,7 @@ void IDT::load() const
         log::ok();
 }
 
-void IDT::set_gate(int vector, void (*isr)(), lib::u8 flags) const
+void IDT::set_gate(int vector, void (*isr)(), lib::u8 flags)
 {
         idt[vector].isr_low     = reinterpret_cast<u64>(isr) & 0xffff;
         idt[vector].selector    = SegmentSelector;

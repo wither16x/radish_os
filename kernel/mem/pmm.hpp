@@ -7,7 +7,7 @@ namespace kernel::mem {
 
 class PMM {
 public:
-        void init(boot::BootInfo::MemmapInfo &memmap);
+        void init(this PMM &self, boot::BootInfo::MemmapInfo &memmap);
 
         lib::uptr allocate_frame(this PMM &self);
         void free_frame(this PMM &self, lib::uptr addr);

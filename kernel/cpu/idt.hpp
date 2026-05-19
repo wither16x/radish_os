@@ -8,10 +8,10 @@ class IDT {
 public:
         IDT();
 
-        void load() const;
+        void load();
 
 private:
-        void set_gate(int vector, void (*isr)(), lib::u8 flags) const; // TODO: add other parameters
+        void set_gate(int vector, void (*isr)(), lib::u8 flags);
 };
 
 } /* namespace kernel::cpu */

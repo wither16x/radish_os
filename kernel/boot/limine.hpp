@@ -10,7 +10,7 @@ struct Revision {
         lib::u64 magic1;
         lib::u64 rev;
 
-        bool is_supported(this volatile Revision& self);
+        bool is_supported(this volatile Revision &self);
 };
 
 // Limine requests start marker

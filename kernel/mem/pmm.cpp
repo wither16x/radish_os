@@ -7,17 +7,17 @@ using namespace kernel::lib;
 
 namespace kernel::mem {
 
-void PMM::init(boot::BootInfo::MemmapInfo &memmap)
+void PMM::init(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 {
         log::status("initializing pmm");
 
-        this->bitmap.set_all();
+        self.bitmap.set_all();
 
         for (usize i = 0; i < memmap.entry_count; i++) {
                 if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
                         boot::memmap_entry& e = memmap.entries[i];
-                        for (uptr addr = e.base; addr < e.base + e.length; addr += this->FrameBytes)
-                                this->bitmap.clear(addr / this->FrameBytes);
+                        for (uptr addr = e.base; addr < e.base + e.length; addr += self.FrameBytes)
+                                self.bitmap.clear(addr / self.FrameBytes);
                 }
         }
 

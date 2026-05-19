@@ -8,7 +8,7 @@ Revision base_revision(lib::u64 n)
         return LIMINE_BASE_REVISION(n);
 }
 
-bool Revision::is_supported(this volatile Revision& self)
+bool Revision::is_supported(this volatile Revision &self)
 {
         lib::u64 _rev[] = {self.magic0, self.magic1, self.rev};
         return LIMINE_BASE_REVISION_SUPPORTED(_rev);

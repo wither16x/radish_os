@@ -46,7 +46,7 @@ GDT::GDT()
         log::ok();
 }
 
-void GDT::load() const
+void GDT::load()
 {
         log::status("loading gdt");
 

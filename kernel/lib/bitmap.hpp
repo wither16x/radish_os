@@ -8,37 +8,37 @@ namespace kernel::lib {
 template<usize N>
 class StaticBitmap {
 public:
-        void set(usize bit)
+        void set(this StaticBitmap &self, usize bit)
         {
-                u64 index = this->get_index(bit);
-                u64 mask = this->get_mask(bit);
-                this->data[index] |= mask;
+                u64 index = self.get_index(bit);
+                u64 mask = self.get_mask(bit);
+                self.data[index] |= mask;
         }
 
-        void clear(usize bit)
+        void clear(this StaticBitmap &self, usize bit)
         {
-                u64 index = this->get_index(bit);
-                u64 mask = this->get_mask(bit);
-                this->data[index] &= ~mask;
+                u64 index = self.get_index(bit);
+                u64 mask = self.get_mask(bit);
+                self.data[index] &= ~mask;
         }
 
-        bool test(usize bit) const
+        bool test(this const StaticBitmap &self,usize bit)
         {
-                u64 index = this->get_index(bit);
-                u64 mask = this->get_mask(bit);
-                return (this->data[index] & mask) != 0;
+                u64 index = self.get_index(bit);
+                u64 mask = self.get_mask(bit);
+                return (self.data[index] & mask) != 0;
         }
 
-        void set_all()
+        void set_all(this StaticBitmap &self)
         {
                 for (usize i = 0; i < N; i++)
-                        this->set(i);
+                        self.set(i);
         }
 
-        void clear_all()
+        void clear_all(this StaticBitmap &self)
         {
                 for (usize i = 0; i < N; i++)
-                        this->clear(i);
+                        self.clear(i);
         }
 
         usize size() const
