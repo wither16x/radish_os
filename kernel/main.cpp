@@ -50,7 +50,9 @@ extern "C" void kernel_main()
 
         boot::boot_info bootinfo;
 
-        mem::PMM pmm(bootinfo.memmap);
+        mem::pmm.init(bootinfo.memmap);
+        lib::u64 f0 = mem::pmm.allocate_frame();
+        lib::println("f0 = 0x%x", f0);
 
         panic("nothing to do");
 }

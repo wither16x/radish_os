@@ -7,7 +7,7 @@ namespace kernel::mem {
 
 class PMM {
 public:
-        PMM(boot::boot_info::memmap_info &memmap);
+        void init(boot::boot_info::memmap_info &memmap);
 
         lib::uptr allocate_frame(this PMM &self);
         void free_frame(this PMM &self, lib::uptr addr);
@@ -19,5 +19,7 @@ private:
         lib::StaticBitmap<MaxMemory / FrameBytes> bitmap;
         lib::usize last_frame                   = 0;            // last allocated frame
 };
+
+inline PMM pmm;
 
 } /* namespace kernel::mem */
