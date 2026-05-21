@@ -7,6 +7,7 @@
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <mem/pmm.hpp>
+#include <mem/vmm.hpp>
 #include <panic.hpp>
 
 using namespace kernel;
@@ -51,6 +52,9 @@ extern "C" void kernel_main()
         boot::BootInfo bootinfo;
 
         mem::pmm.init(bootinfo.memmap);
+
+        mem::vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+        mem::vmm.load();
         
         panic("nothing to do");
 }

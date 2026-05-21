@@ -52,9 +52,20 @@ struct MemmapInfo {
         memmap_entry entries[MaxEntries];
 };
 
-BootloaderInfo         bootloader;
-FirmwareTypeInfo      firmware_type;
-MemmapInfo             memmap;
+struct HHDMInfo {
+        lib::u64 offset;
+};
+
+struct ExecutableInfo {
+        lib::u64 physical_base;
+        lib::u64 virtual_base;
+};
+
+BootloaderInfo          bootloader;
+FirmwareTypeInfo        firmware_type;
+MemmapInfo              memmap;
+HHDMInfo                hhdm;
+ExecutableInfo          executable;
 
 BootInfo();
 

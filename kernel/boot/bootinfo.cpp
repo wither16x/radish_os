@@ -27,6 +27,18 @@ limine_memmap_request l_memmap_info = {
         .response = nullptr
 };
 
+limine_hhdm_request l_hhdm_info = {
+        .id = LIMINE_HHDM_REQUEST_ID,
+        .revision = 0,
+        .response = nullptr      
+};
+
+limine_executable_address_request l_executable_info = {
+        .id = LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID,
+        .revision = 0,
+        .response = nullptr
+};
+
 const char *firmware_type_str[] = {
         "x86 BIOS",
         "EFI 32",
@@ -69,6 +81,11 @@ BootInfo::BootInfo()
                 };
                 this->memmap.entries[i] = e;
         }
+
+        this->hhdm.offset               = l_hhdm_info.response->offset;
+
+        this->executable.physical_base  = l_executable_info.response->physical_base;
+        this->executable.virtual_base   = l_executable_info.response->virtual_base;
 
         log::ok();
 }
