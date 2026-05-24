@@ -6,12 +6,6 @@ namespace kernel::mem {
 
 class Heap {
 public:
-        void init(this Heap &self);
-
-        // Allocate `n` bytes
-        void *allocate(this Heap &self, lib::usize n);
-
-private:
         struct BlockHeader {
                 lib::usize bytes;
                 bool free;
@@ -19,14 +13,26 @@ private:
                 BlockHeader *previous_block_hdr;
         };
 
+        void init(this Heap &self);
+
+        // Allocate `n` bytes
+        void *allocate(this Heap &self, lib::usize n);
+
+private:
         BlockHeader *block_list;
         BlockHeader *curr_block;
 
         lib::usize pages;               // amount of allocated pages
 
+        // Map new pages to handle more blocks
+        void extend(this Heap &self);
+
         // This function may not split the block if it is not
         // necessary
         void split_block(this Heap &self, lib::usize super_size);
+
+        // Find a free block that can handle `n` bytes
+        BlockHeader *find_free_block(this Heap &self, lib::usize n);
 };
 
 inline Heap kheap;

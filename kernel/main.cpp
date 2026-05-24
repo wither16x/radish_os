@@ -65,6 +65,8 @@ extern "C" void kernel_main()
         lib::println("allocated 5 bytes for p2: 0x%x", (lib::u64)p2);
         lib::uptr *p3  = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(29));
         lib::println("allocated 29 bytes for p3: 0x%x", (lib::u64)p3);
+        lib::uptr *p4 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(4096));
+        lib::println("allocated 4096 bytes for p4: 0x%x", (lib::u64)p4);
 
         panic("nothing to do");
 }
