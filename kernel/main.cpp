@@ -62,14 +62,6 @@ extern "C" void kernel_main()
         mem::vmm.load();
 
         mem::kheap.init();
-        uptr *p1 = reinterpret_cast<uptr *>(mem::kheap.allocate(3));
-        println("allocated 3 bytes for p1: 0x%x", (u64)p1);
-        uptr *p2 = reinterpret_cast<uptr *>(mem::kheap.allocate(5));
-        println("allocated 5 bytes for p2: 0x%x", (u64)p2);
-        uptr *p3  = reinterpret_cast<uptr *>(mem::kheap.allocate(29));
-        println("allocated 29 bytes for p3: 0x%x", (u64)p3);
-        uptr *p4 = reinterpret_cast<uptr *>(mem::kheap.allocate(4096));
-        println("allocated 4096 bytes for p4: 0x%x", (u64)p4);
 
         panic("nothing to do");
 }

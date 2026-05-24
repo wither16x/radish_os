@@ -1,12 +1,15 @@
 #include <lib/bytes.hpp>
 #include <lib/logging.hpp>
+#include <lib/print.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <panic.hpp>
 
 using kernel::lib::uptr, kernel::lib::usize, kernel::lib::u8;
 using kernel::lib::log::status, kernel::lib::log::ok;
 using kernel::lib::align_up;
+using kernel::lib::println;
 
 namespace kernel::mem {
 
@@ -48,6 +51,14 @@ void *Heap::allocate(this Heap &self, usize n)
         block->free = false;
 
         return reinterpret_cast<void *>(reinterpret_cast<u8 *>(block) + sizeof(BlockHeader));
+}
+
+void Heap::free(void *p)
+{
+        BlockHeader *hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<u8 *>(p) - sizeof(BlockHeader));
+        if (hdr->free)
+                panic("double free on heap pointer on address 0x%x", p);
+        hdr->free = true;
 }
 
 void Heap::extend(this Heap &self) {

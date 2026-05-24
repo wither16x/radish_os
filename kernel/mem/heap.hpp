@@ -17,6 +17,8 @@ public:
 
         // Allocate `n` bytes
         void *allocate(this Heap &self, lib::usize n);
+        // Free allocated memory
+        void free(void *p);
 
 private:
         BlockHeader *block_list;
