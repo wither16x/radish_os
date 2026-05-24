@@ -2,8 +2,8 @@
 #include <lib/typing.hpp>
 #include <panic.hpp>
 
-using namespace kernel;
-using namespace kernel::lib;
+using kernel::panic;
+using kernel::lib::u64;
 
 namespace {
 

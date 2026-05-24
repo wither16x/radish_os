@@ -1,4 +1,3 @@
-#include "lib/print.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
@@ -13,6 +12,10 @@
 #include <panic.hpp>
 
 using namespace kernel;
+
+using lib::u64, lib::uptr;
+using lib::println;
+using lib::Status;
 
 namespace {
 
@@ -39,10 +42,10 @@ extern "C" void kernel_main()
         if (!limine_base_revision.is_supported())
                 panic("limine base revision not supported"); // unprintable message
 
-        for (lib::u64 i = 0; &__init_array[i] != __init_array_end; i++)
+        for (u64 i = 0; &__init_array[i] != __init_array_end; i++)
                 __init_array[i]();
 
-        if (drivers::serial::init_port(drivers::serial::Port::COM1) != lib::Status::Ok)
+        if (drivers::serial::init_port(drivers::serial::Port::COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
         cpu::GDT gdt;
@@ -59,14 +62,14 @@ extern "C" void kernel_main()
         mem::vmm.load();
 
         mem::kheap.init();
-        lib::uptr *p1 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(3));
-        lib::println("allocated 3 bytes for p1: 0x%x", (lib::u64)p1);
-        lib::uptr *p2 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(5));
-        lib::println("allocated 5 bytes for p2: 0x%x", (lib::u64)p2);
-        lib::uptr *p3  = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(29));
-        lib::println("allocated 29 bytes for p3: 0x%x", (lib::u64)p3);
-        lib::uptr *p4 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(4096));
-        lib::println("allocated 4096 bytes for p4: 0x%x", (lib::u64)p4);
+        uptr *p1 = reinterpret_cast<uptr *>(mem::kheap.allocate(3));
+        println("allocated 3 bytes for p1: 0x%x", (u64)p1);
+        uptr *p2 = reinterpret_cast<uptr *>(mem::kheap.allocate(5));
+        println("allocated 5 bytes for p2: 0x%x", (u64)p2);
+        uptr *p3  = reinterpret_cast<uptr *>(mem::kheap.allocate(29));
+        println("allocated 29 bytes for p3: 0x%x", (u64)p3);
+        uptr *p4 = reinterpret_cast<uptr *>(mem::kheap.allocate(4096));
+        println("allocated 4096 bytes for p4: 0x%x", (u64)p4);
 
         panic("nothing to do");
 }

@@ -2,7 +2,8 @@
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 
-using namespace kernel::lib;
+using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64;
+using kernel::lib::log::status, kernel::lib::log::ok;
 
 namespace kernel::cpu {
 
@@ -38,7 +39,7 @@ IDTR idtptr;
 
 IDT::IDT()
 {
-        log::status("initializing idt");
+        status("initializing idt");
 
         idtptr = {
                 .size = sizeof(idt) - 1,
@@ -48,19 +49,19 @@ IDT::IDT()
         this->set_gate(3, __isr_stub3, 0x8e);
         this->set_gate(14, __isr_stub14, 0x8e);
 
-        log::ok();
+        ok();
 }
 
 void IDT::load()
 {
-        log::status("loading idt");
+        status("loading idt");
 
         idt_flush(reinterpret_cast<u64 *>(&idtptr));
 
-        log::ok();
+        ok();
 }
 
-void IDT::set_gate(int vector, void (*isr)(), lib::u8 flags)
+void IDT::set_gate(int vector, void (*isr)(), u8 flags)
 {
         idt[vector].isr_low     = reinterpret_cast<u64>(isr) & 0xffff;
         idt[vector].selector    = SegmentSelector;

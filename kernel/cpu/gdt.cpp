@@ -1,7 +1,8 @@
 #include <cpu/gdt.hpp>
 #include <lib/logging.hpp>
 
-using namespace kernel::lib;
+using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64;
+using kernel::lib::log::status, kernel::lib::log::ok;
 
 namespace kernel::cpu {
 
@@ -32,7 +33,7 @@ GDTR gdtptr;
 
 GDT::GDT()
 {
-        log::status("initializing gdt");
+        status("initializing gdt");
 
         gdtptr = {
                 .size = sizeof(gdt) - 1,
@@ -43,16 +44,16 @@ GDT::GDT()
         this->set_descriptor(1, 0, 0, 0x9a, 0xa0);
         this->set_descriptor(2, 0, 0, 0x92, 0);
 
-        log::ok();
+        ok();
 }
 
 void GDT::load()
 {
-        log::status("loading gdt");
+        status("loading gdt");
 
         gdt_flush(reinterpret_cast<u64>(&gdtptr));
 
-        log::ok();
+        ok();
 }
 
 void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags) const

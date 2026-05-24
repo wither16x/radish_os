@@ -3,7 +3,8 @@
 #include <lib/typing.hpp>
 #include <limine.h>
 
-using namespace kernel::lib;
+using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::u64;
 
 namespace kernel::boot {
 
@@ -62,7 +63,7 @@ const char *memmap_type_str[] = {
 
 BootInfo::BootInfo()
 {
-        log::status("recovering boot info");
+        status("recovering boot info");
 
         this->bootloader.name           = l_bootloader_info.response->name;
         this->bootloader.version        = l_bootloader_info.response->version;
@@ -87,7 +88,7 @@ BootInfo::BootInfo()
         this->executable.physical_base  = l_executable_info.response->physical_base;
         this->executable.virtual_base   = l_executable_info.response->virtual_base;
 
-        log::ok();
+        ok();
 }
 
 } /* namespace kernel::boot */

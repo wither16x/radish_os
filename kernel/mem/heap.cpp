@@ -4,7 +4,9 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 
-using namespace kernel::lib;
+using kernel::lib::uptr, kernel::lib::usize, kernel::lib::u8;
+using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::align_up;
 
 namespace kernel::mem {
 
@@ -16,14 +18,14 @@ constexpr uptr HeapStart = 0xfffffe8000000000ull;
 
 void Heap::init(this Heap &self)
 {
-        log::status("initializing heap");
+        status("initializing heap");
 
         vmm.map_page(HeapStart, pmm.allocate_frame(), 0x03 | (1ull << 63));
         self.pages = 1;
 
         self.block_list = self.create_block(HeapStart, vmm.PageBytes, true, nullptr, nullptr);
 
-        log::ok();
+        ok();
 }
 
 void *Heap::allocate(this Heap &self, usize n)

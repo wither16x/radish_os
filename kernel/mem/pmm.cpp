@@ -3,13 +3,14 @@
 #include <mem/pmm.hpp>
 #include <panic.hpp>
 
-using namespace kernel::lib;
+using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::usize, kernel::lib::uptr;
 
 namespace kernel::mem {
 
 void PMM::init(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 {
-        log::status("initializing pmm");
+        status("initializing pmm");
 
         self.bitmap.set_all();
 
@@ -21,7 +22,7 @@ void PMM::init(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
                 }
         }
 
-        log::ok();
+        ok();
 }
 
 uptr PMM::allocate_frame(this PMM &self)

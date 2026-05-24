@@ -4,9 +4,10 @@
 #include <lib/print.hpp>
 #include <panic.hpp>
 
-using namespace kernel::lib;
-
 namespace kernel {
+
+using lib::vprintf, lib::println;
+using lib::log::status;
 
 void panic(const char *fmt, ...)
 {
@@ -17,7 +18,7 @@ void panic(const char *fmt, ...)
         va_end(args);
         println("");
 
-        log::status("idling");
+        status("idling");
         while (true)
                 cpu::hlt();
 }
