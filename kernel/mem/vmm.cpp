@@ -1,10 +1,11 @@
 #include <boot/bootinfo.hpp>
+#include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 
-using kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
+using kernel::lib::u16, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::log::status, kernel::lib::log::ok;
 using kernel::lib::memset;
 
@@ -15,7 +16,8 @@ namespace kernel::mem {
 
 namespace {
 
-constexpr usize PhysicalAddressMask = ((1ull << 52) - 1) & ~0xfffull;
+constexpr usize PhysicalAddressMask     = ((1ull << 52) - 1) & ~0xfffull;
+constexpr u16   PageTableEntries        = 512;
 
 }
 
@@ -94,6 +96,55 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
         u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm);
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
+}
+
+void VMM::unmap_page(this VMM &self, uptr virt)
+{
+        u64 pml4t_idx   = (virt >> 39) & 0x1ff;
+        u64 pdpt_idx    = (virt >> 30) & 0x1ff;
+        u64 pdt_idx     = (virt >> 21) & 0x1ff;
+        u64 pt_idx      = (virt >> 12) & 0x1ff;
+
+        if (!(self.pml4t[pml4t_idx] & 1))
+                return;
+
+        u64 *pdpt = reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm);
+        if (!(pdpt[pdpt_idx] & 1))
+                return;
+
+        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm);
+        if (!(pdt[pdt_idx] & 1))
+                return;
+
+        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm);
+        if (!(pt[pt_idx] & 1))
+                return;
+
+        pt[pt_idx] = 0;
+        cpu::invlpg(virt);
+
+        // A table must have no mapped entries to be deleted
+
+        for (u16 i = 0; i < PageTableEntries; i++) {
+                if (pt[i] & 1)
+                        return;
+        }
+        pmm.free_frame(pdt[pdt_idx] & PhysicalAddressMask);
+        pdt[pdt_idx] = 0;
+
+        for (u16 i = 0; i < PageTableEntries; i++) {
+                if (pdt[i] & 1)
+                        return;
+        }
+        pmm.free_frame(pdpt[pdpt_idx] & PhysicalAddressMask);
+        pdpt[pdpt_idx] = 0;
+
+        for (u16 i = 0; i < PageTableEntries; i++) {
+                if (pdpt[i] & 1)
+                        return;
+        }
+        pmm.free_frame(self.pml4t[pml4t_idx] & PhysicalAddressMask);
+        self.pml4t[pml4t_idx] = 0;
 }
 
 uptr VMM::get_pml4t()

@@ -21,4 +21,9 @@ inline lib::u8 inb(lib::u16 port)
         return byte;
 }
 
+inline void invlpg(lib::uptr page)
+{
+        __asm__ volatile ("invlpg (%0)" :: "r"(page) : "memory");
+}
+
 } /* namespace kernel::cpu */

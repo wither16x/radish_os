@@ -9,7 +9,6 @@
 using kernel::lib::uptr, kernel::lib::usize, kernel::lib::u8;
 using kernel::lib::log::status, kernel::lib::log::ok;
 using kernel::lib::align_up;
-using kernel::lib::println;
 
 namespace kernel::mem {
 

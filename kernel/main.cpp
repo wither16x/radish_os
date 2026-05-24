@@ -14,7 +14,6 @@
 using namespace kernel;
 
 using lib::u64, lib::uptr;
-using lib::println;
 using lib::Status;
 
 namespace {

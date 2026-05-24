@@ -17,6 +17,7 @@ public:
         void load(this const VMM &self);
 
         void map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags);
+        void unmap_page(this VMM &self, lib::uptr virt);
 
 private:
 
