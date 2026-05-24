@@ -7,6 +7,8 @@ namespace kernel::mem {
 
 class VMM {
 public:
+        static constexpr lib::usize PageBytes = 0x1000;         // 4 KiB
+
         void init(this VMM &self,
                 lib::u64 hhdm,
                 boot::BootInfo::ExecutableInfo &executable_info,
@@ -14,8 +16,9 @@ public:
         );
         void load(this const VMM &self);
 
+        void map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags);
+
 private:
-        static constexpr lib::usize PageBytes = 0x1000;         // 4 KiB
 
         lib::u64 *pml4t;
         lib::u64 hhdm;
@@ -23,8 +26,6 @@ private:
         boot::BootInfo::MemmapInfo memmap_info;
 
         lib::uptr get_pml4t();
-
-        void map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags);
 
         void map_kernel(this VMM &self);
         void map_hhdm(this VMM &self);

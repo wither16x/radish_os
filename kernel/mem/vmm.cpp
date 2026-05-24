@@ -43,13 +43,6 @@ void VMM::load(this const VMM &self)
         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(self.pml4t) - self.hhdm));
 }
 
-uptr VMM::get_pml4t()
-{
-        u64 cr3;
-        __asm__ ("movq %%cr3, %0" : "=r"(cr3));
-        return cr3;
-}
-
 void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
         // 0x1 = present
@@ -99,6 +92,13 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
         u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm);
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
+}
+
+uptr VMM::get_pml4t()
+{
+        u64 cr3;
+        __asm__ ("movq %%cr3, %0" : "=r"(cr3));
+        return cr3;
 }
 
 void VMM::map_kernel(this VMM &self)

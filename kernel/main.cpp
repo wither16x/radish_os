@@ -1,3 +1,4 @@
+#include "lib/print.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
@@ -6,6 +7,7 @@
 #include <drivers/serial.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
+#include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
@@ -55,6 +57,14 @@ extern "C" void kernel_main()
 
         mem::vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
         mem::vmm.load();
-        
+
+        mem::kheap.init();
+        lib::uptr *p1 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(3));
+        lib::println("allocated 3 bytes for p1: 0x%x", (lib::u64)p1);
+        lib::uptr *p2 = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(5));
+        lib::println("allocated 5 bytes for p2: 0x%x", (lib::u64)p2);
+        lib::uptr *p3  = reinterpret_cast<lib::uptr *>(mem::kheap.allocate(29));
+        lib::println("allocated 29 bytes for p3: 0x%x", (lib::u64)p3);
+
         panic("nothing to do");
 }
