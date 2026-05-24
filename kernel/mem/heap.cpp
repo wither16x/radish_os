@@ -19,14 +19,9 @@ void Heap::init(this Heap &self)
         log::status("initializing heap");
 
         vmm.map_page(HeapStart, pmm.allocate_frame(), 0x03 | (1ull << 63));
-        
         self.pages = 1;
 
-        self.block_list = reinterpret_cast<BlockHeader *>(HeapStart);
-        self.block_list->bytes = vmm.PageBytes - sizeof(BlockHeader);
-        self.block_list->free = true;
-        self.block_list->next_block_hdr = nullptr;
-        self.block_list->previous_block_hdr = nullptr;
+        self.block_list = self.create_block(HeapStart, vmm.PageBytes, true, nullptr, nullptr);
 
         log::ok();
 }
@@ -59,19 +54,14 @@ void Heap::extend(this Heap &self) {
         self.pages++;
 
         BlockHeader *last_block = self.block_list;
-        while (last_block->next_block_hdr)
-                last_block = last_block->next_block_hdr;
+        while (last_block->next)
+                last_block = last_block->next;
 
         if (last_block->free) {
                 last_block->bytes += vmm.PageBytes;
         } else {
-                BlockHeader *new_block          = reinterpret_cast<BlockHeader *>(new_page);
-                new_block->bytes                = vmm.PageBytes - sizeof(BlockHeader);
-                new_block->free                 = true;
-                new_block->next_block_hdr       = nullptr;
-                new_block->previous_block_hdr   = last_block;
-
-                last_block->next_block_hdr = new_block;
+                BlockHeader *new_block = self.create_block(new_page, vmm.PageBytes, true, last_block, nullptr);
+                last_block->next = new_block;
         }
 }
 
@@ -80,18 +70,13 @@ void Heap::split_block(this Heap &self, lib::usize super_size)
         usize rem = self.curr_block->bytes - super_size;        // remaining bytes
 
         if (rem >= sizeof(BlockHeader) + 16) {
-                BlockHeader *new_block = reinterpret_cast<BlockHeader *>(
-                        reinterpret_cast<u8 *>(self.curr_block) + sizeof(BlockHeader) + super_size
-                );
-                new_block->bytes = rem - sizeof(BlockHeader);
-                new_block->free = true;
-                new_block->next_block_hdr = self.curr_block->next_block_hdr;
-                new_block->previous_block_hdr = self.curr_block;
+                uptr block_base = reinterpret_cast<uptr>(reinterpret_cast<u8 *>(self.curr_block) + sizeof(BlockHeader) + super_size);
+                BlockHeader *new_block = self.create_block(block_base, rem, true, self.curr_block, self.curr_block->next);
 
-                if (self.curr_block->next_block_hdr)
-                        self.curr_block->next_block_hdr->previous_block_hdr = new_block;
+                if (self.curr_block->next)
+                        self.curr_block->next->prev = new_block;
 
-                self.curr_block->next_block_hdr = new_block;
+                self.curr_block->next = new_block;
                 self.curr_block->bytes = super_size; 
         }
 }
@@ -104,10 +89,21 @@ Heap::BlockHeader *Heap::find_free_block(this Heap &self, usize n)
                 if (current_block->free && current_block->bytes >= n)
                         return current_block;
 
-                current_block = current_block->next_block_hdr;
+                current_block = current_block->next;
         }
 
         return nullptr;
+}
+
+Heap::BlockHeader *Heap::create_block(lib::uptr base, lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next)
+{
+        BlockHeader *block = reinterpret_cast<BlockHeader *>(base);
+        block->bytes = bytes - sizeof(BlockHeader);
+        block->free = free;
+        block->prev = prev;
+        block->next = next;
+
+        return block;
 }
 
 } /* namespace kernel::mem */

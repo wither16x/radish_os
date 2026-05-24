@@ -9,8 +9,8 @@ public:
         struct BlockHeader {
                 lib::usize bytes;
                 bool free;
-                BlockHeader *next_block_hdr;
-                BlockHeader *previous_block_hdr;
+                BlockHeader *next;
+                BlockHeader *prev;
         };
 
         void init(this Heap &self);
@@ -33,6 +33,8 @@ private:
 
         // Find a free block that can handle `n` bytes
         BlockHeader *find_free_block(this Heap &self, lib::usize n);
+
+        BlockHeader *create_block(lib::uptr base, lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next);
 };
 
 inline Heap kheap;
