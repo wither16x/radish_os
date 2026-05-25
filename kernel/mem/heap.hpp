@@ -18,7 +18,7 @@ public:
         // Allocate `n` bytes
         void *allocate(this Heap &self, lib::usize n);
         // Free allocated memory
-        void free(void *p);
+        void free(this Heap &self, void *p);
 
 private:
         BlockHeader *block_list;
@@ -28,6 +28,8 @@ private:
 
         // Map new pages to handle more blocks
         void extend(this Heap &self);
+        // Unmap useless pages
+        bool shorten(this Heap &self);
 
         // This function may not split the block if it is not
         // necessary

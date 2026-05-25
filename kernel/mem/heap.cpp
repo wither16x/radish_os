@@ -52,18 +52,48 @@ void *Heap::allocate(this Heap &self, usize n)
         return reinterpret_cast<void *>(reinterpret_cast<u8 *>(block) + sizeof(BlockHeader));
 }
 
-void Heap::free(void *p)
+void Heap::free(this Heap &self, void *p)
 {
         BlockHeader *hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<u8 *>(p) - sizeof(BlockHeader));
+
         if (hdr->free)
                 panic("double free on heap pointer on address 0x%x", p);
+
         hdr->free = true;
+
+        if (hdr->next && hdr->next->free) {
+                hdr->bytes += sizeof(BlockHeader) + hdr->next->bytes;
+                hdr->next = hdr->next->next;
+                if (hdr->next)
+                        hdr->next->prev = hdr;
+        }
+
+        if (hdr->prev && hdr->prev->free) {
+                hdr->prev->bytes += sizeof(BlockHeader) + hdr->bytes;
+                hdr->prev->next = hdr->next;
+                if (hdr->next)
+                        hdr->next->prev = hdr->prev;
+                hdr = hdr->prev;
+        }
+
+        while (self.pages > 1) {
+                BlockHeader *last = self.block_list;
+                while (last->next)
+                        last = last->next;
+
+                if (!last->free)
+                        break;
+
+                if (!self.shorten())
+                        break;
+        }
 }
 
 void Heap::extend(this Heap &self) {
         uptr new_page = HeapStart + vmm.PageBytes * self.pages;
         vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm.allocate_frame(), 0x03 | (1ull << 63));
         self.pages++;
+        lib::println("Heap::extend(): heap takes %d pages", self.pages);
 
         BlockHeader *last_block = self.block_list;
         while (last_block->next)
@@ -75,6 +105,49 @@ void Heap::extend(this Heap &self) {
                 BlockHeader *new_block = self.create_block(new_page, vmm.PageBytes, true, last_block, nullptr);
                 last_block->next = new_block;
         }
+}
+
+bool Heap::shorten(this Heap &self)
+{
+        if (self.pages <= 1)
+                return false;
+
+        uptr last_page = HeapStart + vmm.PageBytes * (self.pages - 1);
+
+        BlockHeader *curr = self.block_list;
+        while (curr) {
+                uptr curr_addr = reinterpret_cast<uptr>(curr);
+                if (!curr->free && curr_addr >= last_page)
+                        return false;
+                curr = curr->next;
+        }
+
+        BlockHeader *last = self.block_list;
+        while (last->next)
+                last = last->next;
+
+        if (!last->free)
+                return false;
+
+        uptr last_addr  = reinterpret_cast<uptr>(last);
+        uptr last_start = last_addr + sizeof(BlockHeader);
+
+        if (last_addr >= last_page || last_start >= last_page) {
+                if (last->prev)
+                        last->prev->next = nullptr;
+                else
+                        self.block_list = nullptr;
+        } else {
+                last->bytes = last_page - last_start;
+                last->next  = nullptr;
+        }
+
+        vmm.unmap_page(last_page);
+        self.pages--;
+
+        lib::println("Heap::shorten(): heap takes %d pages", self.pages);
+        
+        return true;
 }
 
 void Heap::split_block(this Heap &self, lib::usize super_size)
