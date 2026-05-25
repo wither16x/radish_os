@@ -93,7 +93,6 @@ void Heap::extend(this Heap &self) {
         uptr new_page = HeapStart + vmm.PageBytes * self.pages;
         vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm.allocate_frame(), 0x03 | (1ull << 63));
         self.pages++;
-        lib::println("Heap::extend(): heap takes %d pages", self.pages);
 
         BlockHeader *last_block = self.block_list;
         while (last_block->next)
@@ -144,8 +143,6 @@ bool Heap::shorten(this Heap &self)
 
         vmm.unmap_page(last_page);
         self.pages--;
-
-        lib::println("Heap::shorten(): heap takes %d pages", self.pages);
         
         return true;
 }

@@ -1,9 +1,11 @@
+#include "lib/print.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
+#include <lib/alloc.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
@@ -15,6 +17,7 @@ using namespace kernel;
 
 using lib::u64, lib::uptr;
 using lib::Status;
+using lib::malloc, lib::free;
 
 namespace {
 
