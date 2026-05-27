@@ -4,7 +4,6 @@
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
-#include <lib/alloc.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
