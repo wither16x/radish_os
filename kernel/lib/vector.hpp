@@ -109,7 +109,7 @@ public:
         // --------------------------------------------------------
         Vector &operator =(const Vector &other)
         {
-                if (this == other)
+                if (this == &other)
                         return *this;
 
                 delete[] this->data;
@@ -126,7 +126,7 @@ public:
 
         Vector &operator =(Vector &&other) noexcept
         {
-                if (this == other)
+                if (this == &other)
                         return *this;
 
                 delete[] this->data;
