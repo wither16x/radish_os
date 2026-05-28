@@ -1,18 +1,17 @@
 #pragma once
 
+#include <lib/linked_list.hpp>
 #include <lib/typing.hpp>
 
 namespace kernel::mem {
 
+struct BlockHeader : public lib::LinkedListHeader {
+        lib::usize bytes;
+        bool free;
+};
+
 class Heap {
 public:
-        struct BlockHeader {
-                lib::usize bytes;
-                bool free;
-                BlockHeader *next;
-                BlockHeader *prev;
-        };
-
         void init(this Heap &self);
 
         // Allocate `n` bytes
@@ -21,7 +20,7 @@ public:
         void free(this Heap &self, void *p);
 
 private:
-        BlockHeader *block_list;
+        lib::LinkedList<BlockHeader> block_list;
         BlockHeader *curr_block;
 
         lib::usize pages;               // amount of allocated pages

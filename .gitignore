@@ -4,3 +4,4 @@
 /images/
 /iso_root/
 /compile_commands.json
+*.bak

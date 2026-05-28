@@ -16,16 +16,20 @@ namespace {
 
 constexpr uptr HeapStart = 0xfffffe8000000000ull;
 
-}
+} /* annonymous namespace */
 
 void Heap::init(this Heap &self)
 {
         status("initializing heap");
 
+        self.block_list.set_base(HeapStart);
+
         vmm.map_page(HeapStart, pmm.allocate_frame(), 0x03 | (1ull << 63));
         self.pages = 1;
 
-        self.block_list = self.create_block(HeapStart, vmm.PageBytes, true, nullptr, nullptr);
+        BlockHeader *new_list = self.block_list.first();
+        new_list->bytes = vmm.PageBytes;
+        new_list->free = true;
 
         ok();
 }
@@ -61,27 +65,25 @@ void Heap::free(this Heap &self, void *p)
 
         hdr->free = true;
 
-        if (hdr->next && hdr->next->free) {
-                hdr->bytes += sizeof(BlockHeader) + hdr->next->bytes;
+        if (hdr->next && static_cast<BlockHeader *>(hdr->next)->free) {
+                hdr->bytes += sizeof(BlockHeader) + static_cast<BlockHeader *>(hdr->next)->bytes;
                 hdr->next = hdr->next->next;
                 if (hdr->next)
                         hdr->next->prev = hdr;
         }
 
-        if (hdr->prev && hdr->prev->free) {
-                hdr->prev->bytes += sizeof(BlockHeader) + hdr->bytes;
+        if (hdr->prev && static_cast<BlockHeader *>(hdr->prev)->free) {
+                static_cast<BlockHeader *>(hdr->prev)->bytes += sizeof(BlockHeader) + hdr->bytes;
                 hdr->prev->next = hdr->next;
                 if (hdr->next)
                         hdr->next->prev = hdr->prev;
-                hdr = hdr->prev;
+                hdr = static_cast<BlockHeader *>(hdr->prev);
         }
 
         while (self.pages > 1) {
-                BlockHeader *last = self.block_list;
-                while (last->next)
-                        last = last->next;
+                BlockHeader *last_block = self.block_list.last();
 
-                if (!last->free)
+                if (!last_block->free)
                         break;
 
                 if (!self.shorten())
@@ -94,15 +96,13 @@ void Heap::extend(this Heap &self) {
         vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm.allocate_frame(), 0x03 | (1ull << 63));
         self.pages++;
 
-        BlockHeader *last_block = self.block_list;
-        while (last_block->next)
-                last_block = last_block->next;
+        BlockHeader *last_block = self.block_list.last();
 
         if (last_block->free) {
                 last_block->bytes += vmm.PageBytes;
         } else {
                 BlockHeader *new_block = self.create_block(new_page, vmm.PageBytes, true, last_block, nullptr);
-                last_block->next = new_block;
+                self.block_list.append(new_block);
         }
 }
 
@@ -113,32 +113,30 @@ bool Heap::shorten(this Heap &self)
 
         uptr last_page = HeapStart + vmm.PageBytes * (self.pages - 1);
 
-        BlockHeader *curr = self.block_list;
+        BlockHeader *curr = self.block_list.first();
         while (curr) {
                 uptr curr_addr = reinterpret_cast<uptr>(curr);
                 if (!curr->free && curr_addr >= last_page)
                         return false;
-                curr = curr->next;
+                curr = static_cast<BlockHeader *>(curr->next);
         }
 
-        BlockHeader *last = self.block_list;
-        while (last->next)
-                last = last->next;
+        BlockHeader *last_block = self.block_list.last();
 
-        if (!last->free)
+        if (!last_block->free)
                 return false;
 
-        uptr last_addr  = reinterpret_cast<uptr>(last);
+        uptr last_addr  = reinterpret_cast<uptr>(last_block);
         uptr last_start = last_addr + sizeof(BlockHeader);
 
         if (last_addr >= last_page || last_start >= last_page) {
-                if (last->prev)
-                        last->prev->next = nullptr;
+                if (last_block->prev)
+                        last_block->prev->next = nullptr;
                 else
-                        self.block_list = nullptr;
+                        self.block_list.reset();
         } else {
-                last->bytes = last_page - last_start;
-                last->next  = nullptr;
+                last_block->bytes = last_page - last_start;
+                last_block->next  = nullptr;
         }
 
         vmm.unmap_page(last_page);
@@ -153,31 +151,31 @@ void Heap::split_block(this Heap &self, lib::usize super_size)
 
         if (rem >= sizeof(BlockHeader) + 16) {
                 uptr block_base = reinterpret_cast<uptr>(reinterpret_cast<u8 *>(self.curr_block) + sizeof(BlockHeader) + super_size);
-                BlockHeader *new_block = self.create_block(block_base, rem, true, self.curr_block, self.curr_block->next);
+                BlockHeader *new_block = self.create_block(block_base, rem, true, self.curr_block, static_cast<BlockHeader *>(self.curr_block->next));
 
                 if (self.curr_block->next)
                         self.curr_block->next->prev = new_block;
 
                 self.curr_block->next = new_block;
-                self.curr_block->bytes = super_size; 
+                self.curr_block->bytes = super_size;
         }
 }
 
-Heap::BlockHeader *Heap::find_free_block(this Heap &self, usize n)
+BlockHeader *Heap::find_free_block(this Heap &self, usize n)
 {
-        BlockHeader *current_block = self.block_list;
+        BlockHeader *current_block = self.block_list.first();
 
         while (current_block) {
                 if (current_block->free && current_block->bytes >= n)
                         return current_block;
 
-                current_block = current_block->next;
+                current_block = static_cast<BlockHeader *>(current_block->next);
         }
 
         return nullptr;
 }
 
-Heap::BlockHeader *Heap::create_block(lib::uptr base, lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next)
+BlockHeader *Heap::create_block(lib::uptr base, lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next)
 {
         BlockHeader *block = reinterpret_cast<BlockHeader *>(base);
         block->bytes = bytes - sizeof(BlockHeader);

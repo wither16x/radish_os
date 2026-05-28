@@ -1,11 +1,14 @@
+#include "lib/print.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
+#include <lib/memory.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
+#include <lib/vector.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
@@ -61,6 +64,21 @@ extern "C" void kernel_main()
         mem::vmm.load();
 
         mem::kheap.init();
+
+        lib::Vector<int> vec1;
+        vec1.push_back(10);
+        vec1.push_back(20);
+
+        lib::Vector<int> vec2 = vec1;
+        lib::Vector<int> vec3 = lib::move(vec1);
+
+        vec2 = vec3;
+        vec3 = lib::move(vec2);
+
+        lib::printf("elements in vec3: ");
+        for (auto e : vec3)
+                lib::printf("%d ", e);
+        lib::println("");
 
         panic("nothing to do");
 }
