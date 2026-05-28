@@ -1,4 +1,4 @@
-#include "lib/print.hpp"
+#include <lib/print.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
@@ -58,7 +58,7 @@ extern "C" void kernel_main()
 
         boot::BootInfo bootinfo;
 
-        mem::pmm.init(bootinfo.memmap);
+        mem::pmm.init_stage1(bootinfo.memmap);
 
         mem::vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
         mem::vmm.load();

@@ -93,6 +93,8 @@ public:
                         T *new_data = new T[self.cap];
                         for (usize i = 0; i < self.length; ++i)
                                 new_data[i] = self.data[i];
+                        delete[] self.data;
+                        self.data = new_data;
                 }
 
                 self.data[self.length] = n;

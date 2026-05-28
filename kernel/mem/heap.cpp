@@ -28,7 +28,7 @@ void Heap::init(this Heap &self)
         self.pages = 1;
 
         BlockHeader *new_list = self.block_list.first();
-        new_list->bytes = vmm.PageBytes;
+        new_list->bytes = vmm.PageBytes - sizeof(BlockHeader);
         new_list->free = true;
 
         ok();
@@ -129,7 +129,7 @@ bool Heap::shorten(this Heap &self)
         uptr last_addr  = reinterpret_cast<uptr>(last_block);
         uptr last_start = last_addr + sizeof(BlockHeader);
 
-        if (last_addr >= last_page || last_start >= last_page) {
+        if (last_addr >= last_page) {
                 if (last_block->prev)
                         last_block->prev->next = nullptr;
                 else
