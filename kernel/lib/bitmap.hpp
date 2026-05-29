@@ -12,35 +12,37 @@ class StaticBitmap {
 public:
         void set(this StaticBitmap<N> &self, usize bit)
         {
-                u64 index = self.get_index(bit);
-                u64 mask = self.get_mask(bit);
-                self.data[index] |= mask;
+                if (bit < N)
+                        self.data[self.get_index(bit)] |= self.get_mask(bit);
         }
 
         void clear(this StaticBitmap<N> &self, usize bit)
         {
-                u64 index = self.get_index(bit);
-                u64 mask = self.get_mask(bit);
-                self.data[index] &= ~mask;
+                if (bit < N)
+                        self.data[self.get_index(bit)] &= ~self.get_mask(bit);
         }
 
         bool test(this const StaticBitmap<N> &self,usize bit)
         {
-                u64 index = self.get_index(bit);
-                u64 mask = self.get_mask(bit);
-                return (self.data[index] & mask) != 0;
+                if (bit < N)
+                        return (self.data[self.get_index(bit)] & self.get_mask(bit)) != 0;
+                return false;
         }
 
         void set_all(this StaticBitmap<N> &self)
         {
-                for (usize i = 0; i < N; i++)
-                        self.set(i);
+                for (usize i = 0; i < Words; i++)
+                        self.data[i] = ~0ull;
+
+                constexpr usize rem = N % BitsPerWord;
+                if constexpr (rem != 0)
+                        self.data[Words - 1] &= (1ull << rem) - 1;
         }
 
         void clear_all(this StaticBitmap<N> &self)
         {
-                for (usize i = 0; i < N; i++)
-                        self.clear(i);
+                for (usize i = 0; i < Words; i++)
+                        self.data[i] = 0;
         }
 
         usize size() const
@@ -49,18 +51,19 @@ public:
         }
 
 private:
-        u64 data[N];
+        static constexpr usize BitsPerWord      = sizeof(u64) * 8;
+        static constexpr usize Words            = (N + BitsPerWord - 1) / BitsPerWord;
 
-        usize get_index(usize bit) const
+        u64 data[Words];
+
+        static constexpr usize get_index(usize bit)
         {
-                usize index = bit / (sizeof(u64) * 8);
-                return index;
+                return bit / BitsPerWord;
         }
 
-        usize get_mask(usize bit) const
+        static constexpr usize get_mask(usize bit)
         {
-                usize mask = 1ull << (bit % (sizeof(u64) * 8));
-                return mask;
+                return 1ull << (bit % BitsPerWord);
         }
 };
 
