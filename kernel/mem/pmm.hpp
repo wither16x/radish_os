@@ -16,7 +16,6 @@ public:
         //   can handle a theorically infinite amount of RAM since the bitmap
         //   is dynamically allocated
         void init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap);
-        void init_stage2(this PMM &self, boot::BootInfo::MemmapInfo &memmap);
 
         lib::uptr allocate_frame(this PMM &self);
         void free_frame(this PMM &self, lib::uptr addr);
@@ -27,8 +26,6 @@ private:
         // only
         static constexpr lib::usize MaxMemory   = 0x40000000;   // 1 GiB
         static constexpr lib::usize MaxFrames   = MaxMemory / FrameBytes;
-
-        bool stage2_enabled;
 
         lib::StaticBitmap<MaxFrames> static_bitmap;        // used in stage 1
 
