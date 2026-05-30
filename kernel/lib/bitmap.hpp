@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/alloc.hpp>
-#include <lib/print.hpp>
 #include <lib/typing.hpp>
 
 namespace kernel::lib {
@@ -109,9 +108,9 @@ public:
         }
 
         // Add bits to the bitmap
-        void extend(this DynamicBitmap &self, usize count)
+        void extend(this DynamicBitmap &self)
         {
-                self.length += count;
+                self.length *= 2;
                 u64 *new_data = new u64[self.length];
                 for (usize i = 0; i < self.length; ++i)
                         new_data[i] = self.data[i];

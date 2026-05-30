@@ -52,7 +52,7 @@ CXXFLAGS := $(COMMON_FLAGS) \
 	-fno-builtin \
 	-fvisibility=hidden \
 	-fno-sized-deallocation
-
+	
 CFLAGS := $(COMMON_FLAGS) \
 	-std=c23 \
 	-fno-builtin \

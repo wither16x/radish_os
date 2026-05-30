@@ -66,6 +66,9 @@ extern "C" void kernel_main()
 
         mem::kheap.init();
 
+        mem::pmm.init_stage2();
+
+        // tests
         lib::Vector<int> vec1;
         vec1.push_back(10);
         vec1.push_back(20);
@@ -90,12 +93,15 @@ extern "C" void kernel_main()
         for (lib::usize i = 0; i < bitmap.size(); i++)
                 lib::println("bitmap[%u] = %d", i, bitmap.test(i));
 
-        bitmap.extend(6);
+        bitmap.extend();
         bitmap.set(6);
         bitmap.set(8);
         bitmap.set(10);
         for (lib::usize i = 0; i < bitmap.size(); i++)
                 lib::println("extended bitmap[%u] = %d", i, bitmap.test(i));
+
+        for (int i = 0; i < 1000000; i++)
+                mem::pmm.allocate_frame();
 
         panic("nothing to do");
 }

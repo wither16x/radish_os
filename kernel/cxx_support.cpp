@@ -14,6 +14,12 @@ void __cxa_pure_virtual()
         panic("call to pure virtual method");
 }
 
+// not sure about this
+int atexit()
+{
+        return 0;
+}
+
 void *__dso_handle;
 
 }
