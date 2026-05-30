@@ -1,12 +1,10 @@
-#include <lib/bitmap.hpp>
-#include <lib/print.hpp>
+#include "lib/logging.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
-#include <lib/memory.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
@@ -51,6 +49,8 @@ extern "C" void kernel_main()
         if (drivers::serial::init_port(drivers::serial::Port::COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
+        lib::log::logger.set_context("kernel");
+
         cpu::GDT gdt;
         gdt.load();
 
@@ -67,41 +67,6 @@ extern "C" void kernel_main()
         mem::kheap.init();
 
         mem::pmm.init_stage2();
-
-        // tests
-        lib::Vector<int> vec1;
-        vec1.push_back(10);
-        vec1.push_back(20);
-
-        lib::Vector<int> vec2 = vec1;
-        lib::Vector<int> vec3 = lib::move(vec1);
-
-        vec2 = vec3;
-        vec3 = lib::move(vec2);
-
-        lib::printf("elements in vec3: ");
-        for (auto e : vec3)
-                lib::printf("%d ", e);
-        lib::println("");
-
-        lib::DynamicBitmap bitmap;
-        bitmap.init(5);
-        bitmap.set_all();
-        bitmap.clear(0);
-        bitmap.clear(2);
-        bitmap.clear(3);
-        for (lib::usize i = 0; i < bitmap.size(); i++)
-                lib::println("bitmap[%u] = %d", i, bitmap.test(i));
-
-        bitmap.extend();
-        bitmap.set(6);
-        bitmap.set(8);
-        bitmap.set(10);
-        for (lib::usize i = 0; i < bitmap.size(); i++)
-                lib::println("extended bitmap[%u] = %d", i, bitmap.test(i));
-
-        for (int i = 0; i < 1000000; i++)
-                mem::pmm.allocate_frame();
 
         panic("nothing to do");
 }

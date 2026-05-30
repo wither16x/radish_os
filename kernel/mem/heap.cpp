@@ -7,7 +7,7 @@
 #include <panic.hpp>
 
 using kernel::lib::uptr, kernel::lib::usize, kernel::lib::u8;
-using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::log::logger;
 using kernel::lib::align_up;
 
 namespace kernel::mem {
@@ -20,7 +20,7 @@ constexpr uptr HeapStart = 0xfffffe8000000000ull;
 
 void Heap::init(this Heap &self)
 {
-        status("initializing heap");
+        logger.info("initializing heap");
 
         self.block_list.set_base(HeapStart);
 
@@ -31,7 +31,7 @@ void Heap::init(this Heap &self)
         new_list->bytes = vmm.PageBytes - sizeof(BlockHeader);
         new_list->free = true;
 
-        ok();
+        logger.ok("initialized heap");
 }
 
 void *Heap::allocate(this Heap &self, usize n)

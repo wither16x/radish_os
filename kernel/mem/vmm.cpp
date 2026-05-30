@@ -6,7 +6,7 @@
 #include <mem/vmm.hpp>
 
 using kernel::lib::u16, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
-using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::log::logger;
 using kernel::lib::memset;
 
 extern "C" u64 _lds_kernel_start[];
@@ -27,7 +27,7 @@ void VMM::init(this VMM &self,
         boot::BootInfo::MemmapInfo &memmap_info
 )
 {
-        status("initializing vmm");
+        logger.info("initializing vmm");
 
         self.hhdm = hhdm;
         self.executable_info = executable_info;
@@ -39,7 +39,7 @@ void VMM::init(this VMM &self,
         self.map_kernel();
         self.map_hhdm();
 
-        ok();
+        logger.ok("initialized vmm");
 }
 
 void VMM::load(this const VMM &self)

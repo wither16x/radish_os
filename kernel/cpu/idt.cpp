@@ -3,7 +3,7 @@
 #include <lib/typing.hpp>
 
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64;
-using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::log::logger;
 
 namespace kernel::cpu {
 
@@ -39,7 +39,7 @@ IDTR idtptr;
 
 IDT::IDT()
 {
-        status("initializing idt");
+        logger.info("initializing idt");
 
         idtptr = {
                 .size = sizeof(idt) - 1,
@@ -49,16 +49,16 @@ IDT::IDT()
         this->set_gate(3, __isr_stub3, 0x8e);
         this->set_gate(14, __isr_stub14, 0x8e);
 
-        ok();
+        logger.ok("initialized idt");
 }
 
 void IDT::load()
 {
-        status("loading idt");
+        logger.info("loading idt");
 
         idt_flush(reinterpret_cast<u64 *>(&idtptr));
 
-        ok();
+        logger.ok("loaded idt");
 }
 
 void IDT::set_gate(int vector, void (*isr)(), u8 flags)

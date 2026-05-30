@@ -4,14 +4,14 @@
 #include <mem/pmm.hpp>
 #include <panic.hpp>
 
-using kernel::lib::log::status, kernel::lib::log::ok;
+using kernel::lib::log::logger;
 using kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
 
 namespace kernel::mem {
 
 void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 {
-        status("initializing pmm stage 1");
+        logger.info("initializing pmm stage 1");
 
         self.static_bitmap.set_all();
 
@@ -25,12 +25,12 @@ void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 
         self.stage2_enabled = false;
 
-        ok();
+        logger.ok("initialized pmm stage 1");
 }
 
 void PMM::init_stage2(this PMM &self)
 {
-        status("initializing pmm stage 2");
+        logger.info("initializing pmm stage 2");
 
         self.dynamic_bitmap.init(self.static_bitmap.size());
         self.dynamic_bitmap.set_all();
@@ -42,7 +42,7 @@ void PMM::init_stage2(this PMM &self)
 
         self.stage2_enabled = true;
 
-        ok();
+        logger.ok("initialized pmm stage 2");
 }
 
 uptr PMM::allocate_frame(this PMM &self)

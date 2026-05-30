@@ -7,10 +7,12 @@
 namespace kernel {
 
 using lib::vprintf, lib::println;
-using lib::log::status;
+using lib::log::logger;
 
 void panic(const char *fmt, ...)
 {
+        logger.set_context("panic handler");
+
         println("\r\n==================== KERNEL PANIC ====================");
         va_list args;
         va_start(args, fmt);
@@ -18,7 +20,7 @@ void panic(const char *fmt, ...)
         va_end(args);
         println("");
 
-        status("idling");
+        logger.info("idling");
         while (true)
                 cpu::hlt();
 }
