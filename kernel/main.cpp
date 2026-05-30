@@ -1,3 +1,4 @@
+#include <lib/bitmap.hpp>
 #include <lib/print.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
@@ -79,6 +80,22 @@ extern "C" void kernel_main()
         for (auto e : vec3)
                 lib::printf("%d ", e);
         lib::println("");
+
+        lib::DynamicBitmap bitmap;
+        bitmap.init(5);
+        bitmap.set_all();
+        bitmap.clear(0);
+        bitmap.clear(2);
+        bitmap.clear(3);
+        for (lib::usize i = 0; i < bitmap.size(); i++)
+                lib::println("bitmap[%u] = %d", i, bitmap.test(i));
+
+        bitmap.extend(6);
+        bitmap.set(6);
+        bitmap.set(8);
+        bitmap.set(10);
+        for (lib::usize i = 0; i < bitmap.size(); i++)
+                lib::println("extended bitmap[%u] = %d", i, bitmap.test(i));
 
         panic("nothing to do");
 }
