@@ -12,25 +12,32 @@
 #include <mem/vmm.hpp>
 #include <panic.hpp>
 
-using namespace kernel;
-
-using lib::u64, lib::uptr;
-using lib::Status;
+using kernel::drivers::serial::init_port, kernel::drivers::serial::Port;
+using kernel::lib::u64, kernel::lib::uptr;
+using kernel::lib::Status;
+using kernel::lib::log::logger;
+using kernel::panic;
+using kernel::boot::limine::Revision, kernel::boot::limine::base_revision;
+using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_marker;
+using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
+using kernel::boot::BootInfo;
+using kernel::cpu::GDT, kernel::cpu::IDT;
+using kernel::mem::pmm, kernel::mem::vmm, kernel::mem::kheap;
 
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests")]]
-volatile boot::limine::Revision limine_base_revision = boot::limine::base_revision(6);
+volatile Revision limine_base_revision = base_revision(6);
 
 } /* anonymous namespace */
 
 namespace {
 
 [[gnu::used, gnu::section(".limine_requests_start")]]
-volatile boot::limine::StartMarker limine_requests_start_marker = boot::limine::requests_start_marker();
+volatile StartMarker limine_requests_start_marker = requests_start_marker();
 
 [[gnu::used, gnu::section(".limine_requests_end")]]
-volatile boot::limine::EndMarker limine_requests_end_marker = boot::limine::requests_end_marker();
+volatile EndMarker limine_requests_end_marker = requests_end_marker();
 
 } /* anonymous namespace */
 
@@ -42,30 +49,30 @@ extern "C" void kernel_main()
         if (!limine_base_revision.is_supported())
                 panic("limine base revision not supported"); // unprintable message
 
-        if (drivers::serial::init_port(drivers::serial::Port::COM1) != Status::Ok)
+        if (init_port(Port::COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
-        lib::log::logger.set_context("kernel");
+        logger.set_context("kernel");
 
-        cpu::GDT gdt;
+        GDT gdt;
         gdt.load();
 
-        cpu::IDT idt;
+        IDT idt;
         idt.load();
 
-        boot::BootInfo bootinfo;
+        BootInfo bootinfo;
 
-        mem::pmm.init_stage1(bootinfo.memmap);
+        pmm.init_stage1(bootinfo.memmap);
 
-        mem::vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
-        mem::vmm.load();
+        vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+        vmm.load();
 
-        mem::kheap.init();
+        kheap.init();
 
-        mem::pmm.init_stage2();
+        pmm.init_stage2();
 
         for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
-                lib::log::logger.debug("initializing global constructor %u", i);
+                logger.debug("initializing global constructor %u", i);
                 __init_array[i]();
         }
         
