@@ -1,6 +1,5 @@
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
-#include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
@@ -12,7 +11,6 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
-#include <lib/print.hpp>
 
 using namespace kernel;
 
