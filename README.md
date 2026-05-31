@@ -2,6 +2,8 @@
 A x86_64 operating system.
 I do it for learning.
 
+![screenshot](screenshots/image.png)
+
 ## Features
 - Serial output
 - tmpfs (but it is HORRIBLE)
