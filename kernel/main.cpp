@@ -72,7 +72,7 @@ extern "C" void kernel_main()
         pmm.init_stage2();
 
         for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
-                logger.debug("initializing global constructor %u", i);
+                logger.info("initializing global constructor %u...", i);
                 __init_array[i]();
         }
         

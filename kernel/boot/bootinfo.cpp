@@ -63,7 +63,7 @@ const char *memmap_type_str[] = {
 
 BootInfo::BootInfo()
 {
-        logger.info("recovering boot info");
+        logger.info("recovering boot info...");
 
         this->bootloader.name           = l_bootloader_info.response->name;
         this->bootloader.version        = l_bootloader_info.response->version;

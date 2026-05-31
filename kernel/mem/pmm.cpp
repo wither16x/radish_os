@@ -11,7 +11,7 @@ namespace kernel::mem {
 
 void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 {
-        logger.info("initializing pmm stage 1");
+        logger.info("initializing pmm stage 1...");
 
         self.static_bitmap.set_all();
 
@@ -30,7 +30,7 @@ void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 
 void PMM::init_stage2(this PMM &self)
 {
-        logger.info("initializing pmm stage 2");
+        logger.info("initializing pmm stage 2...");
 
         self.dynamic_bitmap.init(self.static_bitmap.size());
         self.dynamic_bitmap.set_all();
