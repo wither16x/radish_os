@@ -1,3 +1,6 @@
+# objects and binaries
 /bin/
 /build/
+
+# limine header file, ignored as it is copied here by scripts/get-deps.sh
 /limine.h
