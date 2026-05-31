@@ -11,10 +11,10 @@ I do it for learning.
 - 4-level paging
 
 ## Roadmap (to the next release)
-[] Better tmpfs
-[] VFS
-[] USTAR
-[] Framebuffer driver
-[] initrd
+* [ ] Better tmpfs
+* [ ] VFS
+* [ ] USTAR
+* [ ] Framebuffer driver
+* [ ] initrd
 
 Expect potential cleanup and refactoring.
