@@ -16,15 +16,15 @@ private:
 public:
         // Constructors
         // --------------------------------------------------------
+
         Vector()
         {
                 this->cap = 1;
                 this->length = 0;
-
                 this->data = new T[this->cap];
         }
 
-        Vector(const Vector &other)
+        Vector(const Vector<T> &other)
         {
                 this->length = other.length;
                 this->cap = other.cap;
@@ -34,7 +34,7 @@ public:
                         this->data[i] = other.data[i];
         }
 
-        Vector(Vector &&other) noexcept
+        Vector(Vector<T> &&other) noexcept
         {
                 this->data = other.data;
                 this->length = other.length;
@@ -56,39 +56,40 @@ public:
 
         // Both methods below for range-based for
         // --------------------------------------------------------
-        T *begin(this const Vector &self)
+        T *begin(this const Vector<T> &self)
         {
                 return self.data;
         }
 
-        T *end(this const Vector &self)
+        T *end(this const Vector<T> &self)
         {
                 return self.data + self.length;
         }
         // --------------------------------------------------------
 
-        usize size(this const Vector &self)
+        usize size(this const Vector<T> &self)
         {
                 return self.length;
         }
 
-        usize capacity(this const Vector &self)
+        usize capacity(this const Vector<T> &self)
         {
                 return self.cap;
         }
 
-        void set(this Vector &self, usize idx, const T& n)
+        void set(this Vector<T> &self, usize idx, const T& n)
         {
                 if (idx >= self.cap)
                         return;         // do not extend the vector
 
                 self.data[idx] = n;
-                self.length++;
         }
 
-        void push_back(this Vector &self, const T& n)
+        void push_back(this Vector<T> &self, const T& n)
         {
                 if (self.length == self.cap) {
+                        if (self.cap == 0)
+                                self.cap = 1;
                         self.cap *= 2;
                         T *new_data = new T[self.cap];
                         for (usize i = 0; i < self.length; ++i)
@@ -101,15 +102,26 @@ public:
                 self.length++;
         }
 
-        void pop_back(this Vector &self)
+        void pop_back(this Vector<T> &self)
         {
                 if (self.length > 0)
                         self.length--;
         }
 
+        void erase(this Vector<T> &self, usize index)
+        {
+                if (index >= self.length)
+                        return;
+
+                for (usize i = index; i < self.length - 1; i++)
+                        self.data[i] = self.data[i + 1];
+
+                self.length--;
+        }
+
         // Operators
         // --------------------------------------------------------
-        Vector &operator =(const Vector &other)
+        Vector &operator =(const Vector<T> &other)
         {
                 if (this == &other)
                         return *this;
@@ -126,7 +138,7 @@ public:
                 return *this;
         }
 
-        Vector &operator =(Vector &&other) noexcept
+        Vector &operator =(Vector<T> &&other) noexcept
         {
                 if (this == &other)
                         return *this;
@@ -144,10 +156,16 @@ public:
                 return *this;
         }
 
-        T operator [](this const Vector &self, usize idx)
+        T &operator [](this Vector<T> &self, usize idx)
         {
                 return self.data[idx];
         }
+
+        const T &operator [](this const Vector<T> &self, usize idx)
+        {
+        return self.data[idx];
+        }
+
         // --------------------------------------------------------
 };
 

@@ -52,4 +52,27 @@ int memcmp(const void *s1, const void *s2, usize n) {
 
 } /* extern "C" */
 
+int strcmp(const char *s1, const char *s2)
+{
+        while (*s1 && *s2) {
+                if (*s1 != *s2)
+                        break;
+
+                s1++;
+                s2++;
+        }
+
+        return (*s1 - '0') - (*s2 - '0');
+}
+
+void strcpy(const char *src, char *dest)
+{
+        int i;
+
+        for (i = 0; src[i]; i++)
+                dest[i] = src[i];
+
+        dest[i] = '\0';
+}
+
 } /* namespace kernel::lib */

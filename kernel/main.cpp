@@ -1,17 +1,18 @@
-#include "lib/logging.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
+#include <fs/tmpfs.hpp>
+#include <lib/logging.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
-#include <lib/vector.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
+#include <lib/print.hpp>
 
 using namespace kernel;
 
@@ -43,9 +44,6 @@ extern "C" void kernel_main()
         if (!limine_base_revision.is_supported())
                 panic("limine base revision not supported"); // unprintable message
 
-        for (u64 i = 0; &__init_array[i] != __init_array_end; i++)
-                __init_array[i]();
-
         if (drivers::serial::init_port(drivers::serial::Port::COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
@@ -68,5 +66,10 @@ extern "C" void kernel_main()
 
         mem::pmm.init_stage2();
 
+        for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
+                lib::log::logger.debug("initializing global constructor %u", i);
+                __init_array[i]();
+        }
+        
         panic("nothing to do");
 }

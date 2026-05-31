@@ -51,4 +51,9 @@ constexpr remove_reference_t<T>&& move(T&& value) noexcept
         return static_cast<remove_reference_t<T>&&>(value);
 }
 
+// strings (char pointers)
+
+int strcmp(const char *s1, const char *s2);
+void strcpy(const char *src, char *dest);
+
 } /* namespace kernel::lib */
