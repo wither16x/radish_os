@@ -1,6 +1,7 @@
 #include <drivers/serial.hpp>
 #include <lib/conversion.hpp>
 #include <lib/print.hpp>
+#include <lib/string.hpp>
 
 namespace kernel::lib {
 
@@ -72,7 +73,7 @@ void vprintf(const char *fmt, va_list args)
                         print_string(s);
                         break;
                 }
-                
+
                 default:
                         print_string("<unsupported format>");
                         break;

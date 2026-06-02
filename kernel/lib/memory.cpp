@@ -65,6 +65,14 @@ int strcmp(const char *s1, const char *s2)
         return (*s1 - '0') - (*s2 - '0');
 }
 
+usize strlen(const char *s)
+{
+        usize i;
+        for (i = 0; *s; s++)
+                i++;
+        return i;
+}
+
 void strcpy(const char *src, char *dest)
 {
         int i;
