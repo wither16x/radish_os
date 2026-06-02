@@ -92,6 +92,6 @@ extern "C" void kernel_main()
 
         s += s2;
         logger.debug("%s", s.raw());
-        
+
         panic("nothing to do");
 }
