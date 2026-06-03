@@ -19,8 +19,12 @@ enum class NodeType : int {
 };
 
 // Depending on the node type, `file_data` or `dir_data` is set
-// to `nullptr`
+// to `nullptr`.
+// The parent node may also be set to `nullptr` but only for the first
+// node (root directory)!
 struct Node {
+        Node *parent;
+
         NodeType type;
         lib::String path;
 
@@ -36,7 +40,7 @@ struct Dir {
         lib::Vector<Node *> nodes;
 };
 
-Node *create_node(NodeType type, const lib::String &path);
+Node *create_node(NodeType type, const lib::String &path, Node *parent);
 void remove_node(Node *node);
 
 } /* namespace kernel::fs::tmpfs */

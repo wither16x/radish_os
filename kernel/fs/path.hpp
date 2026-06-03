@@ -13,7 +13,6 @@ private:
 public:
         Path(const lib::String &path);
 
-        bool is_valid(this const Path &self);
         void parse(this Path &self);
 
         const lib::String &get(this const Path &self);

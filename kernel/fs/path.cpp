@@ -13,11 +13,6 @@ Path::Path(const String &path)
         : path(path)
 {}
 
-bool Path::is_valid(this const Path &self)
-{
-        return self.path[0] == '/';
-}
-
 void Path::parse(this Path &self)
 {
         if (self.path[0] == '/' && self.path.length() <= 1) {

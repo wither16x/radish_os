@@ -59,7 +59,7 @@ usize String::length(this const String &self)
         return self.len;
 }
 
-String String::operator +(this String &self, const String &other)
+String String::operator +(this const String &self, const String &other)
 {
         String s;
         s.len = self.len + other.len;
@@ -69,7 +69,7 @@ String String::operator +(this String &self, const String &other)
         return s;
 }
 
-String String::operator +(this String &self, char ch)
+String String::operator +(this const String &self, char ch)
 {
         String s;
         s.len = self.len + 1;

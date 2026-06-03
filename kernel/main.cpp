@@ -79,11 +79,11 @@ extern "C" void kernel_main()
         // test tmpfs
         using namespace kernel::fs::tmpfs;
 
-        auto root = create_node(NodeType::Dir, "/");
-        auto bin = create_node(NodeType::Dir, "/bin");
-        auto readme_txt = create_node(NodeType::File, "/README.txt");
-        auto hello_txt = create_node(NodeType::File, "/hello.txt");
-        auto executable = create_node(NodeType::File, "/bin/executable");
+        auto root = create_node(NodeType::Dir, "/", nullptr);
+        auto bin = create_node(NodeType::Dir, "bin", root);
+        auto readme_txt = create_node(NodeType::File, "README.txt", root);
+        auto hello_txt = create_node(NodeType::File, "hello.txt", root);
+        auto executable = create_node(NodeType::File, "executable", bin);
 
         root->dir_data->nodes.push_back(readme_txt);
         logger.debug("added README.txt");
@@ -97,6 +97,9 @@ extern "C" void kernel_main()
         logger.debug("Root directory: %s", root->path.raw());
         logger.debug("Root content:");
         for (auto &nd : root->dir_data->nodes)
+                logger.debug("* %s", nd->path.raw());
+        logger.debug("%s content: ", bin->path.raw());
+        for (auto &nd : bin->dir_data->nodes)
                 logger.debug("* %s", nd->path.raw());
 
         remove_node(root);
