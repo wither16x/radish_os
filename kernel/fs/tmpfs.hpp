@@ -37,5 +37,6 @@ struct Dir {
 };
 
 Node *create_node(NodeType type, const lib::String &path);
+void remove_node(Node *node);
 
 } /* namespace kernel::fs::tmpfs */

@@ -99,5 +99,11 @@ extern "C" void kernel_main()
         for (auto &nd : root->dir_data->nodes)
                 logger.debug("* %s", nd->path.raw());
 
+        remove_node(root);
+        remove_node(bin);
+        remove_node(readme_txt);
+        remove_node(hello_txt);
+        remove_node(executable);
+
         panic("nothing to do");
 }

@@ -42,4 +42,12 @@ Node *create_node(NodeType type, const String &path)
         return nd;
 }
 
+void remove_node(Node *node)
+{
+        if (!node)
+                return;
+        
+        delete node;
+}
+
 } /* namespace kernel::fs::tmpfs */
