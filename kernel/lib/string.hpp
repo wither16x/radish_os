@@ -15,7 +15,7 @@ private:
         void cleanup(this String &self);
 
 public:
-        String() = default;
+        String();
         String(const char *buf);
         String(const String &other);
         String(String &&other);
@@ -26,9 +26,13 @@ public:
         usize length(this const String &self);
 
         String operator +(this String &self, const String &other);
+        String operator +(this String &self, char ch);
         String &operator =(this String &self, const String &other);
         String &operator =(this String &self, String &&other);
         String &operator +=(this String &self, const String &other);
+        String &operator +=(this String &self, char ch);
+        char operator [](this String &self, usize index);
+        char operator [](this const String &self, usize index);
 };
 
 } /* namespace kernel::lib */

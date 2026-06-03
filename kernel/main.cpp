@@ -6,7 +6,6 @@
 #include <fs/tmpfs.hpp>
 #include <lib/logging.hpp>
 #include <lib/status.hpp>
-#include <lib/string.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
@@ -77,21 +76,28 @@ extern "C" void kernel_main()
                 __init_array[i]();
         }
 
-        kernel::lib::String s = "Hello from String class!";
-        logger.debug("string data as C string = %s", s.raw());
-        logger.debug("string length = %u", s.length());
+        // test tmpfs
+        using namespace kernel::fs::tmpfs;
 
-        kernel::lib::String s2 = "Just another string.";
-        s = s2;
-        logger.debug("after assignment, s = %s", s.raw());
-        logger.debug("s length = %u", s.length());
+        auto root = create_node(NodeType::Dir, "/");
+        auto bin = create_node(NodeType::Dir, "/bin");
+        auto readme_txt = create_node(NodeType::File, "/README.txt");
+        auto hello_txt = create_node(NodeType::File, "/hello.txt");
+        auto executable = create_node(NodeType::File, "/bin/executable");
 
-        s = "Hello, this is a";
-        s2 = " string made of two strings!";
-        logger.debug("%s", (s + s2).raw());
+        root->dir_data->nodes.push_back(readme_txt);
+        logger.debug("added README.txt");
+        root->dir_data->nodes.push_back(hello_txt);
+        logger.debug("added hello.txt");
+        bin->dir_data->nodes.push_back(executable);
+        logger.debug("added /bin/executable");
+        root->dir_data->nodes.push_back(bin);
+        logger.debug("added /bin");
 
-        s += s2;
-        logger.debug("%s", s.raw());
+        logger.debug("Root directory: %s", root->path.raw());
+        logger.debug("Root content:");
+        for (auto &nd : root->dir_data->nodes)
+                logger.debug("* %s", nd->path.raw());
 
         panic("nothing to do");
 }

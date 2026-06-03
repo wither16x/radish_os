@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <lib/string.hpp>
 #include <lib/vector.hpp>
 
 namespace kernel::fs::tmpfs {
@@ -12,15 +13,29 @@ namespace kernel::fs::tmpfs {
 constexpr int MaxPathChars = 255;
 constexpr int MaxDataChars = 1000;
 
-// ahh file struct T-T
-struct File {
-        char path[MaxPathChars];
-        char data[MaxDataChars];
+enum class NodeType : int {
+        File,
+        Dir
 };
 
-void create_file(const char *path, const char *data);
-char *read_file(const char *path);
+// Depending on the node type, `file_data` or `dir_data` is set
+// to `nullptr`
+struct Node {
+        NodeType type;
+        lib::String path;
 
-lib::Vector<File> &get_root();
+        struct File *file_data;
+        struct Dir *dir_data;
+};
+
+struct File {
+        lib::String data;
+};
+
+struct Dir {
+        lib::Vector<Node *> nodes;
+};
+
+Node *create_node(NodeType type, const lib::String &path);
 
 } /* namespace kernel::fs::tmpfs */

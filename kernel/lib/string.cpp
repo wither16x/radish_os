@@ -15,6 +15,13 @@ void String::cleanup(this String &self)
 //
 // public
 // -------------------------------------------------------------
+String::String()
+{
+        this->len = 0;
+        this->data = new char;
+        this->data[0] = '\0';
+}
+
 String::String(const char *buf)
 {
         this->len = strlen(buf);
@@ -58,7 +65,19 @@ String String::operator +(this String &self, const String &other)
         s.len = self.len + other.len;
         s.data = new char[s.len + 1];
         strcpy(self.data, s.data);
-        strcpy(other.data,s.data + self.len);
+        strcpy(other.data, s.data + self.len);
+        return s;
+}
+
+String String::operator +(this String &self, char ch)
+{
+        String s;
+        s.len = self.len + 1;
+        s.data = new char[s.len + 1];
+        if (self.data && self.len > 0)
+                strcpy(self.data, s.data);
+        s.data[self.len] = ch;
+        s.data[self.len + 1] = '\0';
         return s;
 }
 
@@ -85,6 +104,29 @@ String &String::operator +=(this String &self, const String &other)
         self = self + other;
         return self;
 }
+
+String &String::operator +=(this String &self, char ch)
+{
+        self = self + ch;
+        return self;
+}
+
+char String::operator [](this String &self, usize index)
+{
+        if (index >= self.len)
+                return '\0';
+
+        return self.data[index];
+}
+
+char String::operator [](this const String &self, usize index)
+{
+        if (index >= self.len)
+                return '\0';
+
+        return self.data[index];
+}
+
 // -------------------------------------------------------------
 
 } /* namespace kernel::lib */
