@@ -127,6 +127,11 @@ char String::operator [](this const String &self, usize index)
         return self.data[index];
 }
 
+bool String::operator ==(this const String &self, const String &other)
+{
+        return strcmp(self.data, other.data) == 0;
+}
+
 // -------------------------------------------------------------
 
 } /* namespace kernel::lib */

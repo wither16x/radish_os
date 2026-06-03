@@ -1,3 +1,4 @@
+#include "lib/string.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
@@ -86,13 +87,9 @@ extern "C" void kernel_main()
         auto executable = create_node(NodeType::File, "executable", bin);
 
         root->dir_data->nodes.push_back(readme_txt);
-        logger.debug("added README.txt");
         root->dir_data->nodes.push_back(hello_txt);
-        logger.debug("added hello.txt");
         bin->dir_data->nodes.push_back(executable);
-        logger.debug("added /bin/executable");
         root->dir_data->nodes.push_back(bin);
-        logger.debug("added /bin");
 
         logger.debug("Root directory: %s", root->path.raw());
         logger.debug("Root content:");
@@ -102,11 +99,12 @@ extern "C" void kernel_main()
         for (auto &nd : bin->dir_data->nodes)
                 logger.debug("* %s", nd->path.raw());
 
+        write_file(root, "/hello.txt", "Hello, world!");
+        char buf[255];
+        read_file(root, "/hello.txt", buf, sizeof(buf));
+        logger.debug("reading from /hello.txt: %s", buf);
+
         remove_node(root);
-        remove_node(bin);
-        remove_node(readme_txt);
-        remove_node(hello_txt);
-        remove_node(executable);
 
         panic("nothing to do");
 }

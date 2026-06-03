@@ -33,6 +33,7 @@ public:
         String &operator +=(this String &self, char ch);
         char operator [](this String &self, usize index);
         char operator [](this const String &self, usize index);
+        bool operator ==(this const String &self, const String &other);
 };
 
 } /* namespace kernel::lib */
