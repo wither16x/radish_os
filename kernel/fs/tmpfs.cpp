@@ -3,29 +3,30 @@
 #include <lib/memory.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <lib/vector.hpp>
 
 using kernel::lib::String;
 using kernel::lib::usize;
 using kernel::lib::strcpy, kernel::lib::strlen;
+using kernel::lib::Vector;
 
 namespace kernel::fs::tmpfs {
 
 Node *create_node(NodeType type, const String &path, Node *parent)
 {
-        Path p(path);
-        p.parse();
+        Vector<String> parts = parse_path(path);
 
         Node *nd = new Node;
 
         if (parent) {
                 nd->parent = parent;
                 if (parent->path.length() == 1 && parent->path[0] == '/')
-                        nd->path = parent->path + p.get();
+                        nd->path = parent->path + path;
                 else
-                        nd->path = parent->path + '/' + p.get();
+                        nd->path = parent->path + '/' + path;
         } else {
                 nd->parent = nullptr;
-                nd->path = p.get();
+                nd->path = path;
         }
         
         switch (type) {

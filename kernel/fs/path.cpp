@@ -9,44 +9,34 @@ using kernel::lib::Vector;
 
 namespace kernel::fs {
 
-Path::Path(const String &path)
-        : path(path)
-{}
-
-void Path::parse(this Path &self)
+Vector<String> parse_path(const String &path)
 {
-        if (self.path[0] == '/' && self.path.length() <= 1) {
-                self.parts.push_back("/");
-                return;
-        }
-        self.parts.push_back("/");
+        Vector<String> parts;
 
-        for (usize i = 0; i < self.path.length(); i++) {
-                if (self.path[i] == '/') {
+        if (path[0] == '/' && path.length() <= 1) {
+                parts.push_back("/");
+                return parts;
+        }
+        parts.push_back("/");
+
+        for (usize i = 0; i < path.length(); i++) {
+                if (path[i] == '/') {
                         i++;
                         String part_buf;
 
-                        while (i < self.path.length() && self.path[i] != '/') {
-                                part_buf += self.path[i];
+                        while (i < path.length() && path[i] != '/') {
+                                part_buf += path[i];
                                 i++;
                         }
 
                         if (part_buf.length() > 0)
-                                self.parts.push_back(part_buf);
+                                parts.push_back(part_buf);
 
                         i--;
                 }
         }
-}
 
-const String &Path::get(this const Path &self)
-{
-        return self.path;
-}
-
-const Vector<String> &Path::get_parts(this const Path &self)
-{
-        return self.parts;
+        return parts;
 }
 
 } /* namespace kernel::fs */

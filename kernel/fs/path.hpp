@@ -5,18 +5,6 @@
 
 namespace kernel::fs {
 
-class Path {
-private:
-        const lib::String &path;
-        lib::Vector<lib::String> parts;
-
-public:
-        Path(const lib::String &path);
-
-        void parse(this Path &self);
-
-        const lib::String &get(this const Path &self);
-        const lib::Vector<lib::String> &get_parts(this const Path &self);
-};
+lib::Vector<lib::String> parse_path(const lib::String &path);
 
 } /* namespace kernel::fs */
