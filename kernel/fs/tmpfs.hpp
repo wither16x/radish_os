@@ -6,9 +6,6 @@
 
 namespace kernel::fs::tmpfs {
 
-constexpr int MaxPathChars = 255;
-constexpr int MaxDataChars = 1000;
-
 enum class NodeType : int {
         File,
         Dir
