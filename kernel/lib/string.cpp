@@ -18,7 +18,7 @@ void String::cleanup(this String &self)
 String::String()
 {
         this->len = 0;
-        this->data = new char;
+        this->data = new char[1];
         this->data[0] = '\0';
 }
 
@@ -38,10 +38,11 @@ String::String(const String &other)
 
 String::String(String &&other)
 {
-        this->cleanup();
         this->len = other.len;
         this->data = other.data;
+
         other.data = nullptr;
+        other.len = 0;
 }
 
 String::~String()
@@ -93,9 +94,13 @@ String &String::operator =(this String &self, const String &other)
 String &String::operator =(this String &self, String &&other)
 {
         self.cleanup();
+
         self.len = other.len;
         self.data = other.data;
+
         other.data = nullptr;
+        other.len = 0;
+
         return self;
 }
 

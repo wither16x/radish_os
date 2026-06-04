@@ -81,15 +81,10 @@ extern "C" void kernel_main()
         using namespace kernel::fs::tmpfs;
 
         auto root = create_node(NodeType::Dir, "/", nullptr);
-        auto bin = create_node(NodeType::Dir, "bin", root);
-        auto readme_txt = create_node(NodeType::File, "README.txt", root);
-        auto hello_txt = create_node(NodeType::File, "hello.txt", root);
-        auto executable = create_node(NodeType::File, "executable", bin);
-
-        root->dir_data->nodes.push_back(readme_txt);
-        root->dir_data->nodes.push_back(hello_txt);
-        bin->dir_data->nodes.push_back(executable);
-        root->dir_data->nodes.push_back(bin);
+        auto bin = create_node(NodeType::Dir, "/bin", nullptr);
+        create_node(NodeType::File, "/README.txt", nullptr);
+        create_node(NodeType::File, "/hello.txt", nullptr);
+        create_node(NodeType::File, "/bin/executable", nullptr);
 
         logger.debug("Root directory: %s", root->path.raw());
         logger.debug("Root content:");

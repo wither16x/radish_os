@@ -13,12 +13,6 @@ Vector<String> parse_path(const String &path)
 {
         Vector<String> parts;
 
-        if (path[0] == '/' && path.length() <= 1) {
-                parts.push_back("/");
-                return parts;
-        }
-        parts.push_back("/");
-
         for (usize i = 0; i < path.length(); i++) {
                 if (path[i] == '/') {
                         i++;

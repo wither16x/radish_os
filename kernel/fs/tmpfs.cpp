@@ -12,22 +12,65 @@ using kernel::lib::Vector;
 
 namespace kernel::fs::tmpfs {
 
+namespace {
+
+// In order to deduce parent nodes automatically, we need the root node to be
+// accessible here
+Node *root = nullptr;
+
+} /* anonymous namespace */
+
 Node *create_node(NodeType type, const String &path, Node *parent)
 {
-        Vector<String> parts = parse_path(path);
+        // If root does not exist, then create it and return it (so the node
+        // we wanted to create would not be created)
+        if (!root) {
+                root            = new Node;
+                root->parent    = nullptr;
+                root->path      = "/";
+                root->type      = NodeType::Dir;
+                root->dir_data  = new Dir;
+                root->file_data = nullptr;
+                return root;
+        }
 
         Node *nd = new Node;
 
-        if (parent) {
-                nd->parent = parent;
-                if (parent->path.length() == 1 && parent->path[0] == '/')
-                        nd->path = parent->path + path;
-                else
-                        nd->path = parent->path + '/' + path;
-        } else {
-                nd->parent = nullptr;
-                nd->path = path;
+        Vector<String> parts = parse_path(path);
+        String name = parts[parts.size() - 1];
+
+        // The parent node must be a directory because a file cannot store
+        // nodes.
+        // The parent node can be `nullptr`. In this case, it is automatically
+        // deduced using the path parts.
+        if (!parent) {
+                if (parts.size() <= 1) {
+                        parent = root;
+                } else {
+                        // get the parent path by concatenating every segment
+                        // excepted the last one (the name of the node we want
+                        // to create)
+                        String parent_path = "/";
+                        for (usize i = 0; i < parts.size() - 1; i++) {
+                                if (i > 0)
+                                        parent_path += "/";
+                                parent_path += parts[i];
+                        }
+
+                        parent = get_node(root, parent_path);
+                }
+
+                if (!parent)
+                        return nullptr;
         }
+
+        nd->parent = parent;
+        // "/" + "a" = "/a"
+        if (parent->path.length() == 1 && parent->path[0] == '/')
+                nd->path = parent->path + name;
+        // "/a" + "/" + "b" = "/a/b"
+        else
+                nd->path = parent->path + "/" + name;
         
         switch (type) {
         case NodeType::File:
@@ -43,6 +86,9 @@ Node *create_node(NodeType type, const String &path, Node *parent)
         }
 
         nd->type = type;
+
+        if (parent && parent->dir_data)
+                parent->dir_data->nodes.push_back(nd);
 
         return nd;
 }

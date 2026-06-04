@@ -163,7 +163,7 @@ public:
 
         const T &operator [](this const Vector<T> &self, usize idx)
         {
-        return self.data[idx];
+                return self.data[idx];
         }
 
         // --------------------------------------------------------
