@@ -60,6 +60,16 @@ usize String::length(this const String &self)
         return self.len;
 }
 
+String String::sub(this const String &self, usize start)
+{
+        String s;
+
+        for (usize i = start; i < self.len; i++)
+                s += self.data[i];
+
+        return s;
+}
+
 String String::operator +(this const String &self, const String &other)
 {
         String s;

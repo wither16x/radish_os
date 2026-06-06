@@ -24,6 +24,7 @@ public:
 
         const char *raw(this const String &self);
         usize length(this const String &self);
+        String sub(this const String &self, usize start);
 
         String operator +(this const String &self, const String &other);
         String operator +(this const String &self, char ch);

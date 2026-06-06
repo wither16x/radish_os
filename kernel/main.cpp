@@ -1,10 +1,10 @@
-#include "lib/string.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
 #include <fs/tmpfs.hpp>
+#include <fs/vfs.hpp>
 #include <lib/logging.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
@@ -24,6 +24,7 @@ using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT;
 using kernel::mem::pmm, kernel::mem::vmm, kernel::mem::kheap;
+using namespace kernel::fs;
 
 namespace {
 
@@ -77,29 +78,33 @@ extern "C" void kernel_main()
                 __init_array[i]();
         }
 
-        // test tmpfs
-        using namespace kernel::fs::tmpfs;
+        vfs::mount('A', new tmpfs::TMPFS());
 
-        auto root = create_node(NodeType::Dir, "/", nullptr);
-        auto bin = create_node(NodeType::Dir, "/bin", nullptr);
-        create_node(NodeType::File, "/README.txt", nullptr);
-        create_node(NodeType::File, "/hello.txt", nullptr);
-        create_node(NodeType::File, "/bin/executable", nullptr);
+        vfs::create_dir("A:/bin");
+        vfs::create_file("A:/README.txt");
+        vfs::create_file("A:/hello.txt");
+        vfs::create_file("A:/bin/executable");
 
-        logger.debug("Root directory: %s", root->path.raw());
-        logger.debug("Root content:");
-        for (auto &nd : root->dir_data->nodes)
-                logger.debug("* %s", nd->path.raw());
-        logger.debug("%s content: ", bin->path.raw());
-        for (auto &nd : bin->dir_data->nodes)
-                logger.debug("* %s", nd->path.raw());
+        logger.debug("A:/ content:");
+        
+        kernel::lib::Vector<vfs::DirEntry> root;
+        kernel::lib::Vector<vfs::DirEntry> bin;
 
-        write_file(root, "/hello.txt", "Hello, world!");
+        vfs::readdir("A:/", root);
+        for (auto &nd : root)
+                logger.debug("* %s", nd.name.raw());
+
+        vfs::readdir("A:/bin", bin);
+        logger.debug("A:/bin content: ");
+        for (auto &nd : bin)
+                logger.debug("* %s", nd.name.raw());
+        
+        vfs::write_file("A:/hello.txt", "Hello, world!");
         char buf[255];
-        read_file(root, "/hello.txt", buf, sizeof(buf));
-        logger.debug("reading from /hello.txt: %s", buf);
+        vfs::read_file("A:/hello.txt", buf, sizeof(buf));
+        logger.debug("reading from A:/hello.txt: %s", buf);
 
-        remove_node(root);
+        vfs::unmount('A');
 
         panic("nothing to do");
 }
