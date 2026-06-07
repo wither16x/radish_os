@@ -26,7 +26,7 @@ struct Node {
         Node *parent;
 
         NodeType type;
-        lib::String name;
+        String name;
 
         struct File *file_data;
         struct Dir *dir_data;
@@ -34,11 +34,11 @@ struct Node {
 
 struct File {
         char *data;
-        lib::usize size;
+        usize size;
 };
 
 struct Dir {
-        lib::Vector<Node *> nodes;
+        Vector<Node *> nodes;
 };
 
 Node *root = nullptr;
@@ -68,7 +68,7 @@ int remove_node(Node *node)
         return 0;
 }
 
-int create_file(void *fs_data, const lib::String &name)
+int create_file(void *fs_data, const String &name)
 {
         Node *dir = static_cast<Node *>(fs_data);
         if (dir->type != NodeType::Dir)
@@ -88,7 +88,7 @@ int create_file(void *fs_data, const lib::String &name)
         return 0;
 }
 
-int create_dir(void *fs_data, const lib::String &name)
+int create_dir(void *fs_data, const String &name)
 {
         Node *dir = static_cast<Node *>(fs_data);
         if (dir->type != NodeType::Dir)
@@ -179,7 +179,7 @@ int readdir(void *fs_data, Vector<vfs::DirEntry> &entries)
         return 0;
 }
 
-void *lookup(void *fs_data, const lib::String &name)
+void *lookup(void *fs_data, const String &name)
 {
         Node *dir = static_cast<Node *>(fs_data);
         if (dir->type != NodeType::Dir)

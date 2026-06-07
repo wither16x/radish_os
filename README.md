@@ -7,6 +7,7 @@ I do it for learning.
 ## Features
 - Serial output
 - VFS
+- USTAR
 - TMPFS
 - Heap allocator
 - 4-level paging
@@ -14,6 +15,6 @@ I do it for learning.
 ## Roadmap (to the next release)
 * [x] Better tmpfs
 * [x] VFS
-* [ ] USTAR
+* [x] USTAR
 * [ ] Framebuffer driver
-* [ ] initrd
+* [x] initrd

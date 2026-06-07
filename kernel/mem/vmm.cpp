@@ -27,8 +27,6 @@ void VMM::init(this VMM &self,
         boot::BootInfo::MemmapInfo &memmap_info
 )
 {
-        logger.info("initializing vmm...");
-
         self.hhdm = hhdm;
         self.executable_info = executable_info;
         self.memmap_info = memmap_info;

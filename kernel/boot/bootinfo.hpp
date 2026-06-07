@@ -23,11 +23,18 @@ enum class MemmapEntryType : int {
         ReservedMapped
 };
 
-struct memmap_entry {
+struct MemmapEntry {
         lib::u64 base;
         lib::u64 length;
         MemmapEntryType type;
         const char *str;
+};
+
+struct Module {
+        void *address;
+        lib::u64 size;
+        char *path;
+        char *string;
 };
 
 // To avoid the kernel to depend on the boot protocol everywhere,
@@ -49,7 +56,7 @@ struct MemmapInfo {
         static constexpr int MaxEntries = 64;
 
         lib::u64 entry_count;
-        memmap_entry entries[MaxEntries];
+        MemmapEntry entries[MaxEntries];
 };
 
 struct HHDMInfo {
@@ -61,11 +68,19 @@ struct ExecutableInfo {
         lib::u64 virtual_base;
 };
 
+struct ModuleInfo {
+        static constexpr int MaxModules = 25;
+
+        lib::u64 count;
+        Module modules[MaxModules];
+};
+
 BootloaderInfo          bootloader;
 FirmwareTypeInfo        firmware_type;
 MemmapInfo              memmap;
 HHDMInfo                hhdm;
 ExecutableInfo          executable;
+ModuleInfo              modules;
 
 BootInfo();
 

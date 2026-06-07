@@ -40,6 +40,14 @@ limine_executable_address_request l_executable_info = {
         .response = nullptr
 };
 
+limine_module_request l_module_info = {
+        .id = LIMINE_MODULE_REQUEST_ID,
+        .revision = 1,
+        .response = nullptr,
+        .internal_module_count = 1,
+        .internal_modules = nullptr
+};
+
 const char *firmware_type_str[] = {
         "x86 BIOS",
         "EFI 32",
@@ -63,8 +71,6 @@ const char *memmap_type_str[] = {
 
 BootInfo::BootInfo()
 {
-        logger.info("recovering boot info...");
-
         this->bootloader.name           = l_bootloader_info.response->name;
         this->bootloader.version        = l_bootloader_info.response->version;
 
@@ -74,7 +80,7 @@ BootInfo::BootInfo()
         this->memmap.entry_count        = l_memmap_info.response->entry_count;
         for (u64 i = 0; i < this->memmap.entry_count; i++) {
                 limine_memmap_entry **l_entries = l_memmap_info.response->entries;
-                memmap_entry e = {
+                MemmapEntry e = {
                         .base   = l_entries[i]->base,
                         .length = l_entries[i]->length,
                         .type   = static_cast<MemmapEntryType>(l_entries[i]->type),
@@ -87,6 +93,18 @@ BootInfo::BootInfo()
 
         this->executable.physical_base  = l_executable_info.response->physical_base;
         this->executable.virtual_base   = l_executable_info.response->virtual_base;
+
+        this->modules.count             = l_module_info.response->module_count;
+        for (u64 i = 0; i < this->modules.count; i++) {
+                limine_file **l_modules = l_module_info.response->modules;
+                Module e = {
+                        .address        = l_modules[i]->address,
+                        .size           = l_modules[i]->size,
+                        .path           = l_modules[i]->path,
+                        .string         = l_modules[i]->string      
+                };
+                this->modules.modules[i] = e;
+        }
 
         logger.ok("recovered boot info");
 }

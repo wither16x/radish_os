@@ -1,12 +1,12 @@
-#include "lib/vector.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/serial.hpp>
-#include <fs/tmpfs.hpp>
+#include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
 #include <lib/logging.hpp>
+#include <lib/memory.hpp>
 #include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
@@ -32,10 +32,6 @@ namespace {
 [[gnu::used, gnu::section(".limine_requests")]]
 volatile Revision limine_base_revision = base_revision(6);
 
-} /* anonymous namespace */
-
-namespace {
-
 [[gnu::used, gnu::section(".limine_requests_start")]]
 volatile StartMarker limine_requests_start_marker = requests_start_marker();
 
@@ -46,6 +42,30 @@ volatile EndMarker limine_requests_end_marker = requests_end_marker();
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
+
+void call_global_constructors()
+{
+        for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
+                __init_array[i]();
+                logger.ok("initialized global constructor %u", i);
+        }
+}
+
+void mount_initrd(BootInfo::ModuleInfo &info)
+{
+        // 'I' for initrd
+        u64 idx = BootInfo::ModuleInfo::MaxModules + 1;
+        for (u64 i = 0; i < info.count; i++) {
+                if (kernel::lib::strcmp(info.modules[i].path, "/initrd.tar") == 0)
+                        idx = i;
+        }
+        if (idx == BootInfo::ModuleInfo::MaxModules + 1)
+                logger.err("initrd not found");
+        else
+                logger.ok("found initrd");
+
+        vfs::mount('I', new ustar::USTAR(info.modules[idx].address));
+}
 
 extern "C" void kernel_main()
 {
@@ -74,48 +94,24 @@ extern "C" void kernel_main()
 
         pmm.init_stage2();
 
-        for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
-                logger.info("initializing global constructor %u...", i);
-                __init_array[i]();
-        }
+        call_global_constructors();
 
-        vfs::mount('A', new tmpfs::TMPFS());
-        logger.debug("mounted tmpfs");
+        mount_initrd(bootinfo.modules);
+        logger.ok("mounted initrd");
 
-        vfs::create_dir("A:/bin");
-        vfs::create_file("A:/README.txt");
-        vfs::create_file("A:/hello.txt");
-        vfs::create_file("A:/bin/executable");
-        logger.debug("created fs tree");
-
-        logger.debug("A:/ content:");
-        
+        // test USTAR filesystem
         kernel::lib::Vector<vfs::DirEntry> root;
-        kernel::lib::Vector<vfs::DirEntry> bin;
-
-        vfs::readdir("A:/", root);
+        vfs::readdir("I:/", root);
         for (auto &nd : root)
-                logger.debug("* %s", nd.name.raw());
+                logger.debug("* /%s", nd.name.raw());
 
-        vfs::remove("A:/README.txt");
-        kernel::lib::Vector<vfs::DirEntry> root2;
-        logger.debug("A:/ content after removing A:/README.txt:");
-        vfs::readdir("A:/", root2);
-        for (auto &nd : root2)
-                logger.debug("* %s", nd.name.raw());
-
-        vfs::readdir("A:/bin", bin);
-        logger.debug("A:/bin content: ");
-        for (auto &nd : bin)
-                logger.debug("* %s", nd.name.raw());
-        
-        vfs::write_file("A:/hello.txt", "Hello, world!");
         char buf[255];
-        vfs::read_file("A:/hello.txt", buf, sizeof(buf));
-        logger.debug("reading from A:/hello.txt: %s", buf);
+        vfs::read_file("I:/README.txt", buf, sizeof(buf));
+        logger.debug("reading from I:/README.txt: %s", buf);
 
-        vfs::unmount('A');
-        logger.debug("unmounted tmpfs");
+        vfs::unmount('I');
+        logger.ok("unmounted initrd");
 
+        // idle
         panic("nothing to do");
 }

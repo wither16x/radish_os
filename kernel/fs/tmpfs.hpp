@@ -7,8 +7,8 @@ namespace kernel::fs::tmpfs {
 struct TMPFS : public vfs::FileSystem {
         ~TMPFS()           = default;
 
-        vfs::VNode *get_root();
-        void unmount();
+        vfs::VNode *get_root() override;
+        void unmount() override;
 };
 
 } /* namespace kernel::fs::tmpfs */

@@ -20,8 +20,6 @@ constexpr uptr HeapStart = 0xfffffe8000000000ull;
 
 void Heap::init(this Heap &self)
 {
-        logger.info("initializing heap...");
-
         self.block_list.set_base(HeapStart);
 
         vmm.map_page(HeapStart, pmm.allocate_frame(), 0x03 | (1ull << 63));

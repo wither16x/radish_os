@@ -39,8 +39,6 @@ IDTR idtptr;
 
 IDT::IDT()
 {
-        logger.info("initializing idt...");
-
         idtptr = {
                 .size = sizeof(idt) - 1,
                 .offset = reinterpret_cast<u64>(&idt)
@@ -54,8 +52,6 @@ IDT::IDT()
 
 void IDT::load()
 {
-        logger.info("loading idt...");
-
         idt_flush(reinterpret_cast<u64 *>(&idtptr));
 
         logger.ok("loaded idt");

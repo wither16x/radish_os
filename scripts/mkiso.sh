@@ -22,6 +22,7 @@ cp -v "$LIMINE_CONF" \
       "$ISO_DIR/boot/limine"
 cp -v .dependencies/Limine/BOOTX64.EFI "$ISO_DIR/EFI/BOOT"
 cp -v .dependencies/Limine/BOOTIA32.EFI "$ISO_DIR/EFI/BOOT"
+cp -v .build_initrd/initrd.tar "$ISO_DIR/initrd.tar"
 
 xorriso -as mkisofs \
         -R \

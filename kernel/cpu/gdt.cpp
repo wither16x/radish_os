@@ -33,8 +33,6 @@ GDTR gdtptr;
 
 GDT::GDT()
 {
-        logger.info("initializing gdt...");
-
         gdtptr = {
                 .size = sizeof(gdt) - 1,
                 .offset = reinterpret_cast<u64>(&gdt)
@@ -49,8 +47,6 @@ GDT::GDT()
 
 void GDT::load()
 {
-        logger.info("loading gdt...");
-
         gdt_flush(reinterpret_cast<u64>(&gdtptr));
 
         logger.ok("loaded gdt");

@@ -11,13 +11,11 @@ namespace kernel::mem {
 
 void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 {
-        logger.info("initializing pmm stage 1...");
-
         self.static_bitmap.set_all();
 
         for (usize i = 0; i < memmap.entry_count; i++) {
                 if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
-                        boot::memmap_entry& e = memmap.entries[i];
+                        boot::MemmapEntry& e = memmap.entries[i];
                         for (uptr addr = e.base; addr < e.base + e.length; addr += self.FrameBytes)
                                 self.static_bitmap.clear(addr / self.FrameBytes);
                 }
@@ -30,8 +28,6 @@ void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
 
 void PMM::init_stage2(this PMM &self)
 {
-        logger.info("initializing pmm stage 2...");
-
         self.dynamic_bitmap.init(self.static_bitmap.size());
         self.dynamic_bitmap.set_all();
 
