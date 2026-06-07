@@ -1,3 +1,4 @@
+#include "lib/vector.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
@@ -79,11 +80,13 @@ extern "C" void kernel_main()
         }
 
         vfs::mount('A', new tmpfs::TMPFS());
+        logger.debug("mounted tmpfs");
 
         vfs::create_dir("A:/bin");
         vfs::create_file("A:/README.txt");
         vfs::create_file("A:/hello.txt");
         vfs::create_file("A:/bin/executable");
+        logger.debug("created fs tree");
 
         logger.debug("A:/ content:");
         
@@ -92,6 +95,13 @@ extern "C" void kernel_main()
 
         vfs::readdir("A:/", root);
         for (auto &nd : root)
+                logger.debug("* %s", nd.name.raw());
+
+        vfs::remove("A:/README.txt");
+        kernel::lib::Vector<vfs::DirEntry> root2;
+        logger.debug("A:/ content after removing A:/README.txt:");
+        vfs::readdir("A:/", root2);
+        for (auto &nd : root2)
                 logger.debug("* %s", nd.name.raw());
 
         vfs::readdir("A:/bin", bin);
@@ -105,6 +115,7 @@ extern "C" void kernel_main()
         logger.debug("reading from A:/hello.txt: %s", buf);
 
         vfs::unmount('A');
+        logger.debug("unmounted tmpfs");
 
         panic("nothing to do");
 }

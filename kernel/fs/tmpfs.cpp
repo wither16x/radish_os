@@ -47,17 +47,19 @@ Node *root = nullptr;
 int remove_node(Node *node)
 {
         if (!node)
-                return -1;
+                return -1;      // node is null
 
         if (node->dir_data) {
                 for (usize i = 0; i < node->dir_data->nodes.size(); i++)
                         remove_node(node->dir_data->nodes[i]);
+
                 delete node->dir_data;
         }
 
         if (node->file_data) {
                 if (node->file_data->data)
                         delete[] node->file_data->data;
+
                 delete node->file_data;
         }
 
@@ -106,7 +108,24 @@ int create_dir(void *fs_data, const lib::String &name)
 
 int remove(void *fs_data)
 {
-        return remove_node(static_cast<Node *>(fs_data));
+        Node *nd = static_cast<Node *>(fs_data);
+        if (!nd)
+                return -1;              // node is null
+
+        // detach the node before removing it so that the parent directory
+        // does not contain a pointer to the freed memory
+        if (nd->parent && nd->parent->dir_data) {
+                Vector<Node *> &siblings = nd->parent->dir_data->nodes;
+
+                for (usize i = 0; i < siblings.size(); i++) {
+                        if (siblings[i] == nd) {
+                                siblings.erase(i);
+                                break;
+                        }
+                }
+        }
+
+        return remove_node(nd);
 }
 
 int write_file(void *fs_data, const char *buf)

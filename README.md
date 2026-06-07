@@ -6,13 +6,14 @@ I do it for learning.
 
 ## Features
 - Serial output
-- tmpfs
+- VFS
+- TMPFS
 - Heap allocator
 - 4-level paging
 
 ## Roadmap (to the next release)
 * [x] Better tmpfs
-* [ ] VFS
+* [x] VFS
 * [ ] USTAR
 * [ ] Framebuffer driver
 * [ ] initrd

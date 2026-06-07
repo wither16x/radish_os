@@ -180,6 +180,15 @@ int create_dir(const lib::String &path)
         return ret;
 }
 
+int remove(const lib::String &path)
+{
+        VNode *vnd = lookup(path);
+        if (!vnd)
+                return -1;      // file/dir not found
+
+        return vnd->ops->remove(vnd->fs_data);
+}
+
 int write_file(const String &path, const char *buf)
 {
         VNode *vnd = lookup(path);

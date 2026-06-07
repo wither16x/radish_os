@@ -27,19 +27,25 @@ struct VNodeOps {
         void *(*lookup)(void *fs_data, const lib::String &name);
 };
 
-// Virtual node
+// Virtual node, which represents an entry in the VFS tree.
+// "Real" nodes are the nodes from the "real" filesystems.
 struct VNode {
         VNodeOps *ops;
-        void *fs_data;          // filesystem specific node
+        // maybe should I change this field to `real_node` or something
+        // like this?
+        void *fs_data;          // node from the "real" filesystem
 };
 
-// Representation of a directory entry
+// Representation of a directory entry.
+// Used in readdir().
 struct DirEntry {
         lib::String name;
         bool is_dir;
 };
 
-// One per drive
+// One per drive.
+// Used to execute an operation on the whole filesystem and not
+// on a single node.
 struct FileSystem {
         virtual ~FileSystem()           = default;
 
@@ -47,6 +53,7 @@ struct FileSystem {
         virtual void unmount()          = 0;
 };
 
+// Each drive has one filesystem
 struct Drive {
         char id;
         FileSystem *fs;
