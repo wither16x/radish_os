@@ -3,52 +3,36 @@
 #include <boot/bootinfo.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel::mem {
+namespace kernel::mem::vmm {
 
-class VMM {
-public:
-        static constexpr lib::usize PageBytes = 0x1000;         // 4 KiB
+constexpr lib::usize PageBytes = 0x1000;         // 4 KiB
 
-        void init(this VMM &self,
-                lib::u64 hhdm,
-                boot::BootInfo::ExecutableInfo &executable_info,
-                boot::BootInfo::MemmapInfo &memmap_info
-        );
-        void load(this const VMM &self);
+void init(
+        lib::u64 hhdm_base,
+        boot::BootInfo::ExecutableInfo &exec_info,
+        boot::BootInfo::MemmapInfo &_memmap_info
+);
+void load();
 
-        void map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags);
-        void unmap_page(this VMM &self, lib::uptr virt);
+void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags);
+void unmap_page(lib::uptr virt);
 
-private:
+// Helpers
+// --------------------------------------------------------
+inline lib::uptr page_align_down(lib::uptr base)
+{
+        return base / PageBytes * PageBytes;
+}
 
-        lib::u64 *pml4t;
-        lib::u64 hhdm;
-        boot::BootInfo::ExecutableInfo executable_info;
-        boot::BootInfo::MemmapInfo memmap_info;
+inline lib::uptr page_align_up(lib::uptr base)
+{
+        return (base + PageBytes - 1) / PageBytes * PageBytes;
+}
 
-        lib::uptr get_pml4t();
+inline lib::uptr page_div_up(lib::uptr base)
+{
+        return (base + PageBytes - 1) / PageBytes;
+}
+// --------------------------------------------------------
 
-        void map_kernel(this VMM &self);
-        void map_hhdm(this VMM &self);
-
-        // Helpers
-        // ----------------------------------------------------------------------------
-        inline lib::uptr page_align_down(this const VMM &self, lib::uptr base)
-        {
-                return base / self.PageBytes * self.PageBytes;
-        }
-
-        inline lib::uptr page_align_up(this const VMM &self, lib::uptr base)
-        {
-                return (base + self.PageBytes - 1) / self.PageBytes * self.PageBytes;
-        }
-
-        inline lib::uptr page_div_up(this const VMM &self, lib::uptr base)
-        {
-                return (base + self.PageBytes - 1) / self.PageBytes;
-        }
-};
-
-inline VMM vmm;
-
-} /* namespace kernel::mem */
+} /* namespace kernel::mem::vmm */

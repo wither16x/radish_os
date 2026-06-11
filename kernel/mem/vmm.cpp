@@ -12,40 +12,86 @@ using kernel::lib::memset;
 extern "C" u64 _lds_kernel_start[];
 extern "C" u64 _lds_kernel_end[];
 
-namespace kernel::mem {
+namespace kernel::mem::vmm {
 
 namespace {
 
 constexpr usize PhysicalAddressMask     = ((1ull << 52) - 1) & ~0xfffull;
 constexpr u16   PageTableEntries        = 512;
 
+u64 *pml4t = nullptr;
+u64 hhdm = 0;
+u64 executable_phys = 0;
+u64 executable_virt = 0;
+boot::BootInfo::MemmapInfo memmap_info;
+
+void map_kernel()
+{
+        u64 kstart      = reinterpret_cast<u64>(*&_lds_kernel_start);
+        u64 kend        = reinterpret_cast<u64>(*&_lds_kernel_end);
+        u64 ksize       = page_div_up(kend - kstart);
+        u64 phys_addr   = executable_phys;
+        u64 virt_addr   = executable_virt;
+
+        for (u64 i = 0; i < ksize; i++) {
+                map_page(virt_addr, phys_addr, 0x03);
+                phys_addr += PageBytes;
+                virt_addr += PageBytes;
+        }
 }
 
-void VMM::init(this VMM &self,
-        lib::u64 hhdm,
-        boot::BootInfo::ExecutableInfo &executable_info,
-        boot::BootInfo::MemmapInfo &memmap_info
+void map_hhdm()
+{
+	for (u64 index = 0; index < memmap_info.entry_count; index++) {
+		boot::MemmapEntryType type = memmap_info.entries[index].type;
+
+		if (type == boot::MemmapEntryType::ACPINVS ||
+		    type == boot::MemmapEntryType::ACPIReclaimable ||
+		    type == boot::MemmapEntryType::BootloaderReclaimable ||
+		    type == boot::MemmapEntryType::Framebuffer ||
+		    type == boot::MemmapEntryType::ExecutableAndModules ||
+		    type == boot::MemmapEntryType::Usable
+		) {
+                        u64 section_size = page_div_up(memmap_info.entries[index].length);
+                        u64 phys_addr = memmap_info.entries[index].base;
+                        u64 virt_addr = memmap_info.entries[index].base + hhdm;
+                        
+                        for (u64 i = 0; i < section_size; i++) {
+                                map_page(virt_addr, phys_addr, 0x03);
+                                virt_addr += PageBytes;
+                                phys_addr += PageBytes;
+                        }
+                }
+	}
+}
+
+} /* anonymous namespace */
+
+void init(lib::u64 hhdm_base,
+        boot::BootInfo::ExecutableInfo &exec_info,
+        boot::BootInfo::MemmapInfo &_memmap_info
 )
 {
-        self.hhdm = hhdm;
-        self.executable_info = executable_info;
-        self.memmap_info = memmap_info;
+        hhdm = hhdm_base;
+        executable_phys = exec_info.physical_base;
+        executable_virt = exec_info.virtual_base;
+        memmap_info = _memmap_info;
 
-        self.pml4t = reinterpret_cast<u64 *>(pmm::allocate_frame() + self.hhdm);
-        memset(self.pml4t, 0, self.PageBytes);
+        pml4t = reinterpret_cast<u64 *>(pmm::allocate_frame() + hhdm);
+        memset(pml4t, 0, PageBytes);
 
-        self.map_kernel();
-        self.map_hhdm();
+        map_kernel();
+        map_hhdm();
 
         logger.ok("initialized vmm");
 }
 
-void VMM::load(this const VMM &self)
+void load()
 {
-        __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(self.pml4t) - self.hhdm));
+        __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(pml4t) - hhdm));
 }
 
-void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flags)
+void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
         // 0x1 = present
         // 0x03 = rw cpl0
@@ -62,59 +108,59 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
         usize pt_idx    = (virt >> 12) & 0x1ff;
 
         // now map the page to the given frame
-        if (!(self.pml4t[pml4t_idx] & 1)) {
-                self.pml4t[pml4t_idx] = pmm::allocate_frame() + 0x03;
+        if (!(pml4t[pml4t_idx] & 1)) {
+                pml4t[pml4t_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm),
+                        reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm),
                         0,
-                        self.PageBytes
+                        PageBytes
                 );
         }
 
-        u64 *pdpt = reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm);
         if (!(pdpt[pdpt_idx] & 1)) {
                 pdpt[pdpt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm),
+                        reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm),
                         0,
-                        self.PageBytes
+                        PageBytes
                 );
         }
 
-        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm);
         if (!(pdt[pdt_idx] & 1)) {
                 pdt[pdt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm),
+                        reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm),
                         0,
-                        self.PageBytes
+                        PageBytes
                 );
         }
 
-        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm);
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
 }
 
-void VMM::unmap_page(this VMM &self, uptr virt)
+void unmap_page(uptr virt)
 {
         u64 pml4t_idx   = (virt >> 39) & 0x1ff;
         u64 pdpt_idx    = (virt >> 30) & 0x1ff;
         u64 pdt_idx     = (virt >> 21) & 0x1ff;
         u64 pt_idx      = (virt >> 12) & 0x1ff;
 
-        if (!(self.pml4t[pml4t_idx] & 1))
+        if (!(pml4t[pml4t_idx] & 1))
                 return;
 
-        u64 *pdpt = reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm);
         if (!(pdpt[pdpt_idx] & 1))
                 return;
 
-        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm);
         if (!(pdt[pdt_idx] & 1))
                 return;
 
-        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm);
+        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm);
         if (!(pt[pt_idx] & 1))
                 return;
 
@@ -141,55 +187,8 @@ void VMM::unmap_page(this VMM &self, uptr virt)
                 if (pdpt[i] & 1)
                         return;
         }
-        pmm::free_frame(self.pml4t[pml4t_idx] & PhysicalAddressMask);
-        self.pml4t[pml4t_idx] = 0;
+        pmm::free_frame(pml4t[pml4t_idx] & PhysicalAddressMask);
+        pml4t[pml4t_idx] = 0;
 }
 
-uptr VMM::get_pml4t()
-{
-        u64 cr3;
-        __asm__ ("movq %%cr3, %0" : "=r"(cr3));
-        return cr3;
-}
-
-void VMM::map_kernel(this VMM &self)
-{
-        u64 kstart      = reinterpret_cast<u64>(*&_lds_kernel_start);
-        u64 kend        = reinterpret_cast<u64>(*&_lds_kernel_end);
-        u64 ksize       = self.page_div_up(kend - kstart);
-        u64 phys_addr   = self.executable_info.physical_base;
-        u64 virt_addr   = self.executable_info.virtual_base;
-
-        for (u64 i = 0; i < ksize; i++) {
-                self.map_page(virt_addr, phys_addr, 0x03);
-                phys_addr += self.PageBytes;
-                virt_addr += self.PageBytes;
-        }
-}
-
-void VMM::map_hhdm(this VMM &self)
-{
-	for (u64 index = 0; index < self.memmap_info.entry_count; index++) {
-		boot::MemmapEntryType type = self.memmap_info.entries[index].type;
-
-		if (type == boot::MemmapEntryType::ACPINVS ||
-		    type == boot::MemmapEntryType::ACPIReclaimable ||
-		    type == boot::MemmapEntryType::BootloaderReclaimable ||
-		    type == boot::MemmapEntryType::Framebuffer ||
-		    type == boot::MemmapEntryType::ExecutableAndModules ||
-		    type == boot::MemmapEntryType::Usable
-		) {
-                        u64 section_size = self.page_div_up(self.memmap_info.entries[index].length);
-                        u64 phys_addr = self.memmap_info.entries[index].base;
-                        u64 virt_addr = self.memmap_info.entries[index].base + self.hhdm;
-                        
-                        for (u64 i = 0; i < section_size; i++) {
-                                self.map_page(virt_addr, phys_addr, 0x03);
-                                virt_addr += self.PageBytes;
-                                phys_addr += self.PageBytes;
-                        }
-                }
-	}
-}
-
-} /* namespace kernel::mem */
+} /* namespace kernel::mem::vmm */

@@ -22,11 +22,11 @@ void Heap::init(this Heap &self)
 {
         self.block_list.set_base(HeapStart);
 
-        vmm.map_page(HeapStart, pmm::allocate_frame(), 0x03 | (1ull << 63));
+        vmm::map_page(HeapStart, pmm::allocate_frame(), 0x03 | (1ull << 63));
         self.pages = 1;
 
         BlockHeader *new_list = self.block_list.first();
-        new_list->bytes = vmm.PageBytes - sizeof(BlockHeader);
+        new_list->bytes = vmm::PageBytes - sizeof(BlockHeader);
         new_list->free = true;
 
         logger.ok("initialized heap");
@@ -38,7 +38,7 @@ void *Heap::allocate(this Heap &self, usize n)
 
         BlockHeader *block = self.find_free_block(n);
         if (!block) {
-                usize required_pages = align_up(n + sizeof(BlockHeader), vmm.PageBytes) / vmm.PageBytes;
+                usize required_pages = align_up(n + sizeof(BlockHeader), vmm::PageBytes) / vmm::PageBytes;
                 for (usize i = 0; i < required_pages; i++)
                         self.extend();
 
@@ -90,16 +90,16 @@ void Heap::free(this Heap &self, void *p)
 }
 
 void Heap::extend(this Heap &self) {
-        uptr new_page = HeapStart + vmm.PageBytes * self.pages;
-        vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
+        uptr new_page = HeapStart + vmm::PageBytes * self.pages;
+        vmm::map_page(HeapStart + vmm::PageBytes * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
         self.pages++;
 
         BlockHeader *last_block = self.block_list.last();
 
         if (last_block->free) {
-                last_block->bytes += vmm.PageBytes;
+                last_block->bytes += vmm::PageBytes;
         } else {
-                BlockHeader *new_block = self.create_block(new_page, vmm.PageBytes, true, last_block, nullptr);
+                BlockHeader *new_block = self.create_block(new_page, vmm::PageBytes, true, last_block, nullptr);
                 self.block_list.append(new_block);
         }
 }
@@ -109,7 +109,7 @@ bool Heap::shorten(this Heap &self)
         if (self.pages <= 1)
                 return false;
 
-        uptr last_page = HeapStart + vmm.PageBytes * (self.pages - 1);
+        uptr last_page = HeapStart + vmm::PageBytes * (self.pages - 1);
 
         BlockHeader *curr = self.block_list.first();
         while (curr) {
@@ -137,7 +137,7 @@ bool Heap::shorten(this Heap &self)
                 last_block->next  = nullptr;
         }
 
-        vmm.unmap_page(last_page);
+        vmm::unmap_page(last_page);
         self.pages--;
         
         return true;
