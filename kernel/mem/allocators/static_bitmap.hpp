@@ -15,22 +15,25 @@ private:
         lib::usize last_allocated = 0;
 
 public:
-        T allocate() override
+        T allocate(lib::usize n) override
         {
-                lib::usize start = this->last_allocated;
+                for (lib::usize i = 0; i < n; i++) {
+                        lib::usize start = this->last_allocated;
 
-                do {
-                        if (!this->bitmap.test(this->last_allocated))
-                                break;
+                        do {
+                                if (!this->bitmap.test(this->last_allocated))
+                                        break;
 
-                        this->last_allocated++;
+                                this->last_allocated++;
 
-                        if (this->last_allocated >= SIZE)
-                                panic("out of available space");
-                } while (this->last_allocated != start);
+                                if (this->last_allocated >= SIZE)
+                                        panic("out of available space");
+                        } while (this->last_allocated != start);
 
-                this->bitmap.set(this->last_allocated);
+                        this->bitmap.set(this->last_allocated);
+                }
 
+                // returns the value from the last allocation
                 return this->last_allocated;
         }
 

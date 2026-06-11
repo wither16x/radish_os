@@ -60,9 +60,9 @@ void init_stage2()
 uptr allocate_frame()
 {
         if (stage2_enabled)
-                return allocator_stage2.allocate() * FrameBytes;
+                return allocator_stage2.allocate(1) * FrameBytes;
         else
-                return allocator_stage1.allocate() * FrameBytes;
+                return allocator_stage1.allocate(1) * FrameBytes;
 }
 
 void free_frame(uptr addr)
