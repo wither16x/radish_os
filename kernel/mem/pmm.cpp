@@ -1,92 +1,76 @@
 #include <boot/bootinfo.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <mem/allocators/static_bitmap.hpp>
+#include <mem/allocators/dynamic_bitmap.hpp>
 #include <mem/pmm.hpp>
 #include <panic.hpp>
 
 using kernel::lib::log::logger;
 using kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
 
-namespace kernel::mem {
+namespace kernel::mem::pmm {
 
-void PMM::init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap)
+namespace {
+
+constexpr lib::usize FrameBytes  = 0x1000;       // 4 KiB
+// Both constants below are used for stage 1 only
+constexpr lib::usize MaxMemory   = 0x40000000;   // 1 GiB
+constexpr lib::usize MaxFrames   = MaxMemory / FrameBytes;
+
+bool stage2_enabled             = false;
+
+allocators::StaticBitmapAllocator<uptr, MaxFrames> allocator_stage1;
+allocators::DynamicBitmapAllocator<uptr> allocator_stage2;
+
+} /* anonymous namespace */
+
+void init_stage1(boot::BootInfo::MemmapInfo &memmap)
 {
-        self.static_bitmap.set_all();
+        allocator_stage1.get_bitmap().set_all();
 
         for (usize i = 0; i < memmap.entry_count; i++) {
                 if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
                         boot::MemmapEntry& e = memmap.entries[i];
-                        for (uptr addr = e.base; addr < e.base + e.length; addr += self.FrameBytes)
-                                self.static_bitmap.clear(addr / self.FrameBytes);
+                        for (uptr addr = e.base; addr < e.base + e.length; addr += FrameBytes)
+                                allocator_stage1.get_bitmap().clear(addr / FrameBytes);
                 }
         }
 
-        self.stage2_enabled = false;
+        stage2_enabled = false;
 
         logger.ok("initialized pmm stage 1");
 }
 
-void PMM::init_stage2(this PMM &self)
+void init_stage2()
 {
-        self.dynamic_bitmap.init(self.static_bitmap.size());
-        self.dynamic_bitmap.set_all();
+        allocator_stage2.get_bitmap().init(allocator_stage1.get_bitmap().size());
+        allocator_stage2.get_bitmap().set_all();
 
-        for (usize i = 0; i < self.dynamic_bitmap.size(); i++) {
-                if (self.static_bitmap.test(i))
-                        self.dynamic_bitmap.set(i);
+        for (usize i = 0; i < allocator_stage2.get_bitmap().size(); i++) {
+                if (allocator_stage1.get_bitmap().test(i))
+                        allocator_stage2.get_bitmap().set(i);
         }
 
-        self.stage2_enabled = true;
+        stage2_enabled = true;
 
         logger.ok("initialized pmm stage 2");
 }
 
-uptr PMM::allocate_frame(this PMM &self)
+uptr allocate_frame()
 {
-        usize start = self.last_frame;
-
-        if (self.stage2_enabled) {
-                do {
-                        if (!self.dynamic_bitmap.test(self.last_frame))
-                                break;
-                        
-                        self.last_frame++;
-
-                        if (self.last_frame >= self.dynamic_bitmap.size())
-                                self.dynamic_bitmap.extend();
-                } while (self.last_frame != start);
-
-                self.dynamic_bitmap.set(self.last_frame);
-        } else {
-                do {
-                        if (!self.static_bitmap.test(self.last_frame))
-                                break;
-                        
-                        self.last_frame++;
-
-                        if (self.last_frame >= self.MaxFrames)
-                                panic("out of physical memory");
-                } while (self.last_frame != start);
-
-                self.static_bitmap.set(self.last_frame);
-        }
-
-        return self.last_frame * self.FrameBytes;
+        if (stage2_enabled)
+                return allocator_stage2.allocate() * FrameBytes;
+        else
+                return allocator_stage1.allocate() * FrameBytes;
 }
 
-void PMM::free_frame(this PMM &self, uptr addr)
+void free_frame(uptr addr)
 {
-        uptr frame = addr / self.FrameBytes;
-
-        if (self.stage2_enabled) {
-                if (!self.dynamic_bitmap.test(frame))
-                        panic("pmm: double free on frame at address 0x%x", addr);
-                self.dynamic_bitmap.clear(frame);
-        } else {
-                if (!self.static_bitmap.test(frame))
-                        panic("pmm: double free at address 0x%x", addr);
-                self.static_bitmap.clear(frame);
-        }
+        if (stage2_enabled)
+                allocator_stage2.free(addr / FrameBytes);
+        else
+                allocator_stage1.free(addr / FrameBytes);
 }
 
-} /* namespace kernel::mem */
+} /* namespace kernel::mem::pmm */

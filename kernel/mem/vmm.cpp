@@ -31,7 +31,7 @@ void VMM::init(this VMM &self,
         self.executable_info = executable_info;
         self.memmap_info = memmap_info;
 
-        self.pml4t = reinterpret_cast<u64 *>(pmm.allocate_frame() + self.hhdm);
+        self.pml4t = reinterpret_cast<u64 *>(pmm::allocate_frame() + self.hhdm);
         memset(self.pml4t, 0, self.PageBytes);
 
         self.map_kernel();
@@ -63,7 +63,7 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
 
         // now map the page to the given frame
         if (!(self.pml4t[pml4t_idx] & 1)) {
-                self.pml4t[pml4t_idx] = pmm.allocate_frame() + 0x03;
+                self.pml4t[pml4t_idx] = pmm::allocate_frame() + 0x03;
                 memset(
                         reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm),
                         0,
@@ -73,7 +73,7 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
 
         u64 *pdpt = reinterpret_cast<u64 *>((self.pml4t[pml4t_idx] & PhysicalAddressMask) + self.hhdm);
         if (!(pdpt[pdpt_idx] & 1)) {
-                pdpt[pdpt_idx] = pmm.allocate_frame() + 0x03;
+                pdpt[pdpt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
                         reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm),
                         0,
@@ -83,7 +83,7 @@ void VMM::map_page(this VMM &self, lib::uptr virt, lib::uptr phys, lib::u64 flag
 
         u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + self.hhdm);
         if (!(pdt[pdt_idx] & 1)) {
-                pdt[pdt_idx] = pmm.allocate_frame() + 0x03;
+                pdt[pdt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
                         reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + self.hhdm),
                         0,
@@ -127,21 +127,21 @@ void VMM::unmap_page(this VMM &self, uptr virt)
                 if (pt[i] & 1)
                         return;
         }
-        pmm.free_frame(pdt[pdt_idx] & PhysicalAddressMask);
+        pmm::free_frame(pdt[pdt_idx] & PhysicalAddressMask);
         pdt[pdt_idx] = 0;
 
         for (u16 i = 0; i < PageTableEntries; i++) {
                 if (pdt[i] & 1)
                         return;
         }
-        pmm.free_frame(pdpt[pdpt_idx] & PhysicalAddressMask);
+        pmm::free_frame(pdpt[pdpt_idx] & PhysicalAddressMask);
         pdpt[pdpt_idx] = 0;
 
         for (u16 i = 0; i < PageTableEntries; i++) {
                 if (pdpt[i] & 1)
                         return;
         }
-        pmm.free_frame(self.pml4t[pml4t_idx] & PhysicalAddressMask);
+        pmm::free_frame(self.pml4t[pml4t_idx] & PhysicalAddressMask);
         self.pml4t[pml4t_idx] = 0;
 }
 

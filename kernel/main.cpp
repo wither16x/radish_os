@@ -18,6 +18,7 @@
 
 using namespace kernel::drivers;
 using namespace kernel::fs;
+using namespace kernel::mem;
 
 using kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::Status;
@@ -28,7 +29,6 @@ using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_ma
 using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT;
-using kernel::mem::pmm, kernel::mem::vmm, kernel::mem::kheap;
 
 namespace {
 
@@ -109,14 +109,14 @@ extern "C" void kernel_main()
 
         BootInfo bootinfo;
 
-        pmm.init_stage1(bootinfo.memmap);
+        pmm::init_stage1(bootinfo.memmap);
 
         vmm.init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
         vmm.load();
 
         kheap.init();
 
-        pmm.init_stage2();
+        pmm::init_stage2();
 
         call_global_constructors();
 

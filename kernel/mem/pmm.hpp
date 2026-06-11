@@ -3,38 +3,12 @@
 #include <boot/bootinfo.hpp>
 #include <lib/bitmap.hpp>
 
-namespace kernel::mem {
+namespace kernel::mem::pmm {
 
-class PMM {
-public:
-        // (I'm too lazy to implement stage 2 for now.........)
-        //
-        // The PMM has 2 stages:
-        // * stage 1: can handle 1GiB of RAM at max since the bitmap is statically
-        //   allocated
-        // * stage 2 (to be initialized when a heap allocator is available):
-        //   can handle a theorically infinite amount of RAM since the bitmap
-        //   is dynamically allocated
-        void init_stage1(this PMM &self, boot::BootInfo::MemmapInfo &memmap);
-        void init_stage2(this PMM &self);
+void init_stage1(boot::BootInfo::MemmapInfo &memmap);
+void init_stage2();
 
-        lib::uptr allocate_frame(this PMM &self);
-        void free_frame(this PMM &self, lib::uptr addr);
+lib::uptr allocate_frame();
+void free_frame(lib::uptr addr);
 
-private:
-        static constexpr lib::usize FrameBytes  = 0x1000;       // 4 KiB
-        // Both constants below are used for stage 1 only
-        static constexpr lib::usize MaxMemory   = 0x40000000;   // 1 GiB
-        static constexpr lib::usize MaxFrames   = MaxMemory / FrameBytes;
-
-        bool stage2_enabled = false;
-
-        lib::StaticBitmap<MaxFrames> static_bitmap;             // used in stage 1
-        lib::DynamicBitmap dynamic_bitmap;                      // used in stage 2
-
-        lib::usize last_frame                   = 0;            // last allocated frame
-};
-
-inline PMM pmm;
-
-} /* namespace kernel::mem */
+} /* namespace kernel::mem::pmm */

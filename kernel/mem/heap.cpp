@@ -22,7 +22,7 @@ void Heap::init(this Heap &self)
 {
         self.block_list.set_base(HeapStart);
 
-        vmm.map_page(HeapStart, pmm.allocate_frame(), 0x03 | (1ull << 63));
+        vmm.map_page(HeapStart, pmm::allocate_frame(), 0x03 | (1ull << 63));
         self.pages = 1;
 
         BlockHeader *new_list = self.block_list.first();
@@ -91,7 +91,7 @@ void Heap::free(this Heap &self, void *p)
 
 void Heap::extend(this Heap &self) {
         uptr new_page = HeapStart + vmm.PageBytes * self.pages;
-        vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm.allocate_frame(), 0x03 | (1ull << 63));
+        vmm.map_page(HeapStart + vmm.PageBytes * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
         self.pages++;
 
         BlockHeader *last_block = self.block_list.last();
