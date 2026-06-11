@@ -48,6 +48,12 @@ limine_module_request l_module_info = {
         .internal_modules = nullptr
 };
 
+limine_framebuffer_request l_framebuffer_request = {
+        .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
+        .revision = 0,
+        .response = nullptr
+};
+
 const char *firmware_type_str[] = {
         "x86 BIOS",
         "EFI 32",
@@ -105,6 +111,19 @@ BootInfo::BootInfo()
                 };
                 this->modules.modules[i] = e;
         }
+
+        limine_framebuffer *l_fb = l_framebuffer_request.response->framebuffers[0];
+        this->framebuffer.address               = l_fb->address;
+        this->framebuffer.pitch                 = l_fb->pitch;
+        this->framebuffer.width                 = l_fb->width;
+        this->framebuffer.height                = l_fb->height;
+        this->framebuffer.bpp                   = l_fb->bpp;
+        this->framebuffer.red_mask_size         = l_fb->red_mask_size;
+        this->framebuffer.red_mask_shift        = l_fb->red_mask_shift;
+        this->framebuffer.green_mask_size       = l_fb->green_mask_size;
+        this->framebuffer.green_mask_shift      = l_fb->green_mask_shift;
+        this->framebuffer.blue_mask_size        = l_fb->blue_mask_size;
+        this->framebuffer.blue_mask_shift       = l_fb->blue_mask_shift;
 
         logger.ok("recovered boot info");
 }

@@ -1,0 +1,46 @@
+#include <fs/vfs.hpp>
+#include <lib/filesystem.hpp>
+
+namespace kernel::lib {
+
+int create_file(const String &path)
+{
+        return fs::vfs::create_file(path);
+}
+
+int create_dir(const String &path)
+{
+        return fs::vfs::create_dir(path);
+}
+
+int remove(const String &path)
+{
+        return fs::vfs::remove(path);
+}
+
+int write_file(const String &path, const char *buf, usize n)
+{
+        return fs::vfs::write_file(path, buf, n);
+}
+
+int read_file(const String &path, char *buf, usize n)
+{
+        return fs::vfs::read_file(path, buf, n);
+}
+
+int readdir(const String &path, Vector<fs::vfs::DirEntry> &entries)
+{
+        return fs::vfs::readdir(path, entries);
+}
+
+fs::vfs::VNode *lookup(const String &path)
+{
+        return fs::vfs::lookup(path);
+}
+
+usize get_file_size(const String &path)
+{
+        return fs::vfs::get_file_size(path);
+}
+
+} /* namespace kernel::lib */

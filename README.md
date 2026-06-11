@@ -5,6 +5,7 @@ I do it for learning.
 ![screenshot](screenshots/image.png)
 
 ## Features
+- Framebuffer output
 - Serial output
 - VFS
 - USTAR
@@ -16,5 +17,6 @@ I do it for learning.
 * [x] Better tmpfs
 * [x] VFS
 * [x] USTAR
-* [ ] Framebuffer driver
+* [x] Framebuffer driver
 * [x] initrd
+* [ ] Framebuffer console

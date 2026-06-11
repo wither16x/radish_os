@@ -86,6 +86,8 @@ VNode *lookup(const lib::String &path)
         Vector<String> parts = parse_path(rel);
 
         VNode *curr_nd = drv->root;
+        drv->root->owned = false;
+
         for (usize i = 0; i < parts.size(); i++) {
                 void *child = curr_nd->ops->lookup(curr_nd->fs_data, parts[i]);
                 if (!child)
@@ -94,6 +96,7 @@ VNode *lookup(const lib::String &path)
                 VNode *next_nd          = new VNode;
                 next_nd->ops            = curr_nd->ops;
                 next_nd->fs_data        = child;
+                next_nd->owned          = true;
 
                 if (curr_nd != drv->root)
                         delete curr_nd;
@@ -189,13 +192,13 @@ int remove(const lib::String &path)
         return vnd->ops->remove(vnd->fs_data);
 }
 
-int write_file(const String &path, const char *buf)
+int write_file(const String &path, const char *buf, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
                 return -1;      // file not found
 
-        return vnd->ops->write_file(vnd->fs_data, buf);
+        return vnd->ops->write_file(vnd->fs_data, buf, n);
 }
 
 int read_file(const String &path, char *buf, usize n)
@@ -204,7 +207,10 @@ int read_file(const String &path, char *buf, usize n)
         if (!vnd)
                 return -1;      // file not found
 
-        return vnd->ops->read_file(vnd->fs_data, buf, n);
+        int ret = vnd->ops->read_file(vnd->fs_data, buf, n);
+        if (vnd->owned)
+                delete vnd;
+        return ret;
 }
 
 int readdir(const String &path, Vector<DirEntry> &entries)
@@ -213,7 +219,25 @@ int readdir(const String &path, Vector<DirEntry> &entries)
         if (!vnd)
                 return -1;      // directory not found
 
-        return vnd->ops->readdir(vnd->fs_data, entries);
+        int ret = vnd->ops->readdir(vnd->fs_data, entries);
+        if (vnd->owned)
+                delete vnd;
+        return ret;
+}
+
+usize get_file_size(const lib::String &path)
+{
+        VNode *vnd = lookup(path);
+        if (!vnd)
+                return 0;      // file not found
+
+        usize buf = 0;
+        vnd->ops->get_file_size(vnd->fs_data, &buf);
+        
+        if (vnd->owned)
+                delete vnd;
+        
+        return buf;
 }
 
 } /* namespace kernel::fs::vfs */

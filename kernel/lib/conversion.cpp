@@ -76,20 +76,13 @@ char* utoa(usize n, int base)
 
 usize atoi(const char *s, int base)
 {
-        int res = 0;
+        usize res = 0;
         int i = 0;
-
-        int sign = 1;
-
-        if (s[0] == '-') {
-                sign = -1;
-                i++;
-        }
 
         for (; s[i] != '\0'; ++i)
                 res = res * base + s[i] - '0';
 
-        return sign * res;
+        return res;
 }
 
 } /* namespace kernel::lib */

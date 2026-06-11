@@ -21,10 +21,11 @@ struct VNodeOps {
         int (*create_file)(void *fs_data, const lib::String &name);
         int (*create_dir)(void *fs_data, const lib::String &name);
         int (*remove)(void *fs_data);
-        int (*write_file)(void *fs_data, const char *buf);
+        int (*write_file)(void *fs_data, const char *buf, lib::usize n);
         int (*read_file)(void *fs_data, char *buf, lib::usize n);
         int (*readdir)(void *fs_data, lib::Vector<struct DirEntry> &entries);
         void *(*lookup)(void *fs_data, const lib::String &name);
+        int (*get_file_size)(void *fs_data, lib::usize *buf);
 };
 
 // Virtual node, which represents an entry in the VFS tree.
@@ -34,6 +35,7 @@ struct VNode {
         // maybe should I change this field to `real_node` or something
         // like this?
         void *fs_data;          // node from the "real" filesystem
+        bool owned;
 };
 
 // Representation of a directory entry.
@@ -70,8 +72,9 @@ VNode *lookup(const lib::String &path);
 int create_file(const lib::String &path);
 int create_dir(const lib::String &path);
 int remove(const lib::String &path);
-int write_file(const lib::String &path, const char *buf);
+int write_file(const lib::String &path, const char *buf, lib::usize n);
 int read_file(const lib::String &path, char *buf, lib::usize n);
 int readdir(const lib::String &path, lib::Vector<DirEntry> &entries);
+lib::usize get_file_size(const lib::String &path);
 
 } /* namespace kernel::fs::vfs */

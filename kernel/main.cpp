@@ -2,6 +2,8 @@
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
+#include <drivers/console.hpp>
+#include <drivers/framebuffer.hpp>
 #include <drivers/serial.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
@@ -14,7 +16,9 @@
 #include <mem/vmm.hpp>
 #include <panic.hpp>
 
-using kernel::drivers::serial::init_port, kernel::drivers::serial::Port;
+using namespace kernel::drivers;
+using namespace kernel::fs;
+
 using kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::Status;
 using kernel::lib::log::logger;
@@ -25,7 +29,6 @@ using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT;
 using kernel::mem::pmm, kernel::mem::vmm, kernel::mem::kheap;
-using namespace kernel::fs;
 
 namespace {
 
@@ -49,6 +52,8 @@ void call_global_constructors()
                 __init_array[i]();
                 logger.ok("initialized global constructor %u", i);
         }
+
+        logger.ok("called global constructors");
 }
 
 void mount_initrd(BootInfo::ModuleInfo &info)
@@ -65,6 +70,14 @@ void mount_initrd(BootInfo::ModuleInfo &info)
                 logger.ok("found initrd");
 
         vfs::mount('I', new ustar::USTAR(info.modules[idx].address));
+
+        logger.ok("mounted initrd");
+}
+
+void unmount_initrd()
+{
+        vfs::unmount('I');
+        logger.ok("unmounted initrd");
 }
 
 extern "C" void kernel_main()
@@ -72,7 +85,7 @@ extern "C" void kernel_main()
         if (!limine_base_revision.is_supported())
                 panic("limine base revision not supported"); // unprintable message
 
-        if (init_port(Port::COM1) != Status::Ok)
+        if (serial::init_port(serial::Port::COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
         logger.set_context("kernel");
@@ -97,20 +110,30 @@ extern "C" void kernel_main()
         call_global_constructors();
 
         mount_initrd(bootinfo.modules);
-        logger.ok("mounted initrd");
 
-        // test USTAR filesystem
-        kernel::lib::Vector<vfs::DirEntry> root;
-        vfs::readdir("I:/", root);
-        for (auto &nd : root)
-                logger.debug("* /%s", nd.name.raw());
+        framebuffer::init(
+                bootinfo.framebuffer.address,
+                bootinfo.framebuffer.width,
+                bootinfo.framebuffer.height,
+                bootinfo.framebuffer.pitch
+        );
+        logger.ok("initialized framebuffer");
 
-        char buf[255];
-        vfs::read_file("I:/README.txt", buf, sizeof(buf));
-        logger.debug("reading from I:/README.txt: %s", buf);
+        console::Console kconsole;
+        console::set_console(kconsole);
+        auto console = console::get_console();
+        console->init_font("I:/fonts/zap-light20.psf");
 
-        vfs::unmount('I');
-        logger.ok("unmounted initrd");
+        console->draw_char('R', 0, 0);
+        console->draw_char('a', 20, 0);
+        console->draw_char('d', 40, 0);
+        console->draw_char('i', 60, 0);
+        console->draw_char('s', 80, 0);
+        console->draw_char('h', 100, 0);
+        console->draw_char('O', 120, 0);
+        console->draw_char('S', 140, 0);
+
+        unmount_initrd();
 
         // idle
         panic("nothing to do");

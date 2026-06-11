@@ -11,7 +11,7 @@ using kernel::lib::u8, kernel::lib::usize;
 using kernel::lib::atoi;
 using kernel::lib::String;
 using kernel::lib::Vector;
-using kernel::lib::strcpy;
+using kernel::lib::memcpy;
 
 namespace kernel::fs::ustar {
 
@@ -93,10 +93,11 @@ int remove(void *fs_data)
         return 0;
 }
 
-int write_file(void *fs_data, const char *buf)
+int write_file(void *fs_data, const char *buf, usize n)
 {
         static_cast<void>(fs_data);
         static_cast<void>(buf);
+        static_cast<void>(n);
         return 0;
 }
 // -------------------------------------------------------------------------------
@@ -108,10 +109,13 @@ int read_file(void *fs_data, char *buf, usize n)
                 return -1;      // cannot read directories like that
         if (!f->file_data || !f->file_data->data)
                 return -2;      // file has no valid data
-        if (atoi(f->hdr->size, 8) >= n)
+
+        usize filesz = atoi(f->hdr->size, 8);
+
+        if (n < filesz)
                 return -3;      // buffer too small
 
-        strcpy(f->file_data->data, buf);
+        memcpy(buf, f->file_data->data, filesz);
 
         return 0;
 }
@@ -147,6 +151,18 @@ void *lookup(void *fs_data, const String &name)
         }
 
         return nullptr;
+}
+
+int get_file_size(void *fs_data, usize *buf)
+{
+        Node *f = static_cast<Node *>(fs_data);
+        if (f->hdr->type == static_cast<char>(NodeType::Directory))
+                return -1;      // cannot get the size of a directory like this
+        
+        usize filesz = atoi(f->hdr->size, 8);
+        memcpy(buf, &filesz, sizeof(*buf));
+        
+        return 0;
 }
 
 Node *find_dir(Node *parent, const String &name)
@@ -196,9 +212,10 @@ void parse_archive(u8 *archive)
 
                 Node *parent = root;
                 for (usize i = 0; i < parts.size() - 1; i++) {
-                        parent = find_dir(parent, parts[i]);
-                        if (!parent)
-                                parent = __create_dir(parent, parts[i]);
+                        Node *next = find_dir(parent, parts[i]);
+                        if (!next)
+                                next = __create_dir(parent, parts[i]);
+                        parent = next;
                         if (!parent) // failed to create the directory
                                 break;
                 }
@@ -233,7 +250,8 @@ vfs::VNodeOps ustar_ops = {
         .write_file             = write_file,
         .read_file              = read_file,
         .readdir                = readdir,
-        .lookup                 = lookup
+        .lookup                 = lookup,
+        .get_file_size          = get_file_size
 };
 
 } /* anonymous namespace */
@@ -259,6 +277,7 @@ vfs::VNode *USTAR::get_root()
         vfs::VNode *vnd = new vfs::VNode;
         vnd->ops        = &ustar_ops;
         vnd->fs_data    = root;
+        vnd->owned      = false;
 
         return vnd;
 }

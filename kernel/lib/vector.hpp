@@ -119,6 +119,31 @@ public:
                 self.length--;
         }
 
+        void resize(this Vector<T> &self, usize new_size)
+        {
+                if (new_size > self.cap) {
+                        if (self.cap == 0)
+                                self.cap = new_size;
+
+                        while (self.cap < new_size)
+                                self.cap *= 2;
+
+                        T *new_data = new T[self.cap];
+                        for (usize i = 0; i < self.length; ++i)
+                                new_data[i] = self.data[i];
+
+                        delete[] self.data;
+                        self.data = new_data;
+                }
+
+                self.length = new_size;
+        }
+
+        T *get_data(this const Vector<T> &self)
+        {
+                return self.data;
+        }
+
         // Operators
         // --------------------------------------------------------
         Vector &operator =(const Vector<T> &other)

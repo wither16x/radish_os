@@ -8,7 +8,7 @@
 
 using kernel::lib::String;
 using kernel::lib::usize;
-using kernel::lib::strcpy, kernel::lib::strlen;
+using kernel::lib::memcpy;
 using kernel::lib::Vector;
 
 namespace kernel::fs::tmpfs {
@@ -128,7 +128,7 @@ int remove(void *fs_data)
         return remove_node(nd);
 }
 
-int write_file(void *fs_data, const char *buf)
+int write_file(void *fs_data, const char *buf, usize n)
 {
         Node *f = static_cast<Node *>(fs_data);
         if (f->type != NodeType::File)
@@ -137,10 +137,10 @@ int write_file(void *fs_data, const char *buf)
         if (f->file_data->data)
                 delete[] f->file_data->data;
 
-        f->file_data->data = new char[strlen(buf) + 1];
-        f->file_data->size = strlen(buf);
+        f->file_data->data = new char[n + 1];
+        f->file_data->size = n;
 
-        strcpy(buf, f->file_data->data);
+        memcpy(f->file_data->data, buf, n);
 
         return 0;
 }
@@ -155,7 +155,7 @@ int read_file(void *fs_data, char *buf, usize n)
         if (f->file_data->size >= n)
                 return -3;              // buffer too small
 
-        strcpy(f->file_data->data, buf);
+        memcpy(buf, f->file_data->data, f->file_data->size);
 
         return 0;
 }
@@ -193,6 +193,17 @@ void *lookup(void *fs_data, const String &name)
         return nullptr;
 }
 
+int get_file_size(void *fs_data, usize *buf)
+{
+        Node *f = static_cast<Node *>(fs_data);
+        if (f->type != NodeType::File)
+                return 0;      // file not found
+
+        memcpy(buf, &f->file_data->size, sizeof(*buf));
+
+        return 0;
+}
+
 // tmpfs operations
 vfs::VNodeOps tmpfs_ops = {
         .create_file    = create_file,
@@ -201,7 +212,8 @@ vfs::VNodeOps tmpfs_ops = {
         .write_file     = write_file,
         .read_file      = read_file,
         .readdir        = readdir,
-        .lookup         = lookup
+        .lookup         = lookup,
+        .get_file_size  = get_file_size
 };
 
 } /* anonymous namespace */
@@ -220,6 +232,7 @@ vfs::VNode *TMPFS::get_root()
         vfs::VNode *vnd = new vfs::VNode;
         vnd->ops        = &tmpfs_ops;
         vnd->fs_data    = root;
+        vnd->owned      = false;
 
         return vnd;
 }

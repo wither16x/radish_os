@@ -75,12 +75,27 @@ struct ModuleInfo {
         Module modules[MaxModules];
 };
 
+struct FramebufferInfo {
+        void *address;
+        lib::u64 pitch;
+        lib::u64 width;
+        lib::u64 height;
+        lib::u16 bpp;           // bits per pixel
+        lib::u8 red_mask_size;
+        lib::u8 red_mask_shift;
+        lib::u8 green_mask_size;
+        lib::u8 green_mask_shift;
+        lib::u8 blue_mask_size;
+        lib::u8 blue_mask_shift;
+};
+
 BootloaderInfo          bootloader;
 FirmwareTypeInfo        firmware_type;
 MemmapInfo              memmap;
 HHDMInfo                hhdm;
 ExecutableInfo          executable;
 ModuleInfo              modules;
+FramebufferInfo         framebuffer;
 
 BootInfo();
 
