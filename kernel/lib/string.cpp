@@ -3,115 +3,76 @@
 
 namespace kernel::lib {
 
-// private
-// -------------------------------------------------------------
-void String::cleanup(this String &self)
-{
-        if (self.data)
-                delete[] self.data;
-        self.len = 0;
-}
 // -------------------------------------------------------------
 //
 // public
 // -------------------------------------------------------------
 String::String()
 {
-        this->len = 0;
-        this->data = new char[1];
-        this->data[0] = '\0';
+        this->data.push_back('\0');
 }
 
 String::String(const char *buf)
 {
-        this->len = strlen(buf);
-        this->data = new char[this->len + 1];   // add 1 byte for the null character
-        strcpy(buf, this->data);
-}
+        while (*buf)
+                this->data.push_back(*buf++);
 
-String::String(const String &other)
-{
-        this->len = other.len;
-        this->data = new char[this->len + 1];
-        strcpy(other.data, this->data);
-}
-
-String::String(String &&other)
-{
-        this->len = other.len;
-        this->data = other.data;
-
-        other.data = nullptr;
-        other.len = 0;
-}
-
-String::~String()
-{
-        this->cleanup();
+        this->data.push_back('\0');
 }
 
 const char *String::raw(this const String &self)
 {
-        return self.data;
+        return self.data.get_data();
 }
 
 usize String::length(this const String &self)
 {
-        return self.len;
+        // avoid returning -1
+        if (self.data.size() == 0)
+                return 0;
+
+        return self.data.size() - 1;
 }
 
 String String::sub(this const String &self, usize start)
 {
         String s;
 
-        for (usize i = start; i < self.len; i++)
-                s += self.data[i];
+        s.data.pop_back();
+        usize len = self.data.size();
+
+        if (start >= len)
+                return s;
+
+        for (usize i = start; i < len; ++i)
+                s.data.push_back(self.data[i]);
+        s.data.push_back('\0');
 
         return s;
 }
 
 String String::operator +(this const String &self, const String &other)
 {
-        String s;
-        s.len = self.len + other.len;
-        s.data = new char[s.len + 1];
-        strcpy(self.data, s.data);
-        strcpy(other.data, s.data + self.len);
+        String s = self;
+
+        s.data.pop_back();
+
+        for (usize i = 0; i < other.data.size(); ++i)
+                s.data.push_back(other.data[i]);
+        s.data.push_back('\0');
+
         return s;
 }
 
 String String::operator +(this const String &self, char ch)
 {
-        String s;
-        s.len = self.len + 1;
-        s.data = new char[s.len + 1];
-        if (self.data && self.len > 0)
-                strcpy(self.data, s.data);
-        s.data[self.len] = ch;
-        s.data[self.len + 1] = '\0';
+        String s = self;
+
+        s.data.pop_back();
+        s.data.push_back(ch);
+        s.data.push_back('\0');
+
         return s;
-}
-
-String &String::operator =(this String &self, const String &other)
-{
-        self.cleanup();
-        self.len = other.len;
-        self.data = new char[self.len + 1];
-        strcpy(other.data, self.data);
-        return self;
-}
-
-String &String::operator =(this String &self, String &&other)
-{
-        self.cleanup();
-
-        self.len = other.len;
-        self.data = other.data;
-
-        other.data = nullptr;
-        other.len = 0;
-
-        return self;
 }
 
 String &String::operator +=(this String &self, const String &other)
@@ -128,23 +89,17 @@ String &String::operator +=(this String &self, char ch)
 
 char String::operator [](this String &self, usize index)
 {
-        if (index >= self.len)
-                return '\0';
-
         return self.data[index];
 }
 
 char String::operator [](this const String &self, usize index)
 {
-        if (index >= self.len)
-                return '\0';
-
         return self.data[index];
 }
 
 bool String::operator ==(this const String &self, const String &other)
 {
-        return strcmp(self.data, other.data) == 0;
+        return strcmp(self.data.get_data(), other.data.get_data()) == 0;
 }
 
 // -------------------------------------------------------------

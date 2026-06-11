@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/typing.hpp>
+#include <lib/vector.hpp>
 
 namespace kernel::lib {
 
@@ -9,18 +10,15 @@ namespace kernel::lib {
 // Otherwise, please keep it simple and use char pointers.
 class String {
 private:
-        char *data;
-        usize len;
-
-        void cleanup(this String &self);
+        Vector<char> data;
 
 public:
         String();
         String(const char *buf);
-        String(const String &other);
-        String(String &&other);
+        String(const String &other)     = default;
+        String(String &&other)          = default;
 
-        ~String();
+        ~String()                       = default;
 
         const char *raw(this const String &self);
         usize length(this const String &self);
@@ -28,8 +26,8 @@ public:
 
         String operator +(this const String &self, const String &other);
         String operator +(this const String &self, char ch);
-        String &operator =(this String &self, const String &other);
-        String &operator =(this String &self, String &&other);
+        String &operator =(this String &self, const String &other)      = default;
+        String &operator =(this String &self, String &&other)           = default;
         String &operator +=(this String &self, const String &other);
         String &operator +=(this String &self, char ch);
         char operator [](this String &self, usize index);

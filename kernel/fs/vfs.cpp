@@ -34,6 +34,58 @@ bool path_can_handle_drive(const String &path)
 
 } /* anonymous namespace */
 
+// VNode functions
+// --------------------------------------------------------------------
+int VNode::create_file(const lib::String &name)
+{
+        static_cast<void>(name);
+        return 0;
+}
+
+int VNode::create_dir(const lib::String &name)
+{
+        static_cast<void>(name);
+        return 0;
+}
+
+int VNode::remove()
+{
+        return 0;
+}
+
+int VNode::write_file(const char *buf, lib::usize n)
+{
+        static_cast<void>(buf);
+        static_cast<void>(n);
+        return 0;
+}
+
+int VNode::read_file(char *buf, lib::usize n)
+{
+        static_cast<void>(buf);
+        static_cast<void>(n);
+        return 0;
+}
+
+int VNode::readdir(lib::Vector<struct DirEntry> &entries)
+{
+        static_cast<void>(entries);
+        return 0;
+}
+
+void *VNode::lookup(const lib::String &name)
+{
+        static_cast<void>(name);
+        return 0;
+}
+
+int VNode::get_file_size(lib::usize *buf)
+{
+        static_cast<void>(buf);
+        return 0;
+}
+// --------------------------------------------------------------------
+
 int mount(char id, FileSystem *fs)
 {
         Drive *drv = &drives[id - 'A'];
@@ -86,22 +138,12 @@ VNode *lookup(const lib::String &path)
         Vector<String> parts = parse_path(rel);
 
         VNode *curr_nd = drv->root;
-        drv->root->owned = false;
-
         for (usize i = 0; i < parts.size(); i++) {
-                void *child = curr_nd->ops->lookup(curr_nd->fs_data, parts[i]);
+                void *child = curr_nd->lookup(parts[i]);
                 if (!child)
                         return nullptr;         // child not found
 
-                VNode *next_nd          = new VNode;
-                next_nd->ops            = curr_nd->ops;
-                next_nd->fs_data        = child;
-                next_nd->owned          = true;
-
-                if (curr_nd != drv->root)
-                        delete curr_nd;
-
-                curr_nd = next_nd;
+                curr_nd = static_cast<VNode *>(child);
         }
 
         return curr_nd;
@@ -122,27 +164,16 @@ int create_file(const lib::String &path)
         Vector<String> parts = parse_path(rel);
 
         VNode *curr_nd = drv->root;
+
         for (usize i = 0; i < parts.size() - 1; i++) {
-                void *child = curr_nd->ops->lookup(curr_nd->fs_data, parts[i]);
+                void *child = curr_nd->lookup(parts[i]);
                 if (!child)
                         return -3;      // child not found
 
-                VNode *next_nd          = new VNode;
-                next_nd->ops            = curr_nd->ops;
-                next_nd->fs_data        = child;
-
-                if (curr_nd != drv->root)
-                        delete curr_nd;
-
-                curr_nd = next_nd;
+                curr_nd = static_cast<VNode *>(child);
         }
 
-        int ret = curr_nd->ops->create_file(curr_nd->fs_data, parts[parts.size() - 1]);
-        
-        if (curr_nd != drv->root)
-                delete curr_nd;
-
-        return ret;
+        return curr_nd->create_file(parts[parts.size() - 1]);
 }
 
 int create_dir(const lib::String &path)
@@ -161,26 +192,14 @@ int create_dir(const lib::String &path)
 
         VNode *curr_nd = drv->root;
         for (usize i = 0; i < parts.size() - 1; i++) {
-                void *child = curr_nd->ops->lookup(curr_nd->fs_data, parts[i]);
+                void *child = curr_nd->lookup(parts[i]);
                 if (!child)
                         return -3;      // child not found
 
-                VNode *next_nd          = new VNode;
-                next_nd->ops            = curr_nd->ops;
-                next_nd->fs_data        = child;
-
-                if (curr_nd != drv->root)
-                        delete curr_nd;
-
-                curr_nd = next_nd;
+                curr_nd = static_cast<VNode *>(child);
         }
 
-        int ret = curr_nd->ops->create_dir(curr_nd->fs_data, parts[parts.size() - 1]);
-        
-        if (curr_nd != drv->root)
-                delete curr_nd;
-
-        return ret;
+        return curr_nd->create_dir(parts[parts.size() - 1]);
 }
 
 int remove(const lib::String &path)
@@ -189,7 +208,7 @@ int remove(const lib::String &path)
         if (!vnd)
                 return -1;      // file/dir not found
 
-        return vnd->ops->remove(vnd->fs_data);
+        return vnd->remove();
 }
 
 int write_file(const String &path, const char *buf, usize n)
@@ -198,7 +217,7 @@ int write_file(const String &path, const char *buf, usize n)
         if (!vnd)
                 return -1;      // file not found
 
-        return vnd->ops->write_file(vnd->fs_data, buf, n);
+        return vnd->write_file(buf, n);
 }
 
 int read_file(const String &path, char *buf, usize n)
@@ -207,7 +226,7 @@ int read_file(const String &path, char *buf, usize n)
         if (!vnd)
                 return -1;      // file not found
 
-        int ret = vnd->ops->read_file(vnd->fs_data, buf, n);
+        int ret = vnd->read_file(buf, n);
         if (vnd->owned)
                 delete vnd;
         return ret;
@@ -219,9 +238,11 @@ int readdir(const String &path, Vector<DirEntry> &entries)
         if (!vnd)
                 return -1;      // directory not found
 
-        int ret = vnd->ops->readdir(vnd->fs_data, entries);
+        int ret = vnd->readdir(entries);
+
         if (vnd->owned)
                 delete vnd;
+
         return ret;
 }
 
@@ -232,7 +253,7 @@ usize get_file_size(const lib::String &path)
                 return 0;      // file not found
 
         usize buf = 0;
-        vnd->ops->get_file_size(vnd->fs_data, &buf);
+        vnd->get_file_size(&buf);
         
         if (vnd->owned)
                 delete vnd;

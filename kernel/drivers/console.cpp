@@ -37,9 +37,11 @@ Console current_console;
 
 Console::Console(u64 width, u64 height)
 {
-        this->active    = true;
+        this->active    = false;
         this->width     = width;
         this->height    = height;
+        this->cursor_x  = 0;
+        this->cursor_y  = 0;
 }
 
 Console::~Console()
@@ -51,11 +53,9 @@ void Console::init_font(this Console &self, const String &font)
 {
         logger.set_context("console");
 
-        self.cursor_x = 0;
-        self.cursor_y = 0;
-
         usize filesz = get_file_size(font);
         self.font_data.resize(filesz);
+
         read_file(font, reinterpret_cast<char *>(self.font_data.get_data()), filesz);
 
         PSF2Header *hdr = reinterpret_cast<PSF2Header *>(self.font_data.get_data());
@@ -70,6 +70,8 @@ void Console::init_font(this Console &self, const String &font)
         self.glyph_size         = hdr->glyph_size;
         self.glyph_width        = hdr->width;
         self.glyph_height       = hdr->height;
+        // the console is active only if a valid font has been loaded
+        self.active             = true;
 
         logger.set_context("kernel");
 }

@@ -56,12 +56,12 @@ public:
 
         // Both methods below for range-based for
         // --------------------------------------------------------
-        T *begin(this const Vector<T> &self)
+        const T *begin(this const Vector<T> &self)
         {
                 return self.data;
         }
 
-        T *end(this const Vector<T> &self)
+        const T *end(this const Vector<T> &self)
         {
                 return self.data + self.length;
         }
@@ -79,7 +79,7 @@ public:
 
         void set(this Vector<T> &self, usize idx, const T& n)
         {
-                if (idx >= self.cap)
+                if (idx >= self.length)
                         return;         // do not extend the vector
 
                 self.data[idx] = n;
@@ -139,7 +139,12 @@ public:
                 self.length = new_size;
         }
 
-        T *get_data(this const Vector<T> &self)
+        const T *get_data(this const Vector<T> &self)
+        {
+                return self.data;
+        }
+
+        T *get_data(this Vector<T> &self)
         {
                 return self.data;
         }

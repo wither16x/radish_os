@@ -51,7 +51,7 @@ struct [[gnu::packed]] FileHeader {
         char prefix[155];
 };
 
-struct Node {
+struct Node : public vfs::VNode {
         Node *parent;
 
         FileHeader *hdr;
@@ -59,6 +59,11 @@ struct Node {
 
         struct File *file_data;
         struct Dir *dir_data;
+
+        int read_file(char *buf, usize n) override;
+        int readdir(Vector<vfs::DirEntry> &entries) override;
+        void *lookup(const String &name) override;
+        int get_file_size(usize *buf) override;
 };
 
 struct File {
@@ -71,103 +76,9 @@ struct Dir {
 
 Node *root = nullptr;
 
-// Unsupported operations (cast parameters to `void` to avoid compiler warnings)
-// -------------------------------------------------------------------------------
-int create_file(void *fs_data, const String &name)
-{
-        static_cast<void>(fs_data);
-        static_cast<void>(name);
-        return 0;
-}
-
-int create_dir(void *fs_data, const String &name)
-{
-        static_cast<void>(fs_data);
-        static_cast<void>(name);
-        return 0;
-}
-
-int remove(void *fs_data)
-{
-        static_cast<void>(fs_data);
-        return 0;
-}
-
-int write_file(void *fs_data, const char *buf, usize n)
-{
-        static_cast<void>(fs_data);
-        static_cast<void>(buf);
-        static_cast<void>(n);
-        return 0;
-}
-// -------------------------------------------------------------------------------
-
-int read_file(void *fs_data, char *buf, usize n)
-{
-        Node *f = static_cast<Node *>(fs_data);
-        if (f->hdr->type == static_cast<char>(NodeType::Directory))
-                return -1;      // cannot read directories like that
-        if (!f->file_data || !f->file_data->data)
-                return -2;      // file has no valid data
-
-        usize filesz = atoi(f->hdr->size, 8);
-
-        if (n < filesz)
-                return -3;      // buffer too small
-
-        memcpy(buf, f->file_data->data, filesz);
-
-        return 0;
-}
-
-int readdir(void *fs_data, Vector<vfs::DirEntry> &entries)
-{
-        Node *dir = static_cast<Node *>(fs_data);
-        if (!dir->dir_data)
-                return -1;              // not a directory
-
-        for (usize i = 0; i < dir->dir_data->nodes.size(); i++) {
-                Node *child = dir->dir_data->nodes[i];
-                vfs::DirEntry entry;
-
-                entry.name = child->name;
-                entry.is_dir = child->hdr->type == static_cast<char>(NodeType::Directory);
-
-                entries.push_back(entry);
-        }
-
-        return 0;
-}
-
-void *lookup(void *fs_data, const String &name)
-{
-        Node *dir = static_cast<Node *>(fs_data);
-        if (!dir->dir_data)
-                return nullptr;
-
-        for (usize i = 0; i < dir->dir_data->nodes.size(); i++) {
-                if (dir->dir_data->nodes[i]->name == name)
-                        return dir->dir_data->nodes[i];
-        }
-
-        return nullptr;
-}
-
-int get_file_size(void *fs_data, usize *buf)
-{
-        Node *f = static_cast<Node *>(fs_data);
-        if (f->hdr->type == static_cast<char>(NodeType::Directory))
-                return -1;      // cannot get the size of a directory like this
-        
-        usize filesz = atoi(f->hdr->size, 8);
-        memcpy(buf, &filesz, sizeof(*buf));
-        
-        return 0;
-}
-
 Node *find_dir(Node *parent, const String &name)
 {
-        Node *existing = static_cast<Node *>(lookup(parent, name));
+        Node *existing = static_cast<Node *>(parent->lookup(name));
         if (existing && existing->dir_data)
                 return existing;
 
@@ -182,6 +93,7 @@ Node *__create_dir(Node *parent, const String &name)
         dir->name       = name;
         dir->file_data  = nullptr;
         dir->dir_data   = new Dir;
+        dir->owned      = false;
 
         parent->dir_data->nodes.push_back(dir);
 
@@ -225,6 +137,7 @@ void parse_archive(u8 *archive)
                         nd->parent      = parent;
                         nd->hdr         = hdr;
                         nd->name        = name;
+                        nd->owned       = false;
 
                         if (hdr->type == static_cast<char>(NodeType::Directory)) {
                                 nd->file_data = nullptr;
@@ -243,18 +156,66 @@ void parse_archive(u8 *archive)
         }
 }
 
-vfs::VNodeOps ustar_ops = {
-        .create_file            = create_file,
-        .create_dir             = create_dir,
-        .remove                 = remove,
-        .write_file             = write_file,
-        .read_file              = read_file,
-        .readdir                = readdir,
-        .lookup                 = lookup,
-        .get_file_size          = get_file_size
-};
-
 } /* anonymous namespace */
+
+int Node::read_file(char *buf, usize n)
+{
+        if (this->hdr->type == static_cast<char>(NodeType::Directory))
+                return -1;      // cannot read directories like that
+        if (!this->file_data || !this->file_data->data)
+                return -2;      // file has no valid data
+
+        usize filesz = atoi(this->hdr->size, 8);
+
+        if (n < filesz)
+                return -3;      // buffer too small
+
+        memcpy(buf, this->file_data->data, filesz);
+
+        return 0;
+}
+
+int Node::readdir(Vector<vfs::DirEntry> &entries)
+{
+        if (!this->dir_data)
+                return -1;              // not a directory
+
+        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                Node *child = this->dir_data->nodes[i];
+                vfs::DirEntry entry;
+
+                entry.name = child->name;
+                entry.is_dir = child->hdr->type == static_cast<char>(NodeType::Directory);
+
+                entries.push_back(entry);
+        }
+
+        return 0;
+}
+
+void *Node::lookup(const String &name)
+{
+        if (!this->dir_data)
+                return nullptr;
+
+        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                if (this->dir_data->nodes[i]->name == name)
+                        return this->dir_data->nodes[i];
+        }
+
+        return nullptr;
+}
+
+int Node::get_file_size(usize *buf)
+{
+        if (this->hdr->type == static_cast<char>(NodeType::Directory))
+                return -1;      // cannot get the size of a directory like this
+
+        usize filesz = atoi(this->hdr->size, 8);
+        memcpy(buf, &filesz, sizeof(*buf));
+        
+        return 0;
+}
 
 USTAR::USTAR(void *archive)
 {
@@ -270,21 +231,17 @@ vfs::VNode *USTAR::get_root()
                 root->name      = "/";
                 root->file_data = nullptr;
                 root->dir_data  = new Dir;
+                root->owned     = false;
 
                 parse_archive(this->archive);
         }
 
-        vfs::VNode *vnd = new vfs::VNode;
-        vnd->ops        = &ustar_ops;
-        vnd->fs_data    = root;
-        vnd->owned      = false;
-
-        return vnd;
+        return root;
 }
 
 void USTAR::unmount()
 {
-        remove(root);
+        root->remove();
         root = nullptr;
 }
 

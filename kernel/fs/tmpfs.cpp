@@ -22,7 +22,7 @@ enum class NodeType : int {
 
 // Depending on the node type, `file_data` or `dir_data` is set
 // to `nullptr`
-struct Node {
+struct Node : public vfs::VNode{
         Node *parent;
 
         NodeType type;
@@ -30,6 +30,15 @@ struct Node {
 
         struct File *file_data;
         struct Dir *dir_data;
+
+        int create_file(const String &name) override;
+        int create_dir(const String &name) override;
+        int remove() override;
+        int write_file(const char *buf, usize n) override;
+        int read_file(char *buf, usize n) override;
+        int readdir(Vector<vfs::DirEntry> &entries) override;
+        void *lookup(const String &name) override;
+        int get_file_size(usize *buf) override;
 };
 
 struct File {
@@ -68,14 +77,15 @@ int remove_node(Node *node)
         return 0;
 }
 
-int create_file(void *fs_data, const String &name)
+} /* anonymous namespace */
+
+int Node::create_file(const String &name)
 {
-        Node *dir = static_cast<Node *>(fs_data);
-        if (dir->type != NodeType::Dir)
+        if (this->type != NodeType::Dir)
                 return -1;              // files can only be created in directories
 
         Node *nd                = new Node;
-        nd->parent              = dir;
+        nd->parent              = this;
         nd->type                = NodeType::File;
         nd->name                = name;
         nd->file_data           = new File;
@@ -83,91 +93,83 @@ int create_file(void *fs_data, const String &name)
         nd->file_data->size     = 0;
         nd->dir_data            = nullptr;
 
-        dir->dir_data->nodes.push_back(nd);
+        this->dir_data->nodes.push_back(nd);
 
         return 0;
 }
 
-int create_dir(void *fs_data, const String &name)
+int Node::create_dir(const String &name)
 {
-        Node *dir = static_cast<Node *>(fs_data);
-        if (dir->type != NodeType::Dir)
+        if (this->type != NodeType::Dir)
                 return -1;      // directories can only be created in directories
 
         Node *nd                = new Node;
-        nd->parent              = dir;
+        nd->parent              = this;
         nd->type                = NodeType::Dir;
         nd->name                = name;
         nd->file_data           = nullptr;
         nd->dir_data            = new Dir;
 
-        dir->dir_data->nodes.push_back(nd);
+        this->dir_data->nodes.push_back(nd);
 
         return 0;
 }
 
-int remove(void *fs_data)
+int Node::remove()
 {
-        Node *nd = static_cast<Node *>(fs_data);
-        if (!nd)
-                return -1;              // node is null
-
         // detach the node before removing it so that the parent directory
         // does not contain a pointer to the freed memory
-        if (nd->parent && nd->parent->dir_data) {
-                Vector<Node *> &siblings = nd->parent->dir_data->nodes;
+        if (this->parent && this->parent->dir_data) {
+                Vector<Node *> &siblings = this->parent->dir_data->nodes;
 
                 for (usize i = 0; i < siblings.size(); i++) {
-                        if (siblings[i] == nd) {
+                        if (siblings[i] == this) {
                                 siblings.erase(i);
                                 break;
                         }
                 }
         }
 
-        return remove_node(nd);
+        return remove_node(this);
 }
 
-int write_file(void *fs_data, const char *buf, usize n)
+int Node::write_file(const char *buf, usize n)
 {
-        Node *f = static_cast<Node *>(fs_data);
-        if (f->type != NodeType::File)
+        if (this->type != NodeType::File)
                 return -1;              // cannot write in directories like that
 
-        if (f->file_data->data)
-                delete[] f->file_data->data;
+        if (this->file_data->data)
+                delete[] this->file_data->data;
 
-        f->file_data->data = new char[n + 1];
-        f->file_data->size = n;
+        this->file_data->data = new char[n + 1];
+        this->file_data->size = n;
 
-        memcpy(f->file_data->data, buf, n);
+        memcpy(this->file_data->data, buf, n);
 
         return 0;
 }
 
-int read_file(void *fs_data, char *buf, usize n)
+int Node::read_file(char *buf, usize n)
 {
-        Node *f = static_cast<Node *>(fs_data);
-        if (f->type != NodeType::File)
+        if (this->type != NodeType::File)
                 return -1;              // cannot read directories like that
-        if (!f->file_data || !f->file_data->data)
+        if (!this->file_data || !this->file_data->data)
                 return -2;              // file has no valid data
-        if (f->file_data->size >= n)
+        if (this->file_data->size >= n)
                 return -3;              // buffer too small
 
-        memcpy(buf, f->file_data->data, f->file_data->size);
+        memcpy(buf, this->file_data->data, this->file_data->size);
 
         return 0;
 }
 
-int readdir(void *fs_data, Vector<vfs::DirEntry> &entries)
+int Node::readdir(Vector<vfs::DirEntry> &entries)
 {
-        Node *dir = static_cast<Node *>(fs_data);
-        if (dir->type != NodeType::Dir)
+        if (this->type != NodeType::Dir)
                 return -1;              // not a directory
 
-        for (usize i = 0; i < dir->dir_data->nodes.size(); i++) {
-                Node *child = dir->dir_data->nodes[i];
+        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                Node *child = this->dir_data->nodes[i];
                 vfs::DirEntry entry;
 
                 entry.name = child->name;
@@ -179,44 +181,28 @@ int readdir(void *fs_data, Vector<vfs::DirEntry> &entries)
         return 0;
 }
 
-void *lookup(void *fs_data, const String &name)
+void *Node::lookup(const String &name)
 {
-        Node *dir = static_cast<Node *>(fs_data);
-        if (dir->type != NodeType::Dir)
+        if (this->type != NodeType::Dir)
                 return nullptr;
 
-        for (usize i = 0; i < dir->dir_data->nodes.size(); i++) {
-                if (dir->dir_data->nodes[i]->name == name)
-                        return dir->dir_data->nodes[i];
+        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                if (this->dir_data->nodes[i]->name == name)
+                        return this->dir_data->nodes[i];
         }
 
         return nullptr;
 }
 
-int get_file_size(void *fs_data, usize *buf)
+int Node::get_file_size(usize *buf)
 {
-        Node *f = static_cast<Node *>(fs_data);
-        if (f->type != NodeType::File)
+        if (this->type != NodeType::File)
                 return 0;      // file not found
 
-        memcpy(buf, &f->file_data->size, sizeof(*buf));
+        memcpy(buf, &this->file_data->size, sizeof(*buf));
 
         return 0;
 }
-
-// tmpfs operations
-vfs::VNodeOps tmpfs_ops = {
-        .create_file    = create_file,
-        .create_dir     = create_dir,
-        .remove         = remove,
-        .write_file     = write_file,
-        .read_file      = read_file,
-        .readdir        = readdir,
-        .lookup         = lookup,
-        .get_file_size  = get_file_size
-};
-
-} /* anonymous namespace */
 
 vfs::VNode *TMPFS::get_root()
 {
@@ -227,19 +213,15 @@ vfs::VNode *TMPFS::get_root()
                 root->type      = NodeType::Dir;
                 root->dir_data  = new Dir;
                 root->file_data = nullptr;
+                root->owned     = false;
         }
 
-        vfs::VNode *vnd = new vfs::VNode;
-        vnd->ops        = &tmpfs_ops;
-        vnd->fs_data    = root;
-        vnd->owned      = false;
-
-        return vnd;
+        return root;
 }
 
 void TMPFS::unmount()
 {
-        remove_node(root);
+        root->remove();
         root = nullptr;
 }
 
