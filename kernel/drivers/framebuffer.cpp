@@ -30,4 +30,14 @@ void draw_pixel(lib::u64 x, lib::u64 y, lib::u32 color)
         fb_ptr[y * (fb_pitch / 4) + x] = color;
 }
 
+u64 get_width()
+{
+        return fb_width;
+}
+
+u64 get_height()
+{
+        return fb_height;
+}
+
 } /* namespace kernel::drivers::framebuffer */

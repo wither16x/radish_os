@@ -80,6 +80,17 @@ void unmount_initrd()
         logger.ok("unmounted initrd");
 }
 
+void init_console()
+{
+        console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
+        console::set_console(kconsole);
+        console::Console *console = console::get_console();
+        console->init_font("I:/fonts/zap-light20.psf");
+
+        logger.ok("initialized console");
+        logger.info("framebuffer should now be used for display");
+}
+
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())
@@ -119,19 +130,7 @@ extern "C" void kernel_main()
         );
         logger.ok("initialized framebuffer");
 
-        console::Console kconsole;
-        console::set_console(kconsole);
-        auto console = console::get_console();
-        console->init_font("I:/fonts/zap-light20.psf");
-
-        console->draw_char('R', 0, 0);
-        console->draw_char('a', 20, 0);
-        console->draw_char('d', 40, 0);
-        console->draw_char('i', 60, 0);
-        console->draw_char('s', 80, 0);
-        console->draw_char('h', 100, 0);
-        console->draw_char('O', 120, 0);
-        console->draw_char('S', 140, 0);
+        init_console();
 
         unmount_initrd();
 

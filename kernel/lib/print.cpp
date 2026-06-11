@@ -1,3 +1,4 @@
+#include <drivers/console.hpp>
 #include <drivers/serial.hpp>
 #include <lib/conversion.hpp>
 #include <lib/print.hpp>
@@ -7,7 +8,11 @@ namespace kernel::lib {
 
 void putchar(int ch)
 {
-        drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
+        drivers::console::Console *console = drivers::console::get_console();
+        if (console->is_active())
+                console->draw_char(ch);
+        else
+                drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
 }
 
 void print_string(const char *s)
