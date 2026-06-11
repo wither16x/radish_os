@@ -1,7 +1,9 @@
 #include <drivers/framebuffer.hpp>
+#include <lib/memory.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::u32, kernel::lib::u64;
+using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr;
+using kernel::lib::memcpy, kernel::lib::memset;
 
 namespace kernel::drivers::framebuffer {
 
@@ -28,6 +30,30 @@ void draw_pixel(lib::u64 x, lib::u64 y, lib::u32 color)
                 return;
 
         fb_ptr[y * (fb_pitch / 4) + x] = color;
+}
+
+void scroll(u64 height)
+{
+        u8 *base = reinterpret_cast<u8 *>(fb_ptr);
+
+        if (height >= fb_height) {
+                memset(base, 0, fb_pitch * fb_height);
+                return;
+        }
+
+        for (u64 y = height; y != fb_height; ++y) {
+                void *dest = base + (y - height) * fb_pitch;
+                const void *src = base + y * fb_pitch; 
+
+                memcpy(dest, src, fb_width * 4);
+        }
+
+        for (u64 y = fb_height - height; y != fb_height; ++y) {
+                u32 *dest = reinterpret_cast<u32 *>(base + y *fb_pitch);
+
+                for (u64 i = 0; i != fb_width; ++i)
+                        *dest++ = 0x000000;
+        }
 }
 
 u64 get_width()

@@ -22,6 +22,7 @@ private:
         lib::u64 cursor_x;
         lib::u64 cursor_y;
 
+        // both values below are in pixels
         lib::u64 width;
         lib::u64 height;
 
@@ -34,7 +35,8 @@ private:
 
         bool active = false;
 
-        void draw_char_at(this Console &self, char ch, int x, int y);
+        void draw_char_at(this Console &self, char ch, int px, int py);
+        void scroll(this Console &self);
 };
 
 void set_console(Console console);

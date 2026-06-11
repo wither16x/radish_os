@@ -1,5 +1,5 @@
 # RadishOS
-A x86_64 operating system.
+A x86_64 operating system made from scratch.
 I do it for learning.
 
 ![screenshot](screenshots/image.png)
@@ -19,4 +19,5 @@ I do it for learning.
 * [x] USTAR
 * [x] Framebuffer driver
 * [x] initrd
-* [ ] Framebuffer console
+* [x] Framebuffer console
+* [ ] Cleanup

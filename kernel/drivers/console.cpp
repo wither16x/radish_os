@@ -106,9 +106,8 @@ void Console::draw_char(this Console &self, char ch)
                 break;
         }
 
-        if (self.cursor_y + self.glyph_height > self.height) {
-                // TODO
-        }
+        if (self.cursor_y + self.glyph_height > self.height)
+                self.scroll();
 }
 
 bool Console::is_active(this const Console &self)
@@ -116,20 +115,26 @@ bool Console::is_active(this const Console &self)
         return self.active;
 }
 
-void Console::draw_char_at(this Console &self, char ch, int x, int y)
+void Console::draw_char_at(this Console &self, char ch, int px, int py)
 {
         u32 idx = static_cast<u8>(ch);
         u32 bytes_per_row = (self.glyph_width + 7) / 8;
         const u8 *glyph = self.font_data.get_data() + self.glyph_offset + idx * self.glyph_size;
 
-        for (u32 _y = 0; _y < self.glyph_height; _y++) {
-                for (u32 _x = 0; _x < self.glyph_width; _x++) {
-                        u8 byte = glyph[_y * bytes_per_row + _x / 8];
+        for (u32 y = 0; y < self.glyph_height; y++) {
+                for (u32 x = 0; x < self.glyph_width; x++) {
+                        u8 byte = glyph[y * bytes_per_row + x / 8];
 
-                        if (byte & (0x80 >> (_x % 8)))
-                                drivers::framebuffer::draw_pixel(x + _x, y + _y, 0xffffff);
+                        if (byte & (0x80 >> (x % 8)))
+                                drivers::framebuffer::draw_pixel(px + x, py + y, 0xffffff);
                 }
         }
+}
+
+void Console::scroll(this Console &self)
+{
+        framebuffer::scroll(self.glyph_height);
+        self.cursor_y -= self.glyph_height;
 }
 // -------------------------------------------------------------------------
 
