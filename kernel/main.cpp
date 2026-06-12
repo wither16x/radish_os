@@ -114,7 +114,7 @@ extern "C" void kernel_main()
         vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
         vmm::load();
 
-        kheap.init();
+        heap::init();
 
         pmm::init_stage2();
 

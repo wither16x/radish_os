@@ -5,12 +5,12 @@ namespace kernel::lib {
 
 void *malloc(usize n)
 {
-        return mem::kheap.allocate(n);
+        return mem::heap::allocate(n);
 }
 
 void free(void *p)
 {
-        mem::kheap.free(p);
+        mem::heap::free(p);
 }
 
 } /* namespace kernel::leab */
