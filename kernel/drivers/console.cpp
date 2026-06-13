@@ -6,7 +6,7 @@
 #include <lib/typing.hpp>
 
 using kernel::lib::String;
-using kernel::lib::read_file, kernel::lib::get_file_size;
+using kernel::lib::read_file, kernel::lib::getfilesz;
 using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::usize;
 
 using kernel::lib::log::logger;
@@ -53,7 +53,8 @@ void Console::init_font(this Console &self, const String &font)
 {
         logger.set_context("console");
 
-        usize filesz = get_file_size(font);
+        usize filesz = 0;
+        getfilesz(font, &filesz);
         self.font_data.resize(filesz);
 
         read_file(font, reinterpret_cast<char *>(self.font_data.get_data()), filesz);

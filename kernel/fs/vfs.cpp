@@ -80,7 +80,7 @@ void *VNode::lookup(const String &name)
         return 0;
 }
 
-int VNode::get_file_size(usize *buf)
+int VNode::getfilesz(usize *buf)
 {
         static_cast<void>(buf);
         return 0;
@@ -253,19 +253,18 @@ int readdir(const String &path, DirEntry *entry, usize n)
         return ret;
 }
 
-usize get_file_size(const lib::String &path)
+int getfilesz(const lib::String &path, usize *buf)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
                 return 0;      // file not found
 
-        usize buf = 0;
-        vnd->get_file_size(&buf);
+        int ret = vnd->getfilesz(buf);
         
         if (vnd->owned)
                 delete vnd;
         
-        return buf;
+        return ret;
 }
 
 int getdirentn(const lib::String &path, lib::usize *buf)

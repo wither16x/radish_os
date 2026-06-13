@@ -40,7 +40,7 @@ struct Node : public vfs::VNode{
         int read_file(char *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
-        int get_file_size(usize *buf) override;
+        int getfilesz(usize *buf) override;
         int getdirentn(usize *buf) override;
 };
 
@@ -191,7 +191,7 @@ void *Node::lookup(const String &name)
         return nullptr;
 }
 
-int Node::get_file_size(usize *buf)
+int Node::getfilesz(usize *buf)
 {
         if (this->type != NodeType::File)
                 return -1;      // not a file

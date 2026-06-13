@@ -1,4 +1,3 @@
-#include "lib/string.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>

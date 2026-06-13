@@ -38,9 +38,9 @@ fs::vfs::VNode *lookup(const String &path)
         return fs::vfs::lookup(path);
 }
 
-usize get_file_size(const String &path)
+int getfilesz(const String &path, usize *buf)
 {
-        return fs::vfs::get_file_size(path);
+        return fs::vfs::getfilesz(path, buf);
 }
 
 int getdirentn(const String &path, usize *buf)
