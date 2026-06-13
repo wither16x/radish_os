@@ -61,9 +61,10 @@ struct Node : public vfs::VNode {
         struct Dir *dir_data;
 
         int read_file(char *buf, usize n) override;
-        int readdir(Vector<vfs::DirEntry> &entries) override;
+        int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int get_file_size(usize *buf) override;
+        int getdirentn(usize *buf) override;
 };
 
 struct File {
@@ -175,20 +176,14 @@ int Node::read_file(char *buf, usize n)
         return 0;
 }
 
-int Node::readdir(Vector<vfs::DirEntry> &entries)
+int Node::readdir(vfs::DirEntry *entry, usize n)
 {
         if (!this->dir_data)
                 return -1;              // not a directory
 
-        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
-                Node *child = this->dir_data->nodes[i];
-                vfs::DirEntry entry;
-
-                entry.name = child->name;
-                entry.is_dir = child->hdr->type == static_cast<char>(NodeType::Directory);
-
-                entries.push_back(entry);
-        }
+        Node *nd = this->dir_data->nodes[n];
+        entry->name     = nd->name;
+        entry->is_dir   = nd->hdr->type == static_cast<char>(NodeType::Directory); 
 
         return 0;
 }
@@ -197,6 +192,10 @@ void *Node::lookup(const String &name)
 {
         if (!this->dir_data)
                 return nullptr;
+
+        // because root has no parent, the loop below would not work
+        if (name == "/")
+                return root;
 
         for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
                 if (this->dir_data->nodes[i]->name == name)
@@ -217,6 +216,17 @@ int Node::get_file_size(usize *buf)
         return 0;
 }
 
+int Node::getdirentn(usize *buf)
+{
+        if (!this->dir_data)
+                return -1;      // not a directory
+
+        usize count = this->dir_data->nodes.size();
+        memcpy(buf, &count, sizeof(*buf));
+
+        return 0;
+}
+
 USTAR::USTAR(void *archive)
 {
         this->archive = static_cast<u8 *>(archive);
@@ -227,7 +237,6 @@ vfs::VNode *USTAR::get_root()
         if (!root) {
                 root            = new Node;
                 root->parent    = nullptr;
-                root->hdr       = nullptr;
                 root->name      = "/";
                 root->file_data = nullptr;
                 root->dir_data  = new Dir;

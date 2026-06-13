@@ -1,3 +1,4 @@
+#include "lib/string.hpp"
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/gdt.hpp>
@@ -7,6 +8,7 @@
 #include <drivers/serial.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
+#include <lib/filesystem.hpp>
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/status.hpp>
@@ -91,6 +93,29 @@ void init_console()
         logger.info("framebuffer should now be used for display");
 }
 
+void __test_ls(const kernel::lib::String &path)
+{
+        static int spaces = 0;
+
+        kernel::lib::usize count = 0;
+        kernel::lib::getdirentn(path, &count);
+
+        for (kernel::lib::usize i = 0; i < count; i++) {
+                vfs::DirEntry entry;
+                vfs::readdir(path, &entry, i);
+
+                kernel::lib::String whitespaces_str;
+                for (int s = 0; s < spaces; s++)
+                        whitespaces_str += ' ';
+
+                logger.info("%s* %s", whitespaces_str.raw(), entry.name.raw());;
+                if (entry.is_dir) {
+                        spaces++;
+                        __test_ls(path + entry.name);
+                }
+        }
+}
+
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())
@@ -131,6 +156,8 @@ extern "C" void kernel_main()
         logger.ok("initialized framebuffer");
 
         init_console();
+
+        __test_ls("I:/");
 
         unmount_initrd();
 

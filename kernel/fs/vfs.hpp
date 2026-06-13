@@ -27,9 +27,12 @@ struct VNode {
         virtual int remove();
         virtual int write_file(const char *buf, lib::usize n);
         virtual int read_file(char *buf, lib::usize n);
-        virtual int readdir(lib::Vector<struct DirEntry> &entries);
+        // `n` represents the 0-based index of the entry in the directory
+        virtual int readdir(struct DirEntry *entry, lib::usize n);
         virtual void *lookup(const lib::String &name);
         virtual int get_file_size(lib::usize *buf);
+        // get the number of entries in a directory
+        virtual int getdirentn(lib::usize *buf);
 };
 
 // Representation of a directory entry.
@@ -67,7 +70,8 @@ int create_dir(const lib::String &path);
 int remove(const lib::String &path);
 int write_file(const lib::String &path, const char *buf, lib::usize n);
 int read_file(const lib::String &path, char *buf, lib::usize n);
-int readdir(const lib::String &path, lib::Vector<DirEntry> &entries);
+int readdir(const lib::String &path, DirEntry *entry, lib::usize n);
 lib::usize get_file_size(const lib::String &path);
+int getdirentn(const lib::String &path, lib::usize *buf);
 
 } /* namespace kernel::fs::vfs */

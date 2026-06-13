@@ -34,15 +34,15 @@ bool path_can_handle_drive(const String &path)
 
 } /* anonymous namespace */
 
-// VNode functions
+// VNode methods (all virtuals)
 // --------------------------------------------------------------------
-int VNode::create_file(const lib::String &name)
+int VNode::create_file(const String &name)
 {
         static_cast<void>(name);
         return 0;
 }
 
-int VNode::create_dir(const lib::String &name)
+int VNode::create_dir(const String &name)
 {
         static_cast<void>(name);
         return 0;
@@ -53,33 +53,40 @@ int VNode::remove()
         return 0;
 }
 
-int VNode::write_file(const char *buf, lib::usize n)
+int VNode::write_file(const char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
         return 0;
 }
 
-int VNode::read_file(char *buf, lib::usize n)
+int VNode::read_file(char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
         return 0;
 }
 
-int VNode::readdir(lib::Vector<struct DirEntry> &entries)
+int VNode::readdir(DirEntry *entry, usize n)
 {
-        static_cast<void>(entries);
+        static_cast<void>(entry);
+        static_cast<void>(n);
         return 0;
 }
 
-void *VNode::lookup(const lib::String &name)
+void *VNode::lookup(const String &name)
 {
         static_cast<void>(name);
         return 0;
 }
 
-int VNode::get_file_size(lib::usize *buf)
+int VNode::get_file_size(usize *buf)
+{
+        static_cast<void>(buf);
+        return 0;
+}
+
+int VNode::getdirentn(lib::usize *buf)
 {
         static_cast<void>(buf);
         return 0;
@@ -232,13 +239,13 @@ int read_file(const String &path, char *buf, usize n)
         return ret;
 }
 
-int readdir(const String &path, Vector<DirEntry> &entries)
+int readdir(const String &path, DirEntry *entry, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
                 return -1;      // directory not found
 
-        int ret = vnd->readdir(entries);
+        int ret = vnd->readdir(entry, n);
 
         if (vnd->owned)
                 delete vnd;
@@ -259,6 +266,20 @@ usize get_file_size(const lib::String &path)
                 delete vnd;
         
         return buf;
+}
+
+int getdirentn(const lib::String &path, lib::usize *buf)
+{
+        VNode *vnd = lookup(path);
+        if (!vnd)
+                return -1;       // directory not found
+        
+        int ret = vnd->getdirentn(buf);
+
+        if (vnd->owned)
+                delete vnd;
+
+        return ret;
 }
 
 } /* namespace kernel::fs::vfs */

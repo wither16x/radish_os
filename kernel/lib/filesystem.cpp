@@ -28,9 +28,9 @@ int read_file(const String &path, char *buf, usize n)
         return fs::vfs::read_file(path, buf, n);
 }
 
-int readdir(const String &path, Vector<fs::vfs::DirEntry> &entries)
+int readdir(const String &path, fs::vfs::DirEntry *entry, usize n)
 {
-        return fs::vfs::readdir(path, entries);
+        return fs::vfs::readdir(path, entry, n);
 }
 
 fs::vfs::VNode *lookup(const String &path)
@@ -41,6 +41,11 @@ fs::vfs::VNode *lookup(const String &path)
 usize get_file_size(const String &path)
 {
         return fs::vfs::get_file_size(path);
+}
+
+int getdirentn(const String &path, usize *buf)
+{
+        return fs::vfs::getdirentn(path, buf);
 }
 
 } /* namespace kernel::lib */

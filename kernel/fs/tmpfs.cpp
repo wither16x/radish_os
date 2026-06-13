@@ -6,6 +6,8 @@
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 
+// I don't test tmpfs a lot so there might be bugs here...
+
 using kernel::lib::String;
 using kernel::lib::usize;
 using kernel::lib::memcpy;
@@ -36,9 +38,10 @@ struct Node : public vfs::VNode{
         int remove() override;
         int write_file(const char *buf, usize n) override;
         int read_file(char *buf, usize n) override;
-        int readdir(Vector<vfs::DirEntry> &entries) override;
+        int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int get_file_size(usize *buf) override;
+        int getdirentn(usize *buf) override;
 };
 
 struct File {
@@ -163,20 +166,14 @@ int Node::read_file(char *buf, usize n)
         return 0;
 }
 
-int Node::readdir(Vector<vfs::DirEntry> &entries)
+int Node::readdir(vfs::DirEntry *entry, usize n)
 {
         if (this->type != NodeType::Dir)
                 return -1;              // not a directory
 
-        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
-                Node *child = this->dir_data->nodes[i];
-                vfs::DirEntry entry;
-
-                entry.name = child->name;
-                entry.is_dir = child->type == NodeType::Dir;
-
-                entries.push_back(entry);
-        }
+        Node *nd = this->dir_data->nodes[n];
+        entry->name = nd->name;
+        entry->is_dir = nd->type == NodeType::Dir;
 
         return 0;
 }
@@ -197,9 +194,20 @@ void *Node::lookup(const String &name)
 int Node::get_file_size(usize *buf)
 {
         if (this->type != NodeType::File)
-                return 0;      // file not found
+                return -1;      // not a file
 
         memcpy(buf, &this->file_data->size, sizeof(*buf));
+
+        return 0;
+}
+
+int Node::getdirentn(usize *buf)
+{
+        if (this->type != NodeType::Dir)
+                return -1;      // not a directory
+        
+        usize count = this->dir_data->nodes.size();
+        memcpy(buf, &count, sizeof(*buf));
 
         return 0;
 }
