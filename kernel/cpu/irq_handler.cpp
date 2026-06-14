@@ -1,10 +1,8 @@
 #include <drivers/pic.hpp>
 #include <lib/logging.hpp>
-#include <lib/print.hpp>
 #include <lib/typing.hpp>
 
 using kernel::lib::u64;
-using kernel::lib::println;
 using kernel::lib::log::logger;
 
 namespace kernel::cpu {
@@ -38,9 +36,18 @@ struct [[gnu::packed]] CPUFrame {
 	u64 ss;
 };
 
+int irq0_tic = 0;
+int irq0_sec = 0;
+
 void handle_irq0_timer()
 {
-        println("timer");
+        irq0_tic++;
+
+        if (irq0_tic % 1000 == 0) {
+                irq0_tic = 0;
+                irq0_sec++;
+        }
+
         drivers::pic::send_eoi(0);
 }
 
