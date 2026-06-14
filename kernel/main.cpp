@@ -16,6 +16,8 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
+#include <proc/process.hpp>
+#include <lib/print.hpp>
 
 using namespace kernel::drivers;
 using namespace kernel::fs;
@@ -46,6 +48,9 @@ volatile EndMarker limine_requests_end_marker = requests_end_marker();
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
+
+extern char __proc_test_start[];
+extern char __proc_test_end[];
 
 void call_global_constructors()
 {
@@ -79,6 +84,24 @@ void unmount_initrd()
 {
         vfs::unmount('I');
         logger.ok("unmounted initrd");
+}
+
+kernel::proc::Process p1, p2;
+void *current_rsp;
+
+void proc1()
+{
+        kernel::lib::println("[proc1] Hello...");
+        kernel::proc::proc_switch(&p1.rsp, p2.rsp);
+        kernel::lib::println("[proc1] world!");
+        kernel::proc::proc_switch(&p1.rsp, p2.rsp);
+}
+
+void proc2()
+{
+        kernel::lib::println("[proc2] I am...");
+        kernel::proc::proc_switch(&p2.rsp, p1.rsp);
+        kernel::lib::println("[proc2] proc2!");
 }
 
 void init_console()
@@ -157,6 +180,11 @@ extern "C" void kernel_main()
         init_console();
 
         __test_ls("I:/");
+
+        kernel::proc::proc_init(&p1, proc1);
+        kernel::proc::proc_init(&p2, proc2);
+
+        kernel::proc::proc_switch(&current_rsp, p1.rsp);
 
         unmount_initrd();
 
