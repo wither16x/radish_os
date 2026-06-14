@@ -1,9 +1,12 @@
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
+#include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
+#include <drivers/pic.hpp>
+#include <drivers/pit.hpp>
 #include <drivers/serial.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
@@ -164,6 +167,19 @@ extern "C" void kernel_main()
         heap::init();
 
         pmm::init_stage2();
+
+        pic::remap();
+        logger.ok("remapped 8259 pic");
+        pic::irq_mask_all();
+        logger.ok("masked all irq");
+
+        pit::init();
+        logger.ok("initialized pit");
+
+        pic::irq_unmask(0);
+        logger.ok("unmasked irq 0: timer");
+
+        kernel::cpu::sti();
 
         call_global_constructors();
 

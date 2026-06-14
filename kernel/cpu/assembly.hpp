@@ -26,4 +26,14 @@ inline void invlpg(lib::uptr page)
         __asm__ volatile ("invlpg (%0)" :: "r"(page) : "memory");
 }
 
+inline void cli()
+{
+        __asm__ volatile ("cli");
+}
+
+inline void sti()
+{
+        __asm__ volatile ("sti");
+}
+
 } /* namespace kernel::cpu */

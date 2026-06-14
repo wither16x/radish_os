@@ -20,6 +20,7 @@ void panic(const char *fmt, ...)
         va_end(args);
         println("");
 
+        cpu::cli();
         logger.info("idling");
         while (true)
                 cpu::hlt();

@@ -17,6 +17,8 @@ extern "C" void idt_flush(u64 *idtr);
 extern "C" void __isr_stub3();
 extern "C" void __isr_stub14();
 
+extern "C" void __irq_stub0();
+
 struct [[gnu::packed]] IDTEntry {
         u16 isr_low;
         u16 selector;
@@ -44,8 +46,11 @@ IDT::IDT()
                 .offset = reinterpret_cast<u64>(&idt)
         };
 
+        // isr
         this->set_gate(3, __isr_stub3, 0x8e);
         this->set_gate(14, __isr_stub14, 0x8e);
+        // irq
+        this->set_gate(32, __irq_stub0, 0x8e);
 
         logger.ok("initialized idt");
 }

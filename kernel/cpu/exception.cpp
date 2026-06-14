@@ -2,13 +2,13 @@
 #include <lib/typing.hpp>
 #include <panic.hpp>
 
-using kernel::panic;
 using kernel::lib::u64;
+
+namespace kernel::cpu {
 
 namespace {
 
-// Registers and values pushed by the CPU before calling
-// `exception_handler()`
+// Registers and values pushed before calling `exception_handler()`
 struct [[gnu::packed]] CPUFrame {
 	u64 cr2;
 	u64 cr3;
@@ -61,3 +61,5 @@ extern "C" [[gnu::noreturn]] void exception_handler(CPUFrame *f)
                 f->flags
         );
 }
+
+} /* namespace kernel::cpu */
