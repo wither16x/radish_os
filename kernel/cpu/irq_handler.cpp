@@ -2,6 +2,8 @@
 #include <drivers/pit.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <proc/process.hpp>
+#include <proc/scheduler.hpp>
 
 using kernel::lib::u64;
 using kernel::lib::log::logger;
@@ -37,8 +39,13 @@ struct [[gnu::packed]] CPUFrame {
 	u64 ss;
 };
 
+int curr_pid = 0;
+u64 proc_tics = proc::TIME_PER_PROCESS;
+
 void handle_irq0_timer()
 {
+	drivers::pit::consume_tick(true);
+
 	u64 tics = drivers::pit::get_tics();
 	u64 seconds = drivers::pit::get_seconds();
 
@@ -49,11 +56,25 @@ void handle_irq0_timer()
 
 	// reset tics every second so the tic counter never
 	// overflows
-	// I will maybe add minutes, hours, days, ...
+	// I will maybe add minutes, hours, days, and so on
         if (tics % 1000 == 0 && !drivers::pit::is_sleeping()) {
                 drivers::pit::set_tics(0);
                 drivers::pit::set_seconds(seconds + 1);
         }
+
+	if (proc_tics == proc::TIME_PER_PROCESS) {
+		int ret = proc::scheduler::execute_process(curr_pid);
+		
+		proc_tics = 0;
+		curr_pid++;
+		
+		if (ret == -1)
+			curr_pid = 0;
+	}
+
+	proc_tics++;
+
+	drivers::pit::consume_tick(false);
 
         drivers::pic::send_eoi(0);
 }

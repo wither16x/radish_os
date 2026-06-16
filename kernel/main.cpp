@@ -14,7 +14,6 @@
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/status.hpp>
-#include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
@@ -26,6 +25,7 @@
 using namespace kernel::drivers;
 using namespace kernel::fs;
 using namespace kernel::mem;
+using namespace kernel::proc;
 
 using kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::Status;
@@ -195,18 +195,11 @@ extern "C" void kernel_main()
 
         init_console();
 
-        kernel::proc::Scheduler scheduler;
-        logger.ok("initialized scheduler");
-
         __test_ls("I:/");
 
-        scheduler.create_process(proc1);
-        scheduler.create_process(proc2);
-        scheduler.create_process(proc3);
-        scheduler.execute();
-
-        u64 t = kernel::lib::get_current_time();
-        logger.debug("ms since PIT init: %u", t);;
+        scheduler::create_process(proc1);
+        scheduler::create_process(proc2);
+        scheduler::create_process(proc3);
 
         unmount_initrd();
 

@@ -4,17 +4,9 @@
 #include <lib/vector.hpp>
 #include <proc/process.hpp>
 
-namespace kernel::proc {
+namespace kernel::proc::scheduler {
 
-class Scheduler {
-private:
-        lib::Vector<Process *> processes;
+void create_process(void (*entry)());
+int execute_process(lib::usize i);
 
-        void execute_process(this Scheduler &self, lib::usize i);
-
-public:
-        void create_process(this Scheduler &self, void (*entry)());
-        void execute(this Scheduler &self);
-};
-
-}
+} /* namespace kernel::proc::scheduler */

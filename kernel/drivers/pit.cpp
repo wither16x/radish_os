@@ -17,6 +17,7 @@ u64 tics = 0;
 u64 seconds = 0;
 
 bool sleeping = false;
+bool consuming = false;
 
 } /* anonymous namespace */
 
@@ -60,6 +61,16 @@ void set_seconds(lib::u64 n)
 bool is_sleeping()
 {
         return sleeping;
+}
+
+bool consumed_tick()
+{
+        return consuming;
+}
+
+void consume_tick(bool state)
+{
+        consuming = state;
 }
 
 } /* namespace kernel::drivers::pit */
