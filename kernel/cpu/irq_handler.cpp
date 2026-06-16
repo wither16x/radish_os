@@ -50,7 +50,7 @@ void handle_irq0_timer()
 	// reset tics every second so the tic counter never
 	// overflows
 	// I will maybe add minutes, hours, days, ...
-        if (tics % 1000 == 0) {
+        if (tics % 1000 == 0 && !drivers::pit::is_sleeping()) {
                 drivers::pit::set_tics(0);
                 drivers::pit::set_seconds(seconds + 1);
         }

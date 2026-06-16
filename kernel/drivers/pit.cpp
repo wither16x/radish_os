@@ -16,12 +16,14 @@ enum Port : u16 {
 u64 tics = 0;
 u64 seconds = 0;
 
+bool sleeping = false;
+
 } /* anonymous namespace */
 
 void init()
 {
-        u16 tick_per_sec = 1000;
-        u16 divider = 1193181 / tick_per_sec;
+        u16 tps = 1000; // tics per second
+        u16 divider = 1193181 / tps;
 
         cpu::output_byte_port(Port::Command, 0b00110100);
         cpu::output_byte_port(Port::Channel0, divider & 0xff);
@@ -30,10 +32,9 @@ void init()
 
 void sleep(lib::u64 ms)
 {
-        // no need for checks, remember that tics are
-        // managed by the IRQ handler!
-        u64 target_time = tics + ms;
-        while (tics < target_time);
+        sleeping = true;
+        while (tics < ms);
+        sleeping = false;
 }
 
 u64 get_tics()
@@ -54,6 +55,11 @@ void set_tics(lib::u64 n)
 void set_seconds(lib::u64 n)
 {
         seconds = n;
+}
+
+bool is_sleeping()
+{
+        return sleeping;
 }
 
 } /* namespace kernel::drivers::pit */

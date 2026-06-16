@@ -14,6 +14,7 @@
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/status.hpp>
+#include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
@@ -203,6 +204,9 @@ extern "C" void kernel_main()
         scheduler.create_process(proc2);
         scheduler.create_process(proc3);
         scheduler.execute();
+
+        // wait 10 seconds
+        kernel::lib::sleep(10000);
 
         unmount_initrd();
 
