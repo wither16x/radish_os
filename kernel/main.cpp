@@ -127,7 +127,7 @@ void __test_ls(const kernel::lib::String &path)
 
         for (kernel::lib::usize i = 0; i < count; i++) {
                 vfs::DirEntry entry;
-                vfs::readdir(path, &entry, i);
+                kernel::lib::getdirent(path, &entry, i);
 
                 kernel::lib::String whitespaces_str;
                 for (int s = 0; s < spaces; s++)

@@ -28,7 +28,7 @@ int read_file(const String &path, char *buf, usize n)
         return fs::vfs::read_file(path, buf, n);
 }
 
-int readdir(const String &path, fs::vfs::DirEntry *entry, usize n)
+int getdirent(const String &path, fs::vfs::DirEntry *entry, usize n)
 {
         return fs::vfs::readdir(path, entry, n);
 }
