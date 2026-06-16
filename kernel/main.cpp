@@ -205,8 +205,8 @@ extern "C" void kernel_main()
         scheduler.create_process(proc3);
         scheduler.execute();
 
-        // wait 10 seconds
-        kernel::lib::sleep(10000);
+        u64 t = kernel::lib::get_current_time();
+        logger.debug("ms since PIT init: %u", t);;
 
         unmount_initrd();
 
