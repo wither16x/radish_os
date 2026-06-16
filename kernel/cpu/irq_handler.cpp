@@ -1,4 +1,5 @@
 #include <drivers/pic.hpp>
+#include <drivers/pit.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 
@@ -36,16 +37,22 @@ struct [[gnu::packed]] CPUFrame {
 	u64 ss;
 };
 
-int irq0_tic = 0;
-int irq0_sec = 0;
-
 void handle_irq0_timer()
 {
-        irq0_tic++;
+	u64 tics = drivers::pit::get_tics();
+	u64 seconds = drivers::pit::get_seconds();
 
-        if (irq0_tic % 1000 == 0) {
-                irq0_tic = 0;
-                irq0_sec++;
+        drivers::pit::set_tics(tics + 1);
+
+	// update tics since they have been modified above
+	tics = drivers::pit::get_tics();
+
+	// reset tics every second so the tic counter never
+	// overflows
+	// I will maybe add minutes, hours, days, ...
+        if (tics % 1000 == 0) {
+                drivers::pit::set_tics(0);
+                drivers::pit::set_seconds(seconds + 1);
         }
 
         drivers::pic::send_eoi(0);

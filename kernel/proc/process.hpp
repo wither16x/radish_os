@@ -4,17 +4,11 @@
 
 namespace kernel::proc {
 
-constexpr lib::usize ProcessStackSize = 0x1000; // 4 KiB
-
+// In this very minimalist design, each process is a structure
+// containing a pointer to its entry point
 struct Process {
-        void *rsp;
-        lib::u8 stack[ProcessStackSize];
+        void (*entry)();
 };
-
-// defined in `switch.asm`
-extern "C" void proc_switch(void **old_rsp, void *new_rsp);
-
-void proc_exit();
 
 // Note that the entry point of a process must return nothing and takes no
 // parameter (this may change in the future)
