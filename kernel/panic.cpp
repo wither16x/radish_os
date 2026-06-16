@@ -11,6 +11,8 @@ using lib::log::logger;
 
 void panic(const char *fmt, ...)
 {
+        cpu::cli();
+
         logger.set_context("panic handler");
 
         println("\r\n==================== KERNEL PANIC ====================");
@@ -20,7 +22,6 @@ void panic(const char *fmt, ...)
         va_end(args);
         println("");
 
-        cpu::cli();
         logger.info("idling");
         while (true)
                 cpu::hlt();

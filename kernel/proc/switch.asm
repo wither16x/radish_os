@@ -1,3 +1,5 @@
+%define RSP_OFFSET              40
+
 [bits 64]
 
 section .text
@@ -24,9 +26,13 @@ proc_save:
         mov rax, cr3
         push rax
 
+        mov [rdi + RSP_OFFSET], rsp
+
         ret
 
 proc_load:
+        mov rsp, [rdi + RSP_OFFSET]
+
         pop rax
         pop rax
         pop rbp

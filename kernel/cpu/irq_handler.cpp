@@ -64,18 +64,18 @@ void handle_irq0_timer()
 
 	if (proc_tics == proc::TIME_PER_PROCESS) {
 		int ret = proc::scheduler::execute_process(curr_pid);
-		
 		proc_tics = 0;
-		curr_pid++;
-		
-		if (ret == -1)
-			curr_pid = 0;
+
+                if (ret == -2 || ret == -5)
+                        curr_pid = 0;
+                else
+                        curr_pid++;
 	}
 
 	proc_tics++;
 
 	drivers::pit::consume_tick(false);
-
+        
         drivers::pic::send_eoi(0);
 }
 

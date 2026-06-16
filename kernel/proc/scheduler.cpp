@@ -15,12 +15,15 @@ namespace {
 
 Process *curr_proc = nullptr;
 int curr_pid = 0;
+int curr_idx = 0;
 
 lib::Vector<Process *> processes;
 
 void remove_current_process()
 {
-        processes.erase(curr_proc->id);
+        delete curr_proc;
+        processes.erase(curr_idx);
+        curr_proc = nullptr;
 }
 
 } /* anonymous namespace */
@@ -37,40 +40,40 @@ int execute_process(usize i)
         logger.debug("--> executing process %u...", i);
 
         if (processes.size() == 0)
-                return -5;
+                return -1;      // no processes
 
         logger.debug("checking bounds...");
         if (i > processes.size() - 1) {
                 logger.debug("%u < %u", processes.size(), i);
-                return -1; // index too big
+                return -2; // index too big
         }
 
         logger.debug("checking if process is null...");
         curr_proc = processes[i];
+        curr_idx = i;
         if (!curr_proc) {
                 logger.debug("current process is null");
-                return -2; // current process is null
+                return -3; // current process is null
         }
 
         logger.debug("checking process state...");
         if (curr_proc->state == ProcessState::Running)
-                return -3; // current process is not idling
+                return -4; // current process is not idling
 
-        logger.debug("reseting timer...");
         u64 curr_time = get_current_time();
-        curr_proc->timer.reset(curr_time, curr_time + TIME_PER_PROCESS);
+        if (curr_proc->timer.get_time() == 0 || !curr_proc->timer.clock())
+                curr_proc->timer.reset(curr_time, curr_time + TIME_PER_PROCESS);
+        
         curr_proc->state = ProcessState::Running;
 
-        if (i != 0) {
-                logger.debug("loading registers");
-                proc_load();
-                logger.debug("loaded registers");
-        }
+        logger.debug("loading registers");
+        proc_load(&curr_proc->rsp);
+        logger.debug("loaded registers");
 
         if (!curr_proc->timer.clock()) {
-                proc_save();
+                proc_save(&curr_proc->rsp);
                 curr_proc->state = ProcessState::Idle;
-                return -4; // no more time, switch to next process
+                return -5; // no more time, switch to next process
         }
 
         curr_proc->entry();
