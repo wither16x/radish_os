@@ -8,6 +8,7 @@ namespace kernel::proc {
 
 void proc_exit()
 {
+        // no other process, hang forever
         panic("process exited");
 }
 
@@ -18,6 +19,7 @@ void proc_init(Process *p, void (*entry)())
                 reinterpret_cast<uptr>(p->stack) + sizeof(p->stack)
         );
 
+        // push the exit function
         *--sp = reinterpret_cast<u64>(proc_exit);
         // push the entry point
         *--sp = reinterpret_cast<u64>(entry);
