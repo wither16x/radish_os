@@ -19,6 +19,7 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
+#include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 #include <lib/print.hpp>
 
@@ -141,6 +142,11 @@ void __test_ls(const kernel::lib::String &path)
         }
 }
 
+void kernel_hang()
+{
+        panic("process exited");
+}
+
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())
@@ -197,12 +203,49 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        scheduler::create_process(proc1);
-        scheduler::create_process(proc2);
-        scheduler::create_process(proc3);
+        Process p1, p2, p3;
+        proc_init(&p1, 0, proc1, proc2);
+        proc_init(&p2, 1, proc2, proc3);
+        proc_init(&p3, 2, proc3, kernel_hang);
+
+        scheduler::add_process(&p1);
+        scheduler::add_process(&p2);
+        scheduler::add_process(&p3);
+
+        scheduler::init();
+        logger.ok("initialized scheduler...");
+
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+        logger.debug("a");
+
 
         unmount_initrd();
 
-        // idle
-        panic("nothing to do");
+        kernel_hang();
 }

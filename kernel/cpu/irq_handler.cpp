@@ -5,6 +5,9 @@
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 
+#include <lib/logging.hpp>
+using kernel::lib::log::logger;
+
 using kernel::lib::u64;
 using kernel::lib::log::logger;
 
@@ -39,13 +42,8 @@ struct [[gnu::packed]] CPUFrame {
 	u64 ss;
 };
 
-int curr_pid = 0;
-u64 proc_tics = proc::TIME_PER_PROCESS;
-
 void handle_irq0_timer()
 {
-	drivers::pit::consume_tick(true);
-
 	u64 tics = drivers::pit::get_tics();
 	u64 seconds = drivers::pit::get_seconds();
 
@@ -62,20 +60,20 @@ void handle_irq0_timer()
                 drivers::pit::set_seconds(seconds + 1);
         }
 
-	if (proc_tics == proc::TIME_PER_PROCESS) {
-		int ret = proc::scheduler::execute_process(curr_pid);
-		proc_tics = 0;
-
-                if (ret == -2 || ret == -5)
-                        curr_pid = 0;
-                else
-                        curr_pid++;
+	if (!proc::scheduler::is_active()) {
+		logger.debug("irq0: scheduler is not active");
+		goto end;
 	}
 
-	proc_tics++;
-
-	drivers::pit::consume_tick(false);
+	if (proc::scheduler::proc_time_elapsed()) {
+		logger.debug("irq0: process time elapsed, scheduling...");
+		proc::scheduler::schedule();
+	} else {
+		logger.debug("irq0: process has time left");
+		proc::scheduler::inc_proc_time();
+	}
         
+end:
         drivers::pic::send_eoi(0);
 }
 

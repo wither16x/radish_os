@@ -1,4 +1,5 @@
-%define RSP_OFFSET              40
+; depends on where Process::rsp is in the structure
+%define RSP_OFFSET              24
 
 [bits 64]
 
