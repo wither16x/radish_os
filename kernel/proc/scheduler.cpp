@@ -1,12 +1,12 @@
+#include <cpu/irq_handler.hpp>
+#include <lib/logging.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
-
 using kernel::lib::u64, kernel::lib::usize;
+using kernel::lib::log::logger;
 
 namespace kernel::proc::scheduler {
 
@@ -14,15 +14,23 @@ namespace {
 
 lib::Vector<Process *> processes;
 Process *curr_proc = nullptr;
-int proc_idx = -1;
+usize curr_proc_idx = 0;
 bool active = false;
 
 } /* anonymous namespace */
 
 void init()
 {
-        curr_proc = processes[0];
+        if (processes.size() == 0) {
+                logger.err("tried to initialize scheduler with no processes");
+                return;
+        }
+
+        curr_proc_idx = 0;
+        curr_proc = processes[curr_proc_idx];
         active = true;
+
+        logger.ok("initialized scheduler");
 }
 
 void add_process(Process *p)
@@ -30,31 +38,76 @@ void add_process(Process *p)
         // this function only adds the process to the vector:
         // it must have been initialized before
         processes.push_back(p);
-        proc_idx++;
 }
 
-void schedule()
+void tick(cpu::IRQFrame *frame)
 {
-        // switch to the next process
-        proc_idx++;
-        curr_proc = processes[proc_idx];
-        proc_switch(curr_proc);
-}
+        if (!active || processes.size() == 0 || !curr_proc)
+                return;
 
-bool inc_proc_time()
-{
-        if (curr_proc->time == TIME_PER_PROCESS) {
-                curr_proc->time = 0;
-                return true;
-        }
+        curr_proc_idx = (curr_proc_idx + 1) % processes.size();
 
-        curr_proc->time++;
-        return false;
+        Process *old_proc = curr_proc;
+        Process *new_proc = processes[curr_proc_idx];
+
+        old_proc->rax   = frame->rax;
+        old_proc->rbx   = frame->rbx;
+        old_proc->rcx   = frame->rcx;
+        old_proc->rdx   = frame->rdx;
+        old_proc->rsi   = frame->rsi;
+        old_proc->rdi   = frame->rdi;
+        old_proc->rbp   = frame->rbp;
+        old_proc->r8    = frame->r8;
+        old_proc->r9    = frame->r9;
+        old_proc->r10   = frame->r10;
+        old_proc->r11   = frame->r11;
+        old_proc->r12   = frame->r12;
+        old_proc->r13   = frame->r13;
+        old_proc->r14   = frame->r14;
+        old_proc->r15   = frame->r15;
+        old_proc->rip   = frame->rip;
+        old_proc->cs    = frame->cs;
+        old_proc->flags = frame->flags;
+        old_proc->rsp   = frame->rsp;
+        old_proc->ss    = frame->ss;
+
+        frame->rax      = new_proc->rax;
+        frame->rbx      = new_proc->rbx;
+        frame->rcx      = new_proc->rcx;
+        frame->rdx      = new_proc->rdx;
+        frame->rsi      = new_proc->rsi;
+        frame->rdi      = new_proc->rdi;
+        frame->rbp      = new_proc->rbp;
+        frame->r8       = new_proc->r8;
+        frame->r9       = new_proc->r9;
+        frame->r10      = new_proc->r10;
+        frame->r11      = new_proc->r11;
+        frame->r12      = new_proc->r12;
+        frame->r13      = new_proc->r13;
+        frame->r14      = new_proc->r14;
+        frame->r15      = new_proc->r15;
+        frame->rip      = new_proc->rip;
+        frame->cs       = new_proc->cs;
+        frame->flags    = new_proc->flags;
+        frame->rsp      = new_proc->rsp;
+        frame->ss       = new_proc->ss;
+
+        curr_proc = new_proc;
 }
 
 bool is_active()
 {
         return active;
+}
+
+Process *get_current_process()
+{
+        return curr_proc;
+}
+
+void set_current_process(Process *p)
+{
+        curr_proc = p;
 }
 
 } /* namespace kernel::proc::scheduler */

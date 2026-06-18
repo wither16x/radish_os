@@ -1,3 +1,4 @@
+#include <cpu/irq_handler.hpp>
 #include <drivers/pic.hpp>
 #include <drivers/pit.hpp>
 #include <lib/logging.hpp>
@@ -12,34 +13,7 @@ namespace kernel::cpu {
 
 namespace {
 
-// registers pushed before calling `irq_handler()`
-struct [[gnu::packed]] CPUFrame {
-        u64 irqno;
-	u64 cr2;
-	u64 cr3;
-	u64 rax;
-	u64 rbx;
-	u64 rcx;
-	u64 rdx;
-	u64 rsi;
-	u64 rdi;
-	u64 rbp;
-	u64 r8;
-	u64 r9;
-	u64 r10;
-	u64 r11;
-	u64 r12;
-	u64 r13;
-	u64 r14;
-	u64 r15;
-	u64 rip;
-	u64 cs;
-	u64 flags;
-	u64 rsp;
-	u64 ss;
-};
-
-void handle_irq0_timer()
+void handle_irq0_timer(cpu::IRQFrame *f)
 {
 	u64 tics = drivers::pit::get_tics();
 	u64 seconds = drivers::pit::get_seconds();
@@ -57,23 +31,21 @@ void handle_irq0_timer()
                 drivers::pit::set_seconds(seconds + 1);
         }
 
-	if (!proc::scheduler::is_active())
-		goto end;
-
-	if (proc::scheduler::inc_proc_time())
-		proc::scheduler::schedule();
-        
-end:
         drivers::pic::send_eoi(0);
+
+        if (!proc::scheduler::is_active())
+                return;
+
+        proc::scheduler::tick(f);
 }
 
 } /* anonymous namespace */
 
-extern "C" void irq_handler(CPUFrame *f)
+extern "C" void irq_handler(IRQFrame *f)
 {
         switch (f->irqno) {
         case 0:
-                handle_irq0_timer();
+                handle_irq0_timer(f);
                 break;
 
         default:

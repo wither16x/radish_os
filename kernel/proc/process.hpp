@@ -16,12 +16,24 @@ struct Process {
         void (*entry)();
         int id;
         lib::u64 time;  // elapsed time in ms
+
+        // CPU context
+        lib::u64 r15, r14, r13, r12;
+        lib::u64 r11, r10, r9, r8;
+        lib::u64 rsi, rdi, rbp;
+        lib::u64 rdx, rcx, rbx, rax;
+        lib::u64 rip;
+        lib::u64 cs;
+        lib::u64 flags;
+        lib::u64 rsp;
+        lib::u64 ss;
+
+        // each process has its own stack
+        lib::u8 stack[PROCESS_STACK_SIZE];
 };
 
 // Note that the entry point of a process must return nothing and takes no
 // parameter (this may change in the future)
 void proc_init(Process *p, int id, void (*entry)());
-
-extern "C" void proc_switch(Process *p);
 
 } /* namespace kernel::proc */

@@ -93,19 +93,23 @@ void unmount_initrd()
 
 void proc1()
 {
-        kernel::lib::println("[proc1] Hello...");
-        kernel::lib::println("[proc1] world!");
+        u64 i = 0;
+        while (true)
+                kernel::lib::println("Proc1: i = %u", i++);
 }
 
 void proc2()
 {
-        kernel::lib::println("[proc2] I am...");
-        kernel::lib::println("[proc2] proc2!");
+        u64 i = 0;
+        while (true)
+                kernel::lib::println("Proc2: i = %u", i++);
 }
 
 void proc3()
 {
-        kernel::lib::println("[proc3] proc3 right there");
+        u64 i = 0;
+        while (true)
+                kernel::lib::println("Proc3: i = %u", i++);
 }
 
 void init_console()
@@ -213,36 +217,14 @@ extern "C" void kernel_main()
         scheduler::add_process(&p3);
 
         scheduler::init();
-        logger.ok("initialized scheduler...");
-
-#pragma region
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-        logger.debug("");
-#pragma endregion
+        scheduler::set_current_process(&p1);
+        Process *p = scheduler::get_current_process();
+        __asm__ volatile (
+                "mov %0, %%rsp\n"
+                "iretq\n"
+                :
+                : "r"(p->rsp)
+        );
 
         unmount_initrd();
 
