@@ -11,8 +11,11 @@ constexpr lib::u64 TIME_PER_PROCESS = 35; // in ms
 void init();
 void add_process(Process *p);
 void schedule();
-bool proc_time_elapsed();
-void inc_proc_time(); // add 1 ms to `proc_tics`
+// imcrease process' elapsed time
+// if it reached its maximum amount of time, then reset
+// the counter
+// return true if the process' time is elapsed
+bool inc_proc_time();
 bool is_active();
 
 } /* namespace kernel::proc::scheduler */

@@ -12,6 +12,8 @@ extern irq_handler
 
 irq 0                   ; timer
 
+; state before jump:
+; - irqno
 irq_common:
         push r15
         push r14
@@ -53,6 +55,7 @@ irq_common:
         pop r13
         pop r14
         pop r15
+        
         add rsp, 8
 
         iretq

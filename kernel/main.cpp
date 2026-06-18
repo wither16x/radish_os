@@ -144,7 +144,7 @@ void __test_ls(const kernel::lib::String &path)
 
 void kernel_hang()
 {
-        panic("process exited");
+        panic("nothing to do");
 }
 
 extern "C" void kernel_main()
@@ -204,9 +204,9 @@ extern "C" void kernel_main()
         __test_ls("I:/");
 
         Process p1, p2, p3;
-        proc_init(&p1, 0, proc1, proc2);
-        proc_init(&p2, 1, proc2, proc3);
-        proc_init(&p3, 2, proc3, kernel_hang);
+        proc_init(&p1, 0, proc1);
+        proc_init(&p2, 1, proc2);
+        proc_init(&p3, 2, proc3);
 
         scheduler::add_process(&p1);
         scheduler::add_process(&p2);
@@ -215,35 +215,34 @@ extern "C" void kernel_main()
         scheduler::init();
         logger.ok("initialized scheduler...");
 
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-        logger.debug("a");
-
+#pragma region
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+        logger.debug("");
+#pragma endregion
 
         unmount_initrd();
 

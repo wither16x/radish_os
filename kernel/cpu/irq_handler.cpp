@@ -5,9 +5,6 @@
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
-
 using kernel::lib::u64;
 using kernel::lib::log::logger;
 
@@ -60,18 +57,11 @@ void handle_irq0_timer()
                 drivers::pit::set_seconds(seconds + 1);
         }
 
-	if (!proc::scheduler::is_active()) {
-		logger.debug("irq0: scheduler is not active");
+	if (!proc::scheduler::is_active())
 		goto end;
-	}
 
-	if (proc::scheduler::proc_time_elapsed()) {
-		logger.debug("irq0: process time elapsed, scheduling...");
+	if (proc::scheduler::inc_proc_time())
 		proc::scheduler::schedule();
-	} else {
-		logger.debug("irq0: process has time left");
-		proc::scheduler::inc_proc_time();
-	}
         
 end:
         drivers::pic::send_eoi(0);

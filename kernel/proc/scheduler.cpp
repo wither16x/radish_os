@@ -21,6 +21,7 @@ bool active = false;
 
 void init()
 {
+        curr_proc = processes[0];
         active = true;
 }
 
@@ -30,28 +31,25 @@ void add_process(Process *p)
         // it must have been initialized before
         processes.push_back(p);
         proc_idx++;
-        logger.debug("added process PID=%u, proc_idx=%d", p->id, proc_idx);
 }
 
 void schedule()
 {
         // switch to the next process
-        proc_save(curr_proc->rsp);
         proc_idx++;
         curr_proc = processes[proc_idx];
-        proc_load(curr_proc->rsp);
-        curr_proc->entry();
-        curr_proc->exit();
+        proc_switch(curr_proc);
 }
 
-bool proc_time_elapsed()
+bool inc_proc_time()
 {
-        return curr_proc->time == TIME_PER_PROCESS;
-}
+        if (curr_proc->time == TIME_PER_PROCESS) {
+                curr_proc->time = 0;
+                return true;
+        }
 
-void inc_proc_time()
-{
         curr_proc->time++;
+        return false;
 }
 
 bool is_active()

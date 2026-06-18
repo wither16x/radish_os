@@ -45,8 +45,10 @@ isr_common:
         push rax
         mov rax, cr2
         push rax
+
         mov rdi, rsp
         call exception_handler
+
         pop rax
         pop rax
         pop rax
@@ -65,4 +67,5 @@ isr_common:
         pop r14
         pop r15
         add rsp, 16
+        
         iretq
