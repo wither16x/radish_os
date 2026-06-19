@@ -24,6 +24,7 @@ void proc_init(Process *p, int id, void (*entry)())
         *--stack_top = 0x08;                                    // CS
         *--stack_top = reinterpret_cast<u64>(entry);            // RIP
         p->rsp = reinterpret_cast<u64>(stack_top);
+        p->rip = reinterpret_cast<u64>(entry);
 
         p->cs = 0x08;
         p->ss = 0x10;
