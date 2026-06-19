@@ -91,27 +91,6 @@ void unmount_initrd()
         logger.ok("unmounted initrd");
 }
 
-void proc1()
-{
-        u64 i = 0;
-        while (true)
-                kernel::lib::println("Proc1: i = %u", i++);
-}
-
-void proc2()
-{
-        u64 i = 0;
-        while (true)
-                kernel::lib::println("Proc2: i = %u", i++);
-}
-
-void proc3()
-{
-        u64 i = 0;
-        while (true)
-                kernel::lib::println("Proc3: i = %u", i++);
-}
-
 void init_console()
 {
         console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
@@ -207,25 +186,16 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        // test multiprocessing
-        Process p1, p2, p3;
-        proc_init(&p1, 0, proc1);
-        proc_init(&p2, 1, proc2);
-        proc_init(&p3, 2, proc3);
-
-        scheduler::add_process(&p1);
-        scheduler::add_process(&p2);
-        scheduler::add_process(&p3);
-
         scheduler::init();
-        scheduler::set_current_process(&p1);
-        Process *p = scheduler::get_current_process();
-        __asm__ volatile (
-                "mov %0, %%rsp\n"
-                "iretq\n"
-                :
-                : "r"(p->rsp)
-        );
+        // snippet to execute a process `p`
+        // this only needs to be done once
+        // --------------------------------------
+        // __asm__ volatile (
+        //         "mov %0, %%rsp\n"
+        //         "iretq\n"
+        //         :
+        //         : "r"(p->rsp)
+        // );
 
         unmount_initrd();
 

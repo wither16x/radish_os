@@ -55,6 +55,10 @@ SECTIONS
                 *(COMMON)
         } :data
 
+        .note.GNU-stack : {
+                KEEP(*(.note.GNU-stack))
+        }
+
         /DISCARD/ : {
                 *(.eh_frame*)
                 *(.note .note.*)
