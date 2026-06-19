@@ -65,6 +65,17 @@ int strcmp(const char *s1, const char *s2)
         return (*s1 - '0') - (*s2 - '0');
 }
 
+int strncmp(const char *s1, const char *s2, usize length)
+{
+        while (length && *s1 && (*s1 == *s2)) {
+                s1++;
+                s2++;
+                --length;
+        }
+
+        return (*s1 - '0') - (*s2 - '0');
+}
+
 usize strlen(const char *s)
 {
         usize i;
@@ -81,6 +92,11 @@ void strcpy(const char *src, char *dest)
                 dest[i] = src[i];
 
         dest[i] = '\0';
+}
+
+bool strstartswith(const char *s1, const char *s2)
+{
+        return strncmp(s1, s2, strlen(s2)) == 0;
 }
 
 } /* namespace kernel::lib */

@@ -54,7 +54,9 @@ constexpr remove_reference_t<T>&& move(T&& value) noexcept
 // strings (char pointers)
 
 int strcmp(const char *s1, const char *s2);
+int strncmp(const char *s1, const char *s2, usize length);
 usize strlen(const char *s);
 void strcpy(const char *src, char *dest);
+bool strstartswith(const char *s1, const char *s2);
 
 } /* namespace kernel::lib */
