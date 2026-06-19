@@ -53,11 +53,8 @@ void tick(cpu::IRQFrame *frame)
         curr_proc_idx = (curr_proc_idx + 1) % processes.size();
 
         Process *old_proc = curr_proc;
-        logger.debug("old process ID: %d", curr_proc->id);
         Process *new_proc = processes[curr_proc_idx];
-        logger.debug("new process ID: %d", new_proc->id);
 
-        logger.debug("loading registers from frame to old process...");
         old_proc->rax   = frame->rax;
         old_proc->rbx   = frame->rbx;
         old_proc->rcx   = frame->rcx;
@@ -79,7 +76,6 @@ void tick(cpu::IRQFrame *frame)
         old_proc->rsp   = frame->rsp;
         old_proc->ss    = frame->ss;
 
-        logger.debug("loading registers from new process to frame...");
         frame->rax      = new_proc->rax;
         frame->rbx      = new_proc->rbx;
         frame->rcx      = new_proc->rcx;
@@ -101,9 +97,7 @@ void tick(cpu::IRQFrame *frame)
         frame->rsp      = new_proc->rsp;
         frame->ss       = new_proc->ss;
 
-        logger.debug("switching processes");
         curr_proc = new_proc;
-        logger.debug("switched processes");
 }
 
 bool is_active()

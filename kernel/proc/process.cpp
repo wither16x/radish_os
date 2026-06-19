@@ -17,7 +17,7 @@ void proc_init(Process *p, int id, void (*entry)())
         u64 *stack_top = reinterpret_cast<u64 *>(
                 (reinterpret_cast<u64>(p->stack) + PROCESS_STACK_SIZE)
         );
-        // imagine the process started after irteq
+        // do as if the process started after irteq
         *--stack_top = 0x10;                                    // SS
         *--stack_top = reinterpret_cast<u64>(stack_top);        // RSP
         *--stack_top = (1 << 9);                                // flags

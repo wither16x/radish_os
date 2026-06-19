@@ -7,11 +7,6 @@ namespace kernel::proc {
 
 constexpr lib::usize PROCESS_STACK_SIZE = 0x1000;       // 4 KiB
 
-enum class ProcessState : int {
-        Idle,
-        Running
-};
-
 struct Process {
         void (*entry)();
         int id;

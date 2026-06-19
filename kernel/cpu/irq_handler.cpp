@@ -15,27 +15,11 @@ namespace {
 
 void handle_irq0_timer(cpu::IRQFrame *f)
 {
-	u64 tics = drivers::pit::get_tics();
-	u64 seconds = drivers::pit::get_seconds();
-
-        drivers::pit::set_tics(tics + 1);
-
-	// update tics since they have been modified above
-	tics = drivers::pit::get_tics();
-
-	// reset tics every second so the tic counter never
-	// overflows
-	// I will maybe add minutes, hours, days, and so on
-        if (tics % 1000 == 0 && !drivers::pit::is_sleeping()) {
-                drivers::pit::set_tics(0);
-                drivers::pit::set_seconds(seconds + 1);
-        }
-
+        drivers::pit::tick();
         drivers::pic::send_eoi(0);
 
         if (!proc::scheduler::is_active())
                 return;
-
         proc::scheduler::tick(f);
 }
 

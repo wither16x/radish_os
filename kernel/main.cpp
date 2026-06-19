@@ -207,6 +207,7 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
+        // test multiprocessing
         Process p1, p2, p3;
         proc_init(&p1, 0, proc1);
         proc_init(&p2, 1, proc2);

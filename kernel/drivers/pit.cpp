@@ -30,6 +30,19 @@ void init()
         cpu::output_byte_port(Port::Channel0, (divider >> 8) & 0xff);
 }
 
+void tick()
+{
+        tics++;
+
+	// reset tics every second so the tic counter never
+	// overflows
+	// I will maybe add minutes, hours, days, and so on
+        if (tics % 1000 == 0 && !sleeping) {
+                tics = 0;
+                seconds++;
+        }
+}
+
 void sleep(lib::u64 ms)
 {
         sleeping = true;
@@ -45,21 +58,6 @@ u64 get_tics()
 u64 get_seconds()
 {
         return seconds;
-}
-
-void set_tics(lib::u64 n)
-{
-        tics = n;
-}
-
-void set_seconds(lib::u64 n)
-{
-        seconds = n;
-}
-
-bool is_sleeping()
-{
-        return sleeping;
 }
 
 } /* namespace kernel::drivers::pit */
