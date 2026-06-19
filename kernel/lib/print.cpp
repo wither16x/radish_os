@@ -30,32 +30,22 @@ u32 ansi_colors[ANSI_COLOR_COUNT] = {
         0xffffff  // white
 };
 
-void serial_send_str(const char *s)
-{
-        while (*s)
-                drivers::serial::send_byte(drivers::serial::Port::COM1, *s++);
-}
-
 // only supports regular colors
 u32 process_ansi_sequence(int ch)
 {
         if (ch == '\033') {
                 ansi_seq_start = true;
-                serial_send_str("found ansi sequence\r\n");
                 return color;
         }
 
         if (ch == '[' && ansi_seq_start) {
                 found_left_sqb = true;
-                serial_send_str("found lsqb\r\n");
                 return color;
         }
 
         if (found_left_sqb) {
                 if (end_of_ansi_sequence) {
                         usize color_idx = ctoi(color_ch);
-                        serial_send_str("color = ");
-                        serial_send_str(itoa(color_idx, 10));
                         found_left_sqb = false;
                         ansi_seq_start = false;
                         end_of_ansi_sequence = false;
@@ -65,7 +55,6 @@ u32 process_ansi_sequence(int ch)
                 }
 
                 if (ch == 'm' && color_start) {
-                        serial_send_str("end of sequence\r\n");
                         end_of_ansi_sequence = true;
                         color_start = false;
                         return color;
@@ -73,14 +62,10 @@ u32 process_ansi_sequence(int ch)
 
                 if (ch == '3') {
                         color_start = true;
-                        serial_send_str("start color\r\n");
                         return color;
                 }
 
                 color_ch = ch;
-                serial_send_str("color_ch = ");
-                drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
-                serial_send_str("\r\n");
         }
 
         return color;

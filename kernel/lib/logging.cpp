@@ -8,12 +8,12 @@ namespace kernel::lib::log {
 namespace {
 
 const char *log_level_str[] = {
-        "debug",
-        "info",
-        "ok",
-        "warn",
-        "err",
-        "crit"
+        "\033[37mdebug",
+        "\033[36minfo",
+        "\033[32mok",
+        "\033[33mwarn",
+        "\033[31merr",
+        "\033[35mcrit"
 };
 
 } /* anonymous namespace */
@@ -25,7 +25,7 @@ void Logger::set_context(this Logger &self, const char *ctx)
 
 void Logger::va_log(this Logger &self, Logger::LogLevel lv, const char *fmt, va_list args)
 {
-        printf("[%s] %s: ", self.context, log_level_str[static_cast<int>(lv)]);
+        printf("[%s] %s\033[37m: ", self.context, log_level_str[static_cast<int>(lv)]);
         vprintf(fmt, args);
         printf("\r\n");
 }
