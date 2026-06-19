@@ -186,6 +186,8 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
+        logger.debug("\033[31mansi \033[32mregular \033[33mcolors \033[34msupport\033[35m!\033[36m!!\033[37m");
+
         scheduler::init();
         // snippet to execute a process `p`
         // this only needs to be done once

@@ -14,7 +14,7 @@ public:
         ~Console();
 
         void init_font(this Console &self, const lib::String &font);
-        void draw_char(this Console &self, char ch);
+        void draw_char(this Console &self, char ch, lib::u32 color);
 
         bool is_active(this const Console &self);
 
@@ -35,7 +35,7 @@ private:
 
         bool active = false;
 
-        void draw_char_at(this Console &self, char ch, int px, int py);
+        void draw_char_at(this Console &self, char ch, int px, int py, lib::u32 color);
         void scroll(this Console &self);
 };
 

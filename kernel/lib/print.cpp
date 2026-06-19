@@ -6,11 +6,101 @@
 
 namespace kernel::lib {
 
+namespace {
+
+constexpr int ANSI_COLOR_COUNT = 8;
+
+bool ansi_seq_start = false;
+// "sqb" stands for "square bracket"
+bool found_left_sqb = false;
+bool color_start = false;
+bool end_of_ansi_sequence = false;
+
+u32 color = 0xffffff;
+int color_ch;
+
+u32 ansi_colors[ANSI_COLOR_COUNT] = {
+        0x000000, // black
+        0xfc0303, // red
+        0x39fc03, // green
+        0xfcf403, // yellow
+        0x0b03fc, // blue
+        0xfc03e8, // cyan
+        0x00b7ff, // cyan
+        0xffffff  // white
+};
+
+void serial_send_str(const char *s)
+{
+        while (*s)
+                drivers::serial::send_byte(drivers::serial::Port::COM1, *s++);
+}
+
+// only supports regular colors
+u32 process_ansi_sequence(int ch)
+{
+        if (ch == '\033') {
+                ansi_seq_start = true;
+                serial_send_str("found ansi sequence\r\n");
+                return color;
+        }
+
+        if (ch == '[' && ansi_seq_start) {
+                found_left_sqb = true;
+                serial_send_str("found lsqb\r\n");
+                return color;
+        }
+
+        if (found_left_sqb) {
+                if (end_of_ansi_sequence) {
+                        usize color_idx = ctoi(color_ch);
+                        serial_send_str("color = ");
+                        serial_send_str(itoa(color_idx, 10));
+                        found_left_sqb = false;
+                        ansi_seq_start = false;
+                        end_of_ansi_sequence = false;
+                        if (color_idx < ANSI_COLOR_COUNT)
+                                return ansi_colors[color_idx];
+                        return color;
+                }
+
+                if (ch == 'm' && color_start) {
+                        serial_send_str("end of sequence\r\n");
+                        end_of_ansi_sequence = true;
+                        color_start = false;
+                        return color;
+                }
+
+                if (ch == '3') {
+                        color_start = true;
+                        serial_send_str("start color\r\n");
+                        return color;
+                }
+
+                color_ch = ch;
+                serial_send_str("color_ch = ");
+                drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
+                serial_send_str("\r\n");
+        }
+
+        return color;
+}
+
+} /* anonymous namespace */
+
 void putchar(int ch)
 {
+        color = process_ansi_sequence(ch);
+        if (ch == '\033')
+                return;
+        if (ansi_seq_start && '0' <= ch && ch <= '7')
+                return;
+        if (ansi_seq_start && (ch == 'm' || ch == '['))
+                return;
+
         drivers::console::Console *console = drivers::console::get_console();
         if (console->is_active())
-                console->draw_char(ch);
+                console->draw_char(ch, color);
         else
                 drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
 }

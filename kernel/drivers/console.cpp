@@ -77,7 +77,7 @@ void Console::init_font(this Console &self, const String &font)
         logger.set_context("kernel");
 }
 
-void Console::draw_char(this Console &self, char ch)
+void Console::draw_char(this Console &self, char ch, u32 color)
 {
         switch (ch) {
         case '\r':
@@ -98,7 +98,7 @@ void Console::draw_char(this Console &self, char ch)
                 break;
         
         default:
-                self.draw_char_at(ch, self.cursor_x, self.cursor_y);
+                self.draw_char_at(ch, self.cursor_x, self.cursor_y, color);
                 self.cursor_x += self.glyph_width;
 
                 if (self.cursor_x + self.glyph_width > self.width) {
@@ -118,7 +118,7 @@ bool Console::is_active(this const Console &self)
         return self.active;
 }
 
-void Console::draw_char_at(this Console &self, char ch, int px, int py)
+void Console::draw_char_at(this Console &self, char ch, int px, int py, u32 color)
 {
         u32 idx = static_cast<u8>(ch);
         u32 bytes_per_row = (self.glyph_width + 7) / 8;
@@ -129,7 +129,7 @@ void Console::draw_char_at(this Console &self, char ch, int px, int py)
                         u8 byte = glyph[y * bytes_per_row + x / 8];
 
                         if (byte & (0x80 >> (x % 8)))
-                                drivers::framebuffer::draw_pixel(px + x, py + y, 0xffffff);
+                                drivers::framebuffer::draw_pixel(px + x, py + y, color);
                 }
         }
 }

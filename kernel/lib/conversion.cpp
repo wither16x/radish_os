@@ -85,4 +85,9 @@ usize atoi(const char *s, int base)
         return res;
 }
 
+usize ctoi(char ch)
+{
+        return ch - '0';
+}
+
 } /* namespace kernel::lib */
