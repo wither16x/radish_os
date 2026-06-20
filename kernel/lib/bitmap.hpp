@@ -46,19 +46,19 @@ public:
         }
 
 private:
-        static constexpr usize BitsPerWord      = sizeof(u64) * 8;
-        static constexpr usize Words            = (N + BitsPerWord - 1) / BitsPerWord;
+        static constexpr usize BITS_PER_WORD      = sizeof(u64) * 8;
+        static constexpr usize Words            = (N + BITS_PER_WORD - 1) / BITS_PER_WORD;
 
         u64 data[Words]{};
 
         static constexpr usize get_index(usize bit)
         {
-                return bit / BitsPerWord;
+                return bit / BITS_PER_WORD;
         }
 
         static constexpr u64 get_mask(usize bit)
         {
-                return 1ull << (bit % BitsPerWord);
+                return 1ull << (bit % BITS_PER_WORD);
         }
 };
 
@@ -124,7 +124,7 @@ public:
         }
 
 private:
-        static constexpr usize BitsPerWord      = sizeof(u64) * 8;
+        static constexpr usize BITS_PER_WORD = sizeof(u64) * 8;
 
         // Since the length of the bitmap can change, the amount of words
         // cannot be a constant like in `StaticBitmap` 
@@ -134,12 +134,12 @@ private:
 
         static constexpr usize get_index(usize bit)
         {
-                return bit / BitsPerWord;
+                return bit / BITS_PER_WORD;
         }
 
         static constexpr u64 get_mask(usize bit)
         {
-                return 1ull << (bit % BitsPerWord);
+                return 1ull << (bit % BITS_PER_WORD);
         }
 };
 

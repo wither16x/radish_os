@@ -29,16 +29,16 @@ private:
         // Map more pages to handle more blocks
         void extend(this HeapAllocator<T> &self)
         {
-                lib::uptr new_page = self.base + vmm::PageBytes * self.pages;
-                vmm::map_page(self.base + vmm::PageBytes * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
+                lib::uptr new_page = self.base + vmm::PAGE_BYTES * self.pages;
+                vmm::map_page(self.base + vmm::PAGE_BYTES * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
                 self.pages++;
 
                 BlockHeader *last_block = self.block_list.last();
 
                 if (last_block->free) {
-                        last_block->bytes += vmm::PageBytes;
+                        last_block->bytes += vmm::PAGE_BYTES;
                 } else {
-                        BlockHeader *new_block = self.create_block(new_page, vmm::PageBytes, true, last_block, nullptr);
+                        BlockHeader *new_block = self.create_block(new_page, vmm::PAGE_BYTES, true, last_block, nullptr);
                         self.block_list.append(new_block);
                 }
         }
@@ -49,7 +49,7 @@ private:
                 if (self.pages <= 1)
                         return false;
 
-                lib::uptr last_page = self.base + vmm::PageBytes * (self.pages - 1);
+                lib::uptr last_page = self.base + vmm::PAGE_BYTES * (self.pages - 1);
 
                 BlockHeader *curr = self.block_list.first();
                 while (curr) {
@@ -140,7 +140,7 @@ public:
                 self.pages = 1;
 
                 BlockHeader *new_list = self.block_list.first();
-                new_list->bytes = vmm::PageBytes - sizeof(BlockHeader);
+                new_list->bytes = vmm::PAGE_BYTES - sizeof(BlockHeader);
                 new_list->free = true;
         }
 
@@ -151,7 +151,7 @@ public:
 
                 BlockHeader *block = this->find_free_block(n);
                 if (!block) {
-                        lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), vmm::PageBytes) / vmm::PageBytes;
+                        lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), vmm::PAGE_BYTES) / vmm::PAGE_BYTES;
                         for (lib::usize i = 0; i < required_pages; i++)
                                 this->extend();
 

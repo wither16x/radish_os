@@ -5,7 +5,7 @@
 
 namespace kernel::mem::vmm {
 
-constexpr lib::usize PageBytes = 0x1000;         // 4 KiB
+constexpr lib::usize PAGE_BYTES = 0x1000;         // 4 KiB
 
 void init(
         lib::u64 hhdm_base,
@@ -21,17 +21,17 @@ void unmap_page(lib::uptr virt);
 // --------------------------------------------------------
 inline lib::uptr page_align_down(lib::uptr base)
 {
-        return base / PageBytes * PageBytes;
+        return base / PAGE_BYTES * PAGE_BYTES;
 }
 
 inline lib::uptr page_align_up(lib::uptr base)
 {
-        return (base + PageBytes - 1) / PageBytes * PageBytes;
+        return (base + PAGE_BYTES - 1) / PAGE_BYTES * PAGE_BYTES;
 }
 
 inline lib::uptr page_div_up(lib::uptr base)
 {
-        return (base + PageBytes - 1) / PageBytes;
+        return (base + PAGE_BYTES - 1) / PAGE_BYTES;
 }
 // --------------------------------------------------------
 

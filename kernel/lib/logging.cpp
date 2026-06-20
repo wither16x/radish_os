@@ -20,7 +20,7 @@ const char *log_level_str[] = {
 
 void Logger::set_context(this Logger &self, const char *ctx)
 {
-        memmove(self.context, ctx, MaxContextBytes);
+        memmove(self.context, ctx, MAX_CONTEXT_BYTES);
 }
 
 void Logger::va_log(this Logger &self, Logger::LogLevel lv, const char *fmt, va_list args)

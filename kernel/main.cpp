@@ -70,12 +70,12 @@ void call_global_constructors()
 void mount_initrd(BootInfo::ModuleInfo &info)
 {
         // 'I' for initrd
-        u64 idx = BootInfo::ModuleInfo::MaxModules + 1;
+        u64 idx = BootInfo::ModuleInfo::MAX_MODULES + 1;
         for (u64 i = 0; i < info.count; i++) {
                 if (kernel::lib::strcmp(info.modules[i].path, "/initrd.tar") == 0)
                         idx = i;
         }
-        if (idx == BootInfo::ModuleInfo::MaxModules + 1)
+        if (idx == BootInfo::ModuleInfo::MAX_MODULES + 1)
                 logger.err("initrd not found");
         else
                 logger.ok("found initrd");

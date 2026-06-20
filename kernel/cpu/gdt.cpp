@@ -10,7 +10,7 @@ namespace {
 
 extern "C" void gdt_flush(u64 gdtr);
 
-constexpr int MaxDescriptors = 3;
+constexpr int MAX_DESCRIPTORS = 3;
 
 struct [[gnu::packed]] GDTDescriptor {
         u16 limit_low;
@@ -26,7 +26,7 @@ struct [[gnu::packed]] GDTR {
         u64 offset;
 };
 
-GDTDescriptor gdt[MaxDescriptors];
+GDTDescriptor gdt[MAX_DESCRIPTORS];
 GDTR gdtptr;
 
 } /* anonymous namespace */

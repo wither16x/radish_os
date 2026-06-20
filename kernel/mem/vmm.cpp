@@ -16,8 +16,8 @@ namespace kernel::mem::vmm {
 
 namespace {
 
-constexpr usize PhysicalAddressMask     = ((1ull << 52) - 1) & ~0xfffull;
-constexpr u16   PageTableEntries        = 512;
+constexpr usize PHYS_ADDR_MASK     = ((1ull << 52) - 1) & ~0xfffull;
+constexpr u16   PT_ENTRIES         = 512;
 
 u64 *pml4t = nullptr;
 u64 hhdm = 0;
@@ -35,8 +35,8 @@ void map_kernel()
 
         for (u64 i = 0; i < ksize; i++) {
                 map_page(virt_addr, phys_addr, 0x03);
-                phys_addr += PageBytes;
-                virt_addr += PageBytes;
+                phys_addr += PAGE_BYTES;
+                virt_addr += PAGE_BYTES;
         }
 }
 
@@ -58,8 +58,8 @@ void map_hhdm()
                         
                         for (u64 i = 0; i < section_size; i++) {
                                 map_page(virt_addr, phys_addr, 0x03);
-                                virt_addr += PageBytes;
-                                phys_addr += PageBytes;
+                                virt_addr += PAGE_BYTES;
+                                phys_addr += PAGE_BYTES;
                         }
                 }
 	}
@@ -78,7 +78,7 @@ void init(lib::u64 hhdm_base,
         memmap_info = _memmap_info;
 
         pml4t = reinterpret_cast<u64 *>(pmm::allocate_frame() + hhdm);
-        memset(pml4t, 0, PageBytes);
+        memset(pml4t, 0, PAGE_BYTES);
 
         map_kernel();
         map_hhdm();
@@ -111,33 +111,33 @@ void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags)
         if (!(pml4t[pml4t_idx] & 1)) {
                 pml4t[pml4t_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm),
+                        reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,
-                        PageBytes
+                        PAGE_BYTES
                 );
         }
 
-        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdpt[pdpt_idx] & 1)) {
                 pdpt[pdpt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm),
+                        reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,
-                        PageBytes
+                        PAGE_BYTES
                 );
         }
 
-        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdt[pdt_idx] & 1)) {
                 pdt[pdt_idx] = pmm::allocate_frame() + 0x03;
                 memset(
-                        reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm),
+                        reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,
-                        PageBytes
+                        PAGE_BYTES
                 );
         }
 
-        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
 }
@@ -152,15 +152,15 @@ void unmap_page(uptr virt)
         if (!(pml4t[pml4t_idx] & 1))
                 return;
 
-        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdpt[pdpt_idx] & 1))
                 return;
 
-        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdt[pdt_idx] & 1))
                 return;
 
-        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PhysicalAddressMask) + hhdm);
+        u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pt[pt_idx] & 1))
                 return;
 
@@ -169,25 +169,25 @@ void unmap_page(uptr virt)
 
         // A table must have no mapped entries to be deleted
 
-        for (u16 i = 0; i < PageTableEntries; i++) {
+        for (u16 i = 0; i < PT_ENTRIES; i++) {
                 if (pt[i] & 1)
                         return;
         }
-        pmm::free_frame(pdt[pdt_idx] & PhysicalAddressMask);
+        pmm::free_frame(pdt[pdt_idx] & PHYS_ADDR_MASK);
         pdt[pdt_idx] = 0;
 
-        for (u16 i = 0; i < PageTableEntries; i++) {
+        for (u16 i = 0; i < PT_ENTRIES; i++) {
                 if (pdt[i] & 1)
                         return;
         }
-        pmm::free_frame(pdpt[pdpt_idx] & PhysicalAddressMask);
+        pmm::free_frame(pdpt[pdpt_idx] & PHYS_ADDR_MASK);
         pdpt[pdpt_idx] = 0;
 
-        for (u16 i = 0; i < PageTableEntries; i++) {
+        for (u16 i = 0; i < PT_ENTRIES; i++) {
                 if (pdpt[i] & 1)
                         return;
         }
-        pmm::free_frame(pml4t[pml4t_idx] & PhysicalAddressMask);
+        pmm::free_frame(pml4t[pml4t_idx] & PHYS_ADDR_MASK);
         pml4t[pml4t_idx] = 0;
 }
 

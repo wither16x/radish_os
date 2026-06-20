@@ -17,7 +17,7 @@ namespace kernel::fs::ustar {
 
 namespace {
 
-static constexpr int BlockSize = 512;
+constexpr int BLOCK_SIZE = 512;
 
 enum class NodeType : char {
         NormalFile      = '0',
@@ -116,8 +116,8 @@ void parse_archive(u8 *archive)
                 Vector<String> parts = parse_path(path);
 
                 if (parts.size() == 0) {
-                        usize blocks = (bytes + BlockSize - 1) / BlockSize;
-                        archive_p += BlockSize + blocks * BlockSize;
+                        usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
+                        archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
                         continue;
                 }
 
@@ -145,15 +145,15 @@ void parse_archive(u8 *archive)
                                 nd->dir_data = new Dir;
                         } else {
                                 nd->file_data = new File;
-                                nd->file_data->data = reinterpret_cast<char *>(archive_p + BlockSize);
+                                nd->file_data->data = reinterpret_cast<char *>(archive_p + BLOCK_SIZE);
                                 nd->dir_data = nullptr;
                         }
 
                         parent->dir_data->nodes.push_back(nd);
                 }
 
-                usize blocks = (bytes + BlockSize - 1) / BlockSize;
-                archive_p += BlockSize + blocks * BlockSize;
+                usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
+                archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
         }
 }
 

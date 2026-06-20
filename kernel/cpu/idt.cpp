@@ -9,8 +9,8 @@ namespace kernel::cpu {
 
 namespace {
 
-constexpr int MaxGates          = 255;
-constexpr u16 SegmentSelector   = 0x08;
+constexpr int MAX_GATES          = 255;
+constexpr u16 SEGMENT_SELECTOR   = 0x08;
 
 extern "C" void idt_flush(u64 *idtr);
 
@@ -34,7 +34,7 @@ struct [[gnu::packed]] IDTR {
         u64 offset;
 };
 
-IDTEntry idt[MaxGates];
+IDTEntry idt[MAX_GATES];
 IDTR idtptr;
 
 } /* anonymous namespace */
@@ -65,7 +65,7 @@ void IDT::load()
 void IDT::set_gate(int vector, void (*isr)(), u8 flags)
 {
         idt[vector].isr_low     = reinterpret_cast<u64>(isr) & 0xffff;
-        idt[vector].selector    = SegmentSelector;
+        idt[vector].selector    = SEGMENT_SELECTOR;
         idt[vector].ist         = 0;
         idt[vector].flags       = flags;
         idt[vector].isr_mid     = (reinterpret_cast<u64>(isr) >> 16) & 0xffff;

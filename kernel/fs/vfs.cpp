@@ -12,14 +12,14 @@ namespace kernel::fs::vfs {
 
 namespace {
 
-constexpr int MaxDrives = 26;
+constexpr int MAX_DRIVES = 26;
 
-Drive drives[MaxDrives];
+Drive drives[MAX_DRIVES];
 char current_drive_id = 'A';            // default drive
 
 Drive *get_drive_by_id(char id)
 {
-        for (int i = 0; i < MaxDrives; i++) {
+        for (int i = 0; i < MAX_DRIVES; i++) {
                 if (drives[i].id == id)
                         return &drives[i];
         }

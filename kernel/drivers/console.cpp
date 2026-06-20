@@ -15,7 +15,7 @@ namespace kernel::drivers::console {
 
 namespace {
 
-constexpr u32 PSF2Magic = 0x864ab572;
+constexpr u32 PSF2_MAGIC = 0x864ab572;
 
 struct PSF2Header {
         u32 magic;
@@ -61,7 +61,7 @@ void Console::init_font(this Console &self, const String &font)
 
         PSF2Header *hdr = reinterpret_cast<PSF2Header *>(self.font_data.get_data());
 
-        if (hdr->magic != PSF2Magic) {
+        if (hdr->magic != PSF2_MAGIC) {
                 logger.err("invalid PSF2 magic dword: 0x%x", hdr->magic);
                 logger.set_context("kernel");
                 return;

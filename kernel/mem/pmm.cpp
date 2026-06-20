@@ -13,14 +13,14 @@ namespace kernel::mem::pmm {
 
 namespace {
 
-constexpr lib::usize FrameBytes  = 0x1000;       // 4 KiB
+constexpr lib::usize FRAME_BYTES  = 0x1000;       // 4 KiB
 // Both constants below are used for stage 1 only
-constexpr lib::usize MaxMemory   = 0x40000000;   // 1 GiB
-constexpr lib::usize MaxFrames   = MaxMemory / FrameBytes;
+constexpr lib::usize MAX_MEMORY   = 0x40000000;   // 1 GiB
+constexpr lib::usize MAX_FRAMES   = MAX_MEMORY / FRAME_BYTES;
 
-bool stage2_enabled             = false;
+bool stage2_enabled = false;
 
-allocators::StaticBitmapAllocator<uptr, MaxFrames> allocator_stage1;
+allocators::StaticBitmapAllocator<uptr, MAX_FRAMES> allocator_stage1;
 allocators::DynamicBitmapAllocator<uptr> allocator_stage2;
 
 } /* anonymous namespace */
@@ -32,8 +32,8 @@ void init_stage1(boot::BootInfo::MemmapInfo &memmap)
         for (usize i = 0; i < memmap.entry_count; i++) {
                 if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
                         boot::MemmapEntry& e = memmap.entries[i];
-                        for (uptr addr = e.base; addr < e.base + e.length; addr += FrameBytes)
-                                allocator_stage1.get_bitmap().clear(addr / FrameBytes);
+                        for (uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
+                                allocator_stage1.get_bitmap().clear(addr / FRAME_BYTES);
                 }
         }
 
@@ -60,17 +60,17 @@ void init_stage2()
 uptr allocate_frame()
 {
         if (stage2_enabled)
-                return allocator_stage2.allocate(1) * FrameBytes;
+                return allocator_stage2.allocate(1) * FRAME_BYTES;
         else
-                return allocator_stage1.allocate(1) * FrameBytes;
+                return allocator_stage1.allocate(1) * FRAME_BYTES;
 }
 
 void free_frame(uptr addr)
 {
         if (stage2_enabled)
-                allocator_stage2.free(addr / FrameBytes);
+                allocator_stage2.free(addr / FRAME_BYTES);
         else
-                allocator_stage1.free(addr / FrameBytes);
+                allocator_stage1.free(addr / FRAME_BYTES);
 }
 
 } /* namespace kernel::mem::pmm */

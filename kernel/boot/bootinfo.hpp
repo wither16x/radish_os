@@ -53,10 +53,10 @@ struct FirmwareTypeInfo {
 };
 
 struct MemmapInfo {
-        static constexpr int MaxEntries = 64;
+        static constexpr int MAX_ENTRIES = 64;
 
         lib::u64 entry_count;
-        MemmapEntry entries[MaxEntries];
+        MemmapEntry entries[MAX_ENTRIES];
 };
 
 struct HHDMInfo {
@@ -69,10 +69,10 @@ struct ExecutableInfo {
 };
 
 struct ModuleInfo {
-        static constexpr int MaxModules = 25;
+        static constexpr int MAX_MODULES = 25;
 
         lib::u64 count;
-        Module modules[MaxModules];
+        Module modules[MAX_MODULES];
 };
 
 struct FramebufferInfo {

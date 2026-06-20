@@ -10,7 +10,7 @@ namespace kernel::mem::heap {
 
 namespace {
 
-constexpr uptr HeapStart = 0xfffffe8000000000ull;
+constexpr uptr HEAP_START = 0xfffffe8000000000ull;
 
 allocators::HeapAllocator<void *> allocator;
 
@@ -18,7 +18,7 @@ allocators::HeapAllocator<void *> allocator;
 
 void init()
 {
-        allocator.init(HeapStart, 16);
+        allocator.init(HEAP_START, 16);
         logger.ok("initialized heap");
 }
 

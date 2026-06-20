@@ -6,9 +6,9 @@ namespace kernel::lib::log {
 
 class Logger {
 private:
-        static constexpr int MaxContextBytes = 50;
+        static constexpr int MAX_CONTEXT_BYTES = 50;
 
-        char context[MaxContextBytes];
+        char context[MAX_CONTEXT_BYTES];
 
 public:
         // Debug                : information for the developer
