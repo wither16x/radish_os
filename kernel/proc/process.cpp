@@ -8,6 +8,12 @@ using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize;
 
 namespace kernel::proc {
 
+namespace {
+
+int curr_pid = 0;
+
+} /* anonymous namespace */
+
 void proc_init(Process *p, int id, void (*entry)())
 {
         p->id = id;
@@ -29,6 +35,11 @@ void proc_init(Process *p, int id, void (*entry)())
         p->cs = 0x08;
         p->ss = 0x10;
         p->flags = (1 << 9);
+}
+
+int allocate_pid()
+{
+        return curr_pid++;
 }
 
 } /* namespace kernel::proc */

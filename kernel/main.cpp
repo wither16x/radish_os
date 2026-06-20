@@ -130,6 +130,18 @@ void kernel_hang()
         panic("nothing to do");
 }
 
+void proc1()
+{
+        while (true)
+                kernel::lib::println("one");
+}
+
+void proc2()
+{
+        while (true)
+                kernel::lib::println("two");
+}
+
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())
@@ -186,12 +198,21 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        //logger.debug("\033[31mansi \033[32mregular \033[33mcolors \033[34msupport\033[35m!\033[36m!!\033[37m");
+        Process p1, p2;
+        proc_init(&p1, allocate_pid(), proc1);
+        logger.debug("p1 PID = %d", p1.id);
+        proc_init(&p2, allocate_pid(), proc2);
+        logger.debug("p2 PID = %d", p2.id);
+
+        scheduler::add_process(&p1);
+        scheduler::add_process(&p2);
 
         scheduler::init();
         // snippet to execute a process `p`
         // this only needs to be done once
         // --------------------------------------
+        // scheduler::set_current_process(&p1);
+        // Process *p = scheduler::get_current_process();
         // __asm__ volatile (
         //         "mov %0, %%rsp\n"
         //         "iretq\n"

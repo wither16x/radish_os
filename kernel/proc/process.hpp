@@ -30,5 +30,7 @@ struct Process {
 // Note that the entry point of a process must return nothing and takes no
 // parameter (this may change in the future)
 void proc_init(Process *p, int id, void (*entry)());
+// Return a PID choosen automatically
+int allocate_pid();
 
 } /* namespace kernel::proc */
