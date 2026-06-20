@@ -136,7 +136,7 @@ public:
 
                 self.block_list.set_base(self.base);
 
-                vmm::map_page(self.base, pmm::allocate_frame(), 0x03 | (1ull << 63));
+                vmm::map_page(self.base, pmm::allocate_frame(), vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec);
                 self.pages = 1;
 
                 BlockHeader *new_list = self.block_list.first();

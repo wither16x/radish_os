@@ -7,6 +7,11 @@ namespace kernel::mem::vmm {
 
 constexpr lib::usize PAGE_BYTES = 0x1000;         // 4 KiB
 
+enum PageFlag : lib::u64 {
+        ReadWrite       = 0x03,
+        NoExec          = 1ull << 63
+};
+
 void init(
         lib::u64 hhdm_base,
         boot::BootInfo::ExecutableInfo &exec_info,
