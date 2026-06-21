@@ -19,13 +19,12 @@ namespace {
 constexpr usize PHYS_ADDR_MASK     = ((1ull << 52) - 1) & ~0xfffull;
 constexpr u16   PT_ENTRIES         = 512;
 
-u64 *pml4t = nullptr;
 u64 hhdm = 0;
 u64 executable_phys = 0;
 u64 executable_virt = 0;
 boot::BootInfo::MemmapInfo memmap_info;
 
-void map_kernel()
+void map_kernel(u64 *pml4t)
 {
         u64 kstart      = reinterpret_cast<u64>(*&_lds_kernel_start);
         u64 kend        = reinterpret_cast<u64>(*&_lds_kernel_end);
@@ -34,13 +33,13 @@ void map_kernel()
         u64 virt_addr   = executable_virt;
 
         for (u64 i = 0; i < ksize; i++) {
-                map_page(virt_addr, phys_addr, PageFlag::ReadWrite);
+                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWrite);
                 phys_addr += PAGE_BYTES;
                 virt_addr += PAGE_BYTES;
         }
 }
 
-void map_hhdm()
+void map_hhdm(u64 *pml4t)
 {
 	for (u64 index = 0; index < memmap_info.entry_count; index++) {
 		boot::MemmapEntryType type = memmap_info.entries[index].type;
@@ -57,7 +56,7 @@ void map_hhdm()
                         u64 virt_addr = memmap_info.entries[index].base + hhdm;
                         
                         for (u64 i = 0; i < section_size; i++) {
-                                map_page(virt_addr, phys_addr, PageFlag::ReadWrite);
+                                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWrite);
                                 virt_addr += PAGE_BYTES;
                                 phys_addr += PAGE_BYTES;
                         }
@@ -67,7 +66,7 @@ void map_hhdm()
 
 } /* anonymous namespace */
 
-void init(lib::u64 hhdm_base,
+u64 *init(lib::u64 hhdm_base,
         boot::BootInfo::ExecutableInfo &exec_info,
         boot::BootInfo::MemmapInfo &_memmap_info
 )
@@ -77,21 +76,37 @@ void init(lib::u64 hhdm_base,
         executable_virt = exec_info.virtual_base;
         memmap_info = _memmap_info;
 
-        pml4t = reinterpret_cast<u64 *>(pmm::allocate_frame() + hhdm);
-        memset(pml4t, 0, PAGE_BYTES);
+        lib::u64 *pml4t = create_pml4t(nullptr);
 
-        map_kernel();
-        map_hhdm();
+        map_kernel(pml4t);
+        map_hhdm(pml4t);
 
         logger.ok("initialized vmm");
+
+        return pml4t;
 }
 
-void load()
+void load(u64 *pml4t)
 {
         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(pml4t) - hhdm));
 }
 
-void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags)
+u64 *create_pml4t(u64 *parent)
+{
+        uptr frame = pmm::allocate_frame();
+        u64 *pml4t = reinterpret_cast<u64 *>(frame + hhdm);
+        memset(pml4t, 0, PAGE_BYTES);
+
+        if (!parent)
+                return pml4t;
+
+        for (int i = PT_ENTRIES / 2; i < PT_ENTRIES; i++)
+                pml4t[i] = parent[i];
+
+        return pml4t;
+}
+
+void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
         // 0x1 = present
         // 0x03 = rw cpl0
@@ -142,7 +157,7 @@ void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags)
                 pt[pt_idx] = phys | flags;
 }
 
-void unmap_page(uptr virt)
+void unmap_page(u64 *pml4t, uptr virt)
 {
         u64 pml4t_idx   = (virt >> 39) & 0x1ff;
         u64 pdpt_idx    = (virt >> 30) & 0x1ff;

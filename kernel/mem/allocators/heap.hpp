@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel.hpp>
 #include <lib/bytes.hpp>
 #include <lib/linked_list.hpp>
 #include <lib/typing.hpp>
@@ -30,7 +31,12 @@ private:
         void extend(this HeapAllocator<T> &self)
         {
                 lib::uptr new_page = self.base + vmm::PAGE_BYTES * self.pages;
-                vmm::map_page(self.base + vmm::PAGE_BYTES * self.pages, pmm::allocate_frame(), 0x03 | (1ull << 63));
+                vmm::map_page(
+                        get_kernel_pml4t(),
+                        self.base + vmm::PAGE_BYTES * self.pages,
+                        pmm::allocate_frame(),
+                        vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec
+                );
                 self.pages++;
 
                 BlockHeader *last_block = self.block_list.last();
@@ -77,7 +83,7 @@ private:
                         last_block->next  = nullptr;
                 }
 
-                vmm::unmap_page(last_page);
+                vmm::unmap_page(get_kernel_pml4t(), last_page);
                 self.pages--;
                 
                 return true;
@@ -136,7 +142,12 @@ public:
 
                 self.block_list.set_base(self.base);
 
-                vmm::map_page(self.base, pmm::allocate_frame(), vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec);
+                vmm::map_page(
+                        get_kernel_pml4t(),
+                        self.base,
+                        pmm::allocate_frame(),
+                        vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec
+                );
                 self.pages = 1;
 
                 BlockHeader *new_list = self.block_list.first();

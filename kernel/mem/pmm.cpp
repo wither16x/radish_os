@@ -7,7 +7,7 @@
 #include <panic.hpp>
 
 using kernel::lib::log::logger;
-using kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
+using kernel::lib::u8,  kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
 
 namespace kernel::mem::pmm {
 

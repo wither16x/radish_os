@@ -1,10 +1,15 @@
+#include <kernel.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <mem/vmm.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 #include <panic.hpp>
 
-using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize;
+#include <lib/logging.hpp>
+using kernel::lib::log::logger;
+
+using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 
 namespace kernel::proc {
 
@@ -40,6 +45,12 @@ void proc_init(Process *p, int id, void (*entry)())
 int allocate_pid()
 {
         return curr_pid++;
+}
+
+void create_address_space(Process *p)
+{
+        u64 *kpml4t = get_kernel_pml4t();
+        p->pml4t = mem::vmm::create_pml4t(kpml4t);
 }
 
 } /* namespace kernel::proc */

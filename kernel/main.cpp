@@ -1,3 +1,4 @@
+#include <kernel.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
@@ -37,6 +38,7 @@ using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_ma
 using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT;
+using kernel::set_kernel_pml4t;
 
 namespace {
 
@@ -104,8 +106,6 @@ void init_console()
 
 void __test_ls(const kernel::lib::String &path)
 {
-        static int spaces = 0;
-
         kernel::lib::usize count = 0;
         kernel::lib::getdirentn(path, &count);
 
@@ -113,15 +113,9 @@ void __test_ls(const kernel::lib::String &path)
                 vfs::DirEntry entry;
                 kernel::lib::getdirent(path, &entry, i);
 
-                kernel::lib::String whitespaces_str;
-                for (int s = 0; s < spaces; s++)
-                        whitespaces_str += ' ';
-
-                logger.info("%s* %s", whitespaces_str.raw(), entry.name.raw());;
-                if (entry.is_dir) {
-                        spaces++;
+                logger.info("* %s", entry.name.raw());;
+                if (entry.is_dir)
                         __test_ls(path + entry.name);
-                }
         }
 }
 
@@ -162,8 +156,9 @@ extern "C" void kernel_main()
 
         pmm::init_stage1(bootinfo.memmap);
 
-        vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
-        vmm::load();
+        u64 *kpml4t = vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+        vmm::load(kpml4t);
+        set_kernel_pml4t(kpml4t);
 
         heap::init();
 
@@ -198,11 +193,15 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
+        // I don't know why but if the output environment is serial, then I can
+        // create a PML4T for a process.
+        // However, if the output environment is console, I get a panic when allocating
+        // a frame using `kernel::mem::pmm::allocate_frame()`
         Process p1, p2;
         proc_init(&p1, allocate_pid(), proc1);
-        logger.debug("p1 PID = %d", p1.id);
+        create_address_space(&p1);
         proc_init(&p2, allocate_pid(), proc2);
-        logger.debug("p2 PID = %d", p2.id);
+        create_address_space(&p2);
 
         scheduler::add_process(&p1);
         scheduler::add_process(&p2);

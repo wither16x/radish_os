@@ -12,15 +12,16 @@ enum PageFlag : lib::u64 {
         NoExec          = 1ull << 63
 };
 
-void init(
+lib::u64 *init(
         lib::u64 hhdm_base,
         boot::BootInfo::ExecutableInfo &exec_info,
         boot::BootInfo::MemmapInfo &_memmap_info
 );
-void load();
+void load(lib::u64 *pml4t);
+lib::u64 *create_pml4t(lib::u64 *parent);
 
-void map_page(lib::uptr virt, lib::uptr phys, lib::u64 flags);
-void unmap_page(lib::uptr virt);
+void map_page(lib::u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags);
+void unmap_page(lib::u64 *pml4t, lib::uptr virt);
 
 // Helpers
 // --------------------------------------------------------

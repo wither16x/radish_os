@@ -22,9 +22,11 @@ struct Process {
         lib::u64 flags;
         lib::u64 rsp;
         lib::u64 ss;
+        lib::u64 cr2, cr3;
 
         // each process has its own stack
         lib::u8 stack[PROCESS_STACK_SIZE];
+        lib::uptr *pml4t;
 };
 
 // Note that the entry point of a process must return nothing and takes no
@@ -32,5 +34,6 @@ struct Process {
 void proc_init(Process *p, int id, void (*entry)());
 // Return a PID choosen automatically
 int allocate_pid();
+void create_address_space(Process *p);
 
 } /* namespace kernel::proc */

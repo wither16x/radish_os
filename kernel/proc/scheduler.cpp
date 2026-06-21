@@ -75,6 +75,8 @@ void tick(cpu::IRQFrame *frame)
         old_proc->flags = frame->flags | (1 << 9);
         old_proc->rsp   = frame->rsp;
         old_proc->ss    = frame->ss;
+        old_proc->cr2   = frame->cr2;
+        old_proc->cr3   = frame->cr3;
 
         frame->rax      = new_proc->rax;
         frame->rbx      = new_proc->rbx;
@@ -96,6 +98,8 @@ void tick(cpu::IRQFrame *frame)
         frame->flags    = new_proc->flags | (1 << 9);
         frame->rsp      = new_proc->rsp;
         frame->ss       = new_proc->ss;
+        frame->cr2      = new_proc->cr2;
+        frame->cr3      = new_proc->cr3;
 
         curr_proc = new_proc;
 }

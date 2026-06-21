@@ -21,7 +21,8 @@ public:
                         lib::usize start = this->last_allocated;
 
                         do {
-                                if (!this->bitmap.test(this->last_allocated))
+                                bool state = this->bitmap.test(this->last_allocated);
+                                if (!state)
                                         break;
                                 
                                 this->last_allocated++;

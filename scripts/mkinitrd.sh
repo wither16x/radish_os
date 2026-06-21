@@ -2,6 +2,8 @@
 
 set -e
 
-mkdir -p .build_initrd
+mkdir -p initrd/bin
+nasm -f bin userspace/test.asm -o initrd/bin/test.bin
 
-tar --format=ustar -cf .build_initrd/initrd.tar -C initrd . 
+mkdir -p .build_initrd
+tar --format=ustar -cf .build_initrd/initrd.tar -C initrd .
