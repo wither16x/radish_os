@@ -1,10 +1,10 @@
 #pragma once
 
-#include <lib/alloc.hpp>
+#include <lib/vector.hpp>
 #include <lib/typing.hpp>
 
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
+// I have serious doubts on my bits/bytes operations not
+// gonna lie.
 
 namespace kernel::lib {
 
@@ -66,16 +66,17 @@ private:
 };
 
 // This bitmap can extend itself
+// ------------------------------------------------
+// I refactored this class by replacing the raw
+// pointer used to represent the bitmap data by
+// a Vector instance. So I guess that having a
+// length member is now useless, then consider the
+// refactoring as unfinished.
 class DynamicBitmap {
 public:
-        ~DynamicBitmap()
-        {
-                delete[] this->data;
-        }
-
         void init(this DynamicBitmap &self, usize len)
         {
-                self.data = new u64[len];
+                self.data.resize(len);
                 self.length = len;
         }
 
@@ -116,22 +117,6 @@ public:
                         self.clear(i);
         }
 
-        // Add bits to the bitmap
-        void extend(this DynamicBitmap &self)
-        {
-                usize old_length = self.length;                
-                self.length *= 2;
-
-                u64 *new_data = new u64[self.length];
-                for (usize i = 0; i < old_length; ++i)
-                        new_data[i] = self.data[i];
-                for (usize i = old_length; i < self.length; ++i)
-                        new_data[i] = 0;
-
-                delete[] self.data;
-                self.data = new_data;
-        }
-
         usize size(this const DynamicBitmap &self)
         {
                 return self.length;
@@ -140,10 +125,8 @@ public:
 private:
         static constexpr usize BITS_PER_WORD = sizeof(u64) * 8;
 
-        // Since the length of the bitmap can change, the amount of words
-        // cannot be a constant like in `StaticBitmap` 
         usize length;
-        u64 *data;
+        Vector<u64> data;
 
         static constexpr usize get_index(usize bit)
         {

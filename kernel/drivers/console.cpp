@@ -4,10 +4,12 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <lib/vector.hpp>
 
 using kernel::lib::String;
 using kernel::lib::read_file, kernel::lib::getfilesz;
 using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::usize;
+using kernel::lib::Vector;
 
 using kernel::lib::log::logger;
 
@@ -118,6 +120,11 @@ bool Console::is_active(this const Console &self)
         return self.active;
 }
 
+const Vector<u8> &Console::get_font_data(this const Console &self)
+{
+        return self.font_data;
+}
+
 void Console::draw_char_at(this Console &self, char ch, int px, int py, u32 color)
 {
         u32 idx = static_cast<u8>(ch);
@@ -143,14 +150,14 @@ void Console::scroll(this Console &self)
 
 // Functions
 // -------------------------------------------------------------------------
-void set_console(Console console)
+void set_console(const Console &console)
 {
         current_console = console;
 }
 
-Console *get_console()
+Console &get_console()
 {
-        return &current_console;
+        return current_console;
 }
 // -------------------------------------------------------------------------
 

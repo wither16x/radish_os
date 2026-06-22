@@ -17,6 +17,7 @@ public:
         void draw_char(this Console &self, char ch, lib::u32 color);
 
         bool is_active(this const Console &self);
+        const lib::Vector<lib::u8> &get_font_data(this const Console &self);
 
 private:
         lib::u64 cursor_x;
@@ -39,7 +40,7 @@ private:
         void scroll(this Console &self);
 };
 
-void set_console(Console console);
-Console *get_console();
+void set_console(const Console &console);
+Console &get_console();
 
 } /* namespace kernel::drivers::console */

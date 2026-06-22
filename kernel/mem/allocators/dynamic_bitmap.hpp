@@ -28,7 +28,7 @@ public:
                                 this->last_allocated++;
 
                                 if (this->last_allocated >= this->bitmap.size())
-                                        this->bitmap.extend();
+                                        panic("out of memory");
                         } while (this->last_allocated != start);
 
                         this->bitmap.set(this->last_allocated);

@@ -27,7 +27,7 @@ public:
                                 this->last_allocated++;
 
                                 if (this->last_allocated >= SIZE)
-                                        panic("out of available space");
+                                        panic("out of memory");
                         } while (this->last_allocated != start);
 
                         this->bitmap.set(this->last_allocated);

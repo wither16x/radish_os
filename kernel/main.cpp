@@ -97,8 +97,8 @@ void init_console()
 {
         console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
         console::set_console(kconsole);
-        console::Console *console = console::get_console();
-        console->init_font("I:/fonts/zap-light20.psf");
+        console::Console &console = console::get_console();
+        console.init_font("I:/fonts/zap-light20.psf");
 
         logger.ok("initialized console");
         logger.info("framebuffer should now be used for display");

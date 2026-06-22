@@ -83,9 +83,9 @@ void putchar(int ch)
         if (ansi_seq_start && (ch == 'm' || ch == '['))
                 return;
 
-        drivers::console::Console *console = drivers::console::get_console();
-        if (console->is_active())
-                console->draw_char(ch, color);
+        drivers::console::Console &console = drivers::console::get_console();
+        if (console.is_active())
+                console.draw_char(ch, color);
         else
                 drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
 }
