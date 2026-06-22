@@ -4,7 +4,7 @@
 #include <lib/vector.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
-#include <proc/loader.hpp>
+#include <proc/elf.hpp>
 
 using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
@@ -12,7 +12,7 @@ using kernel::lib::Vector;
 using kernel::lib::getfilesz, kernel::lib::read_file;
 using kernel::lib::memcpy;
 
-namespace kernel::proc {
+namespace kernel::proc::elf {
 
 void load_program(u64 *pml4t, const String &path, uptr address, uptr hhdm)
 {
@@ -33,4 +33,4 @@ void load_program(u64 *pml4t, const String &path, uptr address, uptr hhdm)
         memcpy(reinterpret_cast<void *>(hhdm + frame), buf.get_data(), buf.size());
 }
 
-} /* namespace kernel::proc */
+} /* namespace kernel::proc::elf */
