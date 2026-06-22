@@ -1,3 +1,4 @@
+#include "lib/vector.hpp"
 #include <kernel.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
@@ -124,20 +125,6 @@ void kernel_hang()
         panic("nothing to do");
 }
 
-void proc1()
-{
-        u64 i = 0;
-        while (true)
-                kernel::lib::println("proc1: i = %u", i++);
-}
-
-void proc2()
-{
-        u64 i = 0;
-        while (true)
-                kernel::lib::println("proc2: i = %u", i++);
-}
-
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())
@@ -195,18 +182,23 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        Process p1(allocate_pid(), proc1);
-        Process p2(allocate_pid(), proc2);
+        kernel::lib::Vector<kernel::lib::u8> test_bin;
+        kernel::lib::usize test_bin_sz = 0;
+        kernel::lib::getfilesz("I:/bin/test.bin", &test_bin_sz);
+        test_bin.resize(test_bin_sz);
+        kernel::lib::read_file("I:/bin/test.bin", reinterpret_cast<char *>(test_bin.get_data()), test_bin_sz);
 
-        scheduler::add_process(&p1);
-        scheduler::add_process(&p2);
+        void (*test_entry)() = reinterpret_cast<void (*)()>(test_bin.get_data());
+        Process test_proc(allocate_pid(), test_entry);
+
+        scheduler::add_process(&test_proc);
 
         scheduler::init();
 
         // Snippet to execute a process `p`.
         // This only needs to be done once.
         // --------------------------------------
-        scheduler::set_current_process(&p1);
+        scheduler::set_current_process(&test_proc);
         Process *p = scheduler::get_current_process();
         __asm__ volatile (
                 "mov %0, %%rsp\n"
