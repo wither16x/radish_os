@@ -75,7 +75,6 @@ public:
 
         void init(this DynamicBitmap &self, usize len)
         {
-                //logger.debug("len = 0x%x", len);
                 self.data = new u64[len];
                 self.length = len;
         }
@@ -94,21 +93,14 @@ public:
 
         bool test(this const DynamicBitmap &self,usize bit)
         {
-                //logger.debug("testing bit 0x%x...", bit);
                 if (bit < self.length) {
-                        //logger.debug("bit is in bounds");
                         usize idx = self.get_index(bit);
-                        //logger.debug("index = 0x%x", idx);
                         u64 mask = self.get_mask(bit);
-                        //logger.debug("mask = 0x%x", mask);
-                        //logger.debug("self.length = 0x%x", self.length);
                         u64 word = self.data[idx] & mask;
-                        //logger.debug("word = 0x%x", word);
                         bool ret = word != 0;
-                        //logger.debug("ret = %u", ret);
                         return ret;
                 }
-                //logger.debug("bit is not in bounds");
+
                 return false;
         }
 
