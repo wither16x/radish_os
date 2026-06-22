@@ -11,7 +11,7 @@ class Process {
 public:
         // It is recommended to use `allocate_pid()` instead
         // of assigning a PID manually
-        Process(int id, void (*entry)());
+        Process(int id, void (*entry)(), lib::u64 *pml4t);
 
         void load(this Process &self);
 

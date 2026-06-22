@@ -9,6 +9,7 @@ constexpr lib::usize PAGE_BYTES = 0x1000;         // 4 KiB
 
 enum PageFlag : lib::u64 {
         ReadWrite       = 0x03,
+        ReadExec        = 0x05,
         NoExec          = 1ull << 63
 };
 

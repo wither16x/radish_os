@@ -1,4 +1,3 @@
-#include "lib/vector.hpp"
 #include <kernel.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
@@ -21,9 +20,9 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
+#include <proc/loader.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
-#include <lib/print.hpp>
 
 using namespace kernel::drivers;
 using namespace kernel::fs;
@@ -182,14 +181,10 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        kernel::lib::Vector<kernel::lib::u8> test_bin;
-        kernel::lib::usize test_bin_sz = 0;
-        kernel::lib::getfilesz("I:/bin/test.bin", &test_bin_sz);
-        test_bin.resize(test_bin_sz);
-        kernel::lib::read_file("I:/bin/test.bin", reinterpret_cast<char *>(test_bin.get_data()), test_bin_sz);
-
-        void (*test_entry)() = reinterpret_cast<void (*)()>(test_bin.get_data());
-        Process test_proc(allocate_pid(), test_entry);
+        u64 *test_proc_pml4t = vmm::create_pml4t(kernel::get_kernel_pml4t());
+        load_program(test_proc_pml4t, "I:/bin/test.bin", 0x400000, bootinfo.hhdm.offset);
+        void (*test_entry)() = reinterpret_cast<void (*)()>(0x400000);
+        Process test_proc(allocate_pid(), test_entry, test_proc_pml4t);
 
         scheduler::add_process(&test_proc);
 
@@ -198,14 +193,15 @@ extern "C" void kernel_main()
         // Snippet to execute a process `p`.
         // This only needs to be done once.
         // --------------------------------------
-        scheduler::set_current_process(&test_proc);
-        Process *p = scheduler::get_current_process();
-        __asm__ volatile (
-                "mov %0, %%rsp\n"
-                "iretq\n"
-                :
-                : "r"(p->rsp)
-        );
+        // scheduler::set_current_process(&test_proc);
+        // Process *p = scheduler::get_current_process();
+        // p->load();
+        // __asm__ volatile (
+        //         "mov %0, %%rsp\n"
+        //         "iretq\n"
+        //         :
+        //         : "r"(p->rsp)
+        // );
 
         unmount_initrd();
 

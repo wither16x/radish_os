@@ -16,7 +16,7 @@ int curr_pid = 0;
 
 } /* anonymous namespace */
 
-Process::Process(int id, void (*entry)())
+Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
 {
         this->id = id;
         this->entry = entry;
@@ -38,8 +38,7 @@ Process::Process(int id, void (*entry)())
         this->ss = 0x10;
         this->flags = (1 << 9);
 
-        u64 *kpml4t = get_kernel_pml4t();
-        this->pml4t = mem::vmm::create_pml4t(kpml4t);
+        this->pml4t = pml4t;
 }
 
 void Process::load(this Process &self)
