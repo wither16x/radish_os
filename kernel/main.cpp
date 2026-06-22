@@ -195,15 +195,8 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        // I don't know why but if the output environment is serial, then I can
-        // create a PML4T for a process.
-        // However, if the output environment is console, I get a panic when allocating
-        // a frame using `kernel::mem::pmm::allocate_frame()`
-        Process p1, p2;
-        proc_init(&p1, allocate_pid(), proc1);
-        create_address_space(&p1);
-        proc_init(&p2, allocate_pid(), proc2);
-        create_address_space(&p2);
+        Process p1(allocate_pid(), proc1);
+        Process p2(allocate_pid(), proc2);
 
         scheduler::add_process(&p1);
         scheduler::add_process(&p2);

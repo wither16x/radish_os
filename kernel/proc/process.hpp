@@ -7,7 +7,14 @@ namespace kernel::proc {
 
 constexpr lib::usize PROCESS_STACK_SIZE = 0x1000;       // 4 KiB
 
-struct Process {
+class Process {
+public:
+        // It is recommended to use `allocate_pid()` instead
+        // of assigning a PID manually
+        Process(int id, void (*entry)());
+
+        void load(this Process &self);
+
         void (*entry)();
         int id;
         lib::u64 time;  // elapsed time in ms
@@ -29,12 +36,7 @@ struct Process {
         lib::uptr *pml4t;
 };
 
-// Note that the entry point of a process must return nothing and takes no
-// parameter (this may change in the future)
-void proc_init(Process *p, int id, void (*entry)());
-// Return a PID choosen automatically
+// // Return a PID choosen automatically
 int allocate_pid();
-void create_address_space(Process *p);
-void load_address_space(Process *p);
 
 } /* namespace kernel::proc */

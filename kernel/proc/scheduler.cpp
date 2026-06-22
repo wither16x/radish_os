@@ -102,7 +102,7 @@ void tick(cpu::IRQFrame *frame)
         frame->cr3      = new_proc->cr3;
 
         curr_proc = new_proc;
-        load_address_space(new_proc);
+        new_proc->load();
 }
 
 bool is_active()
