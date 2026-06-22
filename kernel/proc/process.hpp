@@ -35,5 +35,6 @@ void proc_init(Process *p, int id, void (*entry)());
 // Return a PID choosen automatically
 int allocate_pid();
 void create_address_space(Process *p);
+void load_address_space(Process *p);
 
 } /* namespace kernel::proc */

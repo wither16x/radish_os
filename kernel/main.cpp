@@ -126,14 +126,16 @@ void kernel_hang()
 
 void proc1()
 {
+        u64 i = 0;
         while (true)
-                kernel::lib::println("one");
+                kernel::lib::println("proc1: i = %u", i++);
 }
 
 void proc2()
 {
+        u64 i = 0;
         while (true)
-                kernel::lib::println("two");
+                kernel::lib::println("proc2: i = %u", i++);
 }
 
 extern "C" void kernel_main()
@@ -207,17 +209,18 @@ extern "C" void kernel_main()
         scheduler::add_process(&p2);
 
         scheduler::init();
-        // snippet to execute a process `p`
-        // this only needs to be done once
+
+        // Snippet to execute a process `p`.
+        // This only needs to be done once.
         // --------------------------------------
-        // scheduler::set_current_process(&p1);
-        // Process *p = scheduler::get_current_process();
-        // __asm__ volatile (
-        //         "mov %0, %%rsp\n"
-        //         "iretq\n"
-        //         :
-        //         : "r"(p->rsp)
-        // );
+        scheduler::set_current_process(&p1);
+        Process *p = scheduler::get_current_process();
+        __asm__ volatile (
+                "mov %0, %%rsp\n"
+                "iretq\n"
+                :
+                : "r"(p->rsp)
+        );
 
         unmount_initrd();
 

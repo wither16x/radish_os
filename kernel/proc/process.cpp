@@ -6,9 +6,6 @@
 #include <proc/scheduler.hpp>
 #include <panic.hpp>
 
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
-
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 
 namespace kernel::proc {
@@ -51,6 +48,11 @@ void create_address_space(Process *p)
 {
         u64 *kpml4t = get_kernel_pml4t();
         p->pml4t = mem::vmm::create_pml4t(kpml4t);
+}
+
+void load_address_space(Process *p)
+{
+        mem::vmm::load(p->pml4t);
 }
 
 } /* namespace kernel::proc */
