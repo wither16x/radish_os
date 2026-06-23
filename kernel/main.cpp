@@ -20,7 +20,7 @@
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <panic.hpp>
-#include <proc/loader.hpp>
+#include <proc/elf.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 
@@ -182,10 +182,12 @@ extern "C" void kernel_main()
         __test_ls("I:/");
 
         u64 *test_proc_pml4t = vmm::create_pml4t(kernel::get_kernel_pml4t());
-        load_program(test_proc_pml4t, "I:/bin/test.bin", 0x400000, bootinfo.hhdm.offset);
+        int res = elf::load_elf(test_proc_pml4t, "I:/bin/test", bootinfo.hhdm.offset);
+        if (res == -1)
+                logger.err("file is not valid");
+
         void (*test_entry)() = reinterpret_cast<void (*)()>(0x400000);
         Process test_proc(allocate_pid(), test_entry, test_proc_pml4t);
-
         scheduler::add_process(&test_proc);
 
         scheduler::init();
@@ -193,15 +195,15 @@ extern "C" void kernel_main()
         // Snippet to execute a process `p`.
         // This only needs to be done once.
         // --------------------------------------
-        // scheduler::set_current_process(&test_proc);
-        // Process *p = scheduler::get_current_process();
-        // p->load();
-        // __asm__ volatile (
-        //         "mov %0, %%rsp\n"
-        //         "iretq\n"
-        //         :
-        //         : "r"(p->rsp)
-        // );
+        scheduler::set_current_process(&test_proc);
+        Process *p = scheduler::get_current_process();
+        p->load();
+        __asm__ volatile (
+                "mov %0, %%rsp\n"
+                "iretq\n"
+                :
+                : "r"(p->rsp)
+        );
 
         unmount_initrd();
 

@@ -55,7 +55,7 @@ enum ISAType : lib::u16 {
 };
 
 struct [[gnu::packed]] ELFHeader {
-        lib::u32 magic;         // 0x7f 'E' 'L' 'F'
+        lib::u8  magic[4];      // 0x7f 'E' 'L' 'F'
         lib::u8  machine;       // 1 = 32-bit, 2 = 64-bit
         lib::u8  endian;        // 1 = little, 2 = big
         lib::u8  hdr_version;
@@ -76,6 +76,19 @@ struct [[gnu::packed]] ELFHeader {
         lib::u16 hdr_str_table;
 };
 
+struct [[gnu::packed]] SectionHeader {
+        lib::u32 name;
+        lib::u32 type;
+        lib::u64 flags;
+        lib::u64 addr;
+        lib::u64 off;
+        lib::u64 size;
+        lib::u32 link;
+        lib::u32 info;
+        lib::u64 addralign;
+        lib::u64 entsize;
+};
+
 struct [[gnu::packed]] ProgramHeader {
         lib::u32 segment_type;
         lib::u32 flags;
@@ -89,6 +102,6 @@ struct [[gnu::packed]] ProgramHeader {
 
 // pml4t: pml4 table of the process
 // hhdm: hhdm offset
-void load_program(lib::u64 *pml4t, const lib::String &path, lib::uptr address, lib::uptr hhdm);
+int load_elf(lib::u64 *pml4t, const lib::String &path, lib::uptr hhdm);
 
 } /* namespace kernel::proc::elf */
