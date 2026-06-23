@@ -195,15 +195,15 @@ extern "C" void kernel_main()
         // Snippet to execute a process `p`.
         // This only needs to be done once.
         // --------------------------------------
-        scheduler::set_current_process(&test_proc);
-        Process *p = scheduler::get_current_process();
-        p->load();
-        __asm__ volatile (
-                "mov %0, %%rsp\n"
-                "iretq\n"
-                :
-                : "r"(p->rsp)
-        );
+        // scheduler::set_current_process(&test_proc);
+        // Process *p = scheduler::get_current_process();
+        // p->load();
+        // __asm__ volatile (
+        //         "mov %0, %%rsp\n"
+        //         "iretq\n"
+        //         :
+        //         : "r"(p->rsp)
+        // );
 
         unmount_initrd();
 

@@ -5,99 +5,90 @@
 
 namespace kernel::proc::elf {
 
-enum MachineType : lib::u8 {
-        Bit32   = 1,
-        Bit64
+constexpr int EI_NIDENT = 16;
+
+enum ELF64Magic : unsigned char {
+        Index0          = 0,
+        Index1,
+        Index2,
+        Index3,
+        Byte0           = 0x7f,
+        Byte1           = 'E',
+        Byte2           = 'L',
+        Byte3           = 'F'
 };
 
-enum EndianType : lib::u8 {
-        LittleEndian = 1,
-        BigEndian
+// ELF64 specific types
+using elf64_half                = lib::u16;
+using elf64_word                = lib::u32;
+using elf64_sword               = lib::i32;
+using elf64_xword               = lib::u64;
+using elf64_sxword              = lib::i64;
+using elf64_addr                = lib::u64;
+using elf64_off                 = lib::u64;
+using elf64_section             = lib::u16;
+using elf64_versym              = elf64_half;
+
+enum ELF64Type : elf64_half {
+        ELF64TypeExec           = 2
 };
 
-enum ABIType : lib::u8 {
-        SystemV
+enum SHN : int {
+        SHNUndef
 };
 
-enum ELFType : lib::u8 {
-        Relocatable = 1,
-        Executable,
-        Shared,
-        Core
+// eh = ELF header
+// ph = program header
+// sh = section header
+
+struct ELF64Ehdr {
+        unsigned char   e_ident[EI_NIDENT];
+        elf64_half      e_type;
+        elf64_half      e_machine;
+        elf64_word      e_version;
+        elf64_addr      e_entry;
+        elf64_off       e_phoff;
+        elf64_off       e_shoff;
+        elf64_word      e_flags;
+        elf64_half      e_ehsize;
+        elf64_half      e_phentsize;
+        elf64_half      e_phnum;
+        elf64_half      e_shentsize;
+        elf64_half      e_shnum;
+        elf64_half      e_shstrndx;
 };
 
-enum ELFVersion : lib::u32 {
-        Version1 = 1
+struct ELF64Shdr {
+        elf64_word      sh_name;
+        elf64_word      sh_type;
+        elf64_xword     sh_flags;
+        elf64_addr      sh_addr;
+        elf64_off       sh_offset;
+        elf64_xword     sh_size;
+        elf64_word      sh_link;
+        elf64_word      sh_info;
+        elf64_xword     sh_addralign;
+        elf64_xword     sh_entsize;
 };
 
-enum FlagType : lib::u32 {
-        FExecutable = 1,
-        FWritable,
-        FReadable = 4
+struct ELF64Phdr {
+        elf64_word      p_type;
+        elf64_word      p_flags;
+        elf64_off       p_offset;
+        elf64_addr      p_vaddr;
+        elf64_addr      p_paddr;
+        elf64_xword     p_filesz;
+        elf64_xword     p_memsz;
+        elf64_xword     p_align;
 };
 
-enum ISAType : lib::u16 {
-        NoSpecific,
-        Sparc           = 0x02,
-        x86,
-        MIPS            = 0x08,
-        PARISC          = 0x0f,
-        PowerPC32       = 0x14,
-        PowerPC64       = 0x15,
-        S390            = 0x16,
-        ARM             = 0x28,
-        Alpha           = 0x29,
-        SuperH          = 0x2a,
-        IA64            = 0x32,
-        x86_64          = 0x3e,
-        AArch64         = 0xb7,
-        RISCV           = 0xf3
-};
-
-struct [[gnu::packed]] ELFHeader {
-        lib::u8  magic[4];      // 0x7f 'E' 'L' 'F'
-        lib::u8  machine;       // 1 = 32-bit, 2 = 64-bit
-        lib::u8  endian;        // 1 = little, 2 = big
-        lib::u8  hdr_version;
-        lib::u8  abi;
-        lib::u64 __padding;
-        lib::u16 type;
-        lib::u16 isa;
-        lib::u32 elf_version;
-        lib::u64 entry_offset;
-        lib::u64 prog_hdr_table_offset;
-        lib::u64 prog_sect_table_offset;
-        lib::u32 flags;
-        lib::u16 hdr_size;
-        lib::u16 prog_hdr_table_entry_size;
-        lib::u16 prog_hdr_table_entry_count;
-        lib::u16 prog_hdr_sect_entry_size;
-        lib::u16 prog_hdr_sect_entry_count;
-        lib::u16 hdr_str_table;
-};
-
-struct [[gnu::packed]] SectionHeader {
-        lib::u32 name;
-        lib::u32 type;
-        lib::u64 flags;
-        lib::u64 addr;
-        lib::u64 off;
-        lib::u64 size;
-        lib::u32 link;
-        lib::u32 info;
-        lib::u64 addralign;
-        lib::u64 entsize;
-};
-
-struct [[gnu::packed]] ProgramHeader {
-        lib::u32 segment_type;
-        lib::u32 flags;
-        lib::u64 p_offset;
-        lib::u64 p_vaddr;
-        lib::u64 p_paddr;
-        lib::u64 p_filesz;
-        lib::u64 p_memsz;       // at least as big as p_filesz
-        lib::u64 section_alignment;
+struct ELF64Sym {
+        elf64_word      st_name;
+        unsigned char   st_info;
+        unsigned char   st_other;
+        elf64_section   st_shndx;
+        elf64_addr      st_value;
+        elf64_xword     st_size;
 };
 
 // pml4t: pml4 table of the process
