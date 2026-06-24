@@ -21,11 +21,6 @@ bool active = false;
 
 void init()
 {
-        if (processes.size() == 0) {
-                logger.err("tried to initialize scheduler with no processes");
-                return;
-        }
-
         curr_proc_idx = 0;
         curr_proc = processes[curr_proc_idx];
         active = true;

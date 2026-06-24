@@ -43,8 +43,10 @@ int elf_check(ELF64Ehdr *hdr)
 
 } /* anonymous namespace */
 
-int load_elf(u64 *pml4t, const String &path, uptr hhdm, uptr *addr)
+int load_elf(u64 *pml4t, const String &path, uptr *addr)
 {
+        uptr hhdm = get_kernel_hhdm_offset();
+
         // read the file
         Vector<u8> buf;
         usize size = 0;

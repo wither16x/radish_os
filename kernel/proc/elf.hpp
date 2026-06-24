@@ -93,6 +93,6 @@ struct ELF64Sym {
 
 // pml4t: pml4 table of the process
 // hhdm: hhdm offset
-int load_elf(lib::u64 *pml4t, const lib::String &path, lib::uptr hhdm, lib::uptr *addr);
+int load_elf(lib::u64 *pml4t, const lib::String &path, lib::uptr *addr);
 
 } /* namespace kernel::proc::elf */

@@ -21,7 +21,7 @@
 #include <mem/vmm.hpp>
 #include <panic.hpp>
 #include <proc/elf.hpp>
-#include <proc/process.hpp>
+#include <proc/exec.hpp>
 #include <proc/scheduler.hpp>
 
 using namespace kernel::drivers;
@@ -38,7 +38,7 @@ using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_ma
 using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT;
-using kernel::set_kernel_pml4t;
+using kernel::set_kernel_pml4t, kernel::set_kernel_hhdm_offset;
 
 namespace {
 
@@ -141,6 +141,7 @@ extern "C" void kernel_main()
         idt.load();
 
         BootInfo bootinfo;
+        set_kernel_hhdm_offset(bootinfo.hhdm.offset);
 
         pmm::init_stage1(bootinfo.memmap);
 
@@ -181,30 +182,9 @@ extern "C" void kernel_main()
 
         __test_ls("I:/");
 
-        u64 *test_proc_pml4t = vmm::create_pml4t(kernel::get_kernel_pml4t());
-        uptr proc_addr = 0;
-        int res = elf::load_elf(test_proc_pml4t, "I:/bin/test", bootinfo.hhdm.offset, &proc_addr);
-        if (res == -1)
-                logger.err("failed to load elf");
-
-        void (*test_entry)() = reinterpret_cast<void (*)()>(proc_addr);
-        Process test_proc(allocate_pid(), test_entry, test_proc_pml4t);
-        scheduler::add_process(&test_proc);
-
         scheduler::init();
 
-        // Snippet to execute a process `p`.
-        // This only needs to be done once.
-        // --------------------------------------
-        scheduler::set_current_process(&test_proc);
-        Process *p = scheduler::get_current_process();
-        p->load();
-        __asm__ volatile (
-                "mov %0, %%rsp\n"
-                "iretq\n"
-                :
-                : "r"(p->rsp)
-        );
+        exec("I:/bin/test");
 
         unmount_initrd();
 
