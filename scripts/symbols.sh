@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 KERNEL_MAP=".symbols_data/kernel.map"
 SYM_HDR="kernel/kernel_sym_entries.h"
 
