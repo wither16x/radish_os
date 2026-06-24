@@ -1,6 +1,8 @@
 [bits 64]
 
 section .text
+global _start
+
 _start:
         mov rax, [constant]
         mov rbx, [random_qword]
