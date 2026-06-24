@@ -88,11 +88,12 @@ int load_elf(u64 *pml4t, const String &path, uptr hhdm)
         if (is_file_valid != 0)
                 return -1;
 
-        Vector<ELF64Phdr *> phdrs;
-        phdrs.resize(hdr->e_phnum);
 
         logger.debug("parsing program headers");
         logger.debug("------------------------------");
+
+        Vector<ELF64Phdr *> phdrs;
+        phdrs.resize(hdr->e_phnum);
 
         uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
         logger.debug("1st PHDR offset = 0x%x", phdr_offset);
@@ -101,6 +102,21 @@ int load_elf(u64 *pml4t, const String &path, uptr hhdm)
                 logger.debug("phdr#%u.vaddr = 0x%x", i, phdr->p_vaddr);
         
                 phdrs.push_back(phdr);
+        }
+
+        logger.debug("parsing section headers");
+        logger.debug("------------------------------");
+
+        Vector<ELF64Shdr *> shdrs;
+        phdrs.resize(hdr->e_phnum);
+
+        uptr shdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_shoff;
+        logger.debug("1st SHDR offset = 0x%x", shdr_offset);
+        for (elf64_half i = 0; i < hdr->e_shnum; i++) {
+                ELF64Shdr *shdr = reinterpret_cast<ELF64Shdr *>(shdr_offset + i * hdr->e_shentsize);
+                logger.debug("shdr#%u.addralign = 0x%x", i, shdr->sh_addralign);
+        
+                shdrs.push_back(shdr);
         }
 
         // since the buffer is allocated on the heap, the pages it is on are
