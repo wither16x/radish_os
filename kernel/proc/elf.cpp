@@ -1,23 +1,26 @@
 #include <kernel.hpp>
 #include <lib/filesystem.hpp>
+#include <lib/math.hpp>
 #include <lib/memory.hpp>
 #include <lib/vector.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <proc/elf.hpp>
 
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
-
 using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
 using kernel::lib::getfilesz, kernel::lib::read_file;
-using kernel::lib::memcpy;
+using kernel::lib::memcpy, kernel::lib::memset;
+using kernel::lib::min;
 
 namespace kernel::proc::elf {
 
 namespace {
+
+enum PHDRType : elf64_word {
+        PHDRTypeLoad            = 1
+};
 
 int elf_check(ELF64Ehdr *hdr)
 {
@@ -42,46 +45,52 @@ int elf_check(ELF64Ehdr *hdr)
 
 int load_elf(u64 *pml4t, const String &path, uptr hhdm, uptr *addr)
 {
-        logger.debug("loading %s", path.raw());
-        logger.debug("------------------------------");
-
         // read the file
         Vector<u8> buf;
         usize size = 0;
-
         getfilesz(path, &size);
         buf.resize(size);
-
         read_file(path, reinterpret_cast<char *>(buf.get_data()), size);
 
         // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
-
         int is_file_valid = elf_check(hdr);
         if (is_file_valid != 0)
                 return -1;
 
-        logger.debug("parsing program headers");
-        logger.debug("------------------------------");
         uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
-        uptr required_size = 0;
+
         for (elf64_half i = 0; i < hdr->e_phnum; i++) {
                 ELF64Phdr *phdr = reinterpret_cast<ELF64Phdr *>(phdr_offset + i * hdr->e_phentsize);        
-                required_size += phdr->p_memsz;
+                if (phdr->p_type != PHDRType::PHDRTypeLoad)
+                        continue;
+
+                usize pages = (phdr->p_memsz + mem::vmm::PAGE_BYTES - 1) / mem::vmm::PAGE_BYTES;
+                for (usize j = 0; j < pages; j++) {
+                        // since the buffer containing the data is allocated on the heap, it cannot
+                        // be executed as all heap pages are NX, so we copy the data from these pages
+                        // to new RX pages
+                        uptr frame = mem::pmm::allocate_frame();
+                        uptr vaddr = phdr->p_vaddr + j * mem::vmm::PAGE_BYTES;
+                        mem::vmm::map_page(pml4t, vaddr, frame, mem::vmm::PageFlag::ReadExec);
+
+                        memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::vmm::PAGE_BYTES);
+
+                        uptr src_off = phdr->p_offset + j * mem::vmm::PAGE_BYTES;
+                        // we need the offset between pages as it may not be mapped otherwise
+                        uptr intra_offset = phdr->p_vaddr & (mem::vmm::PAGE_BYTES - 1);
+                        usize to_copy = min(mem::vmm::PAGE_BYTES, phdr->p_filesz - j * mem::vmm::PAGE_BYTES);
+                        if (to_copy > 0) {
+                                memcpy(
+                                        reinterpret_cast<void *>(hhdm + frame + (j == 0 ? intra_offset : 0)),
+                                        buf.get_data() + src_off,
+                                        to_copy
+                                );
+                        }
+                }
         }
 
-        usize required_pages = (required_size + mem::vmm::PAGE_BYTES - 1) / mem::vmm::PAGE_BYTES;
-        logger.debug("pages needed: %u", required_pages);
-
-        // since the buffer is allocated on the heap, the pages it is on are
-        // not executable, so we need to copy its content to a new executable
-        // page
-        for (usize i = 1; i <= required_pages; i++) {
-                uptr frame = mem::pmm::allocate_frame();
-                mem::vmm::map_page(pml4t, hdr->e_entry, frame, mem::vmm::PageFlag::ReadExec);
-                memcpy(reinterpret_cast<void *>(hhdm + frame), buf.get_data() + mem::vmm::PAGE_BYTES * i, mem::vmm::PAGE_BYTES);
-        }
-
+        // copy the entry address
         memcpy(addr, &hdr->e_entry, sizeof(*addr));
 
         return 0;
