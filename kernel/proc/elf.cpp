@@ -38,36 +38,9 @@ int elf_check(ELF64Ehdr *hdr)
         return 0;
 }
 
-inline ELF64Shdr *get_section_header(ELF64Ehdr *hdr)
-{
-        return reinterpret_cast<ELF64Shdr *>(
-                reinterpret_cast<u64>(hdr) + hdr->e_shoff
-        );
-}
-
-inline ELF64Shdr *get_section(ELF64Ehdr *hdr, u64 idx)
-{
-        return &get_section_header(hdr)[idx];
-}
-
-inline char *get_string_table(ELF64Ehdr *hdr)
-{
-        if (hdr->e_shstrndx == SHN::SHNUndef)
-                return nullptr;
-        return reinterpret_cast<char *>(hdr) + get_section(hdr, hdr->e_shstrndx)->sh_offset;
-}
-
-inline char *lookup_string(ELF64Ehdr *hdr, u64 offset)
-{
-        char *string_table = get_string_table(hdr);
-        if (!string_table)
-                return nullptr;
-        return string_table + offset;
-}
-
 } /* anonymous namespace */
 
-int load_elf(u64 *pml4t, const String &path, uptr hhdm)
+int load_elf(u64 *pml4t, const String &path, uptr hhdm, uptr *addr)
 {
         logger.debug("loading %s", path.raw());
         logger.debug("------------------------------");
@@ -83,48 +56,33 @@ int load_elf(u64 *pml4t, const String &path, uptr hhdm)
 
         // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
-        
+
         int is_file_valid = elf_check(hdr);
         if (is_file_valid != 0)
                 return -1;
 
-
         logger.debug("parsing program headers");
         logger.debug("------------------------------");
-
-        Vector<ELF64Phdr *> phdrs;
-        phdrs.resize(hdr->e_phnum);
-
         uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
-        logger.debug("1st PHDR offset = 0x%x", phdr_offset);
+        uptr required_size = 0;
         for (elf64_half i = 0; i < hdr->e_phnum; i++) {
-                ELF64Phdr *phdr = reinterpret_cast<ELF64Phdr *>(phdr_offset + i * hdr->e_phentsize);
-                logger.debug("phdr#%u.vaddr = 0x%x", i, phdr->p_vaddr);
-        
-                phdrs.push_back(phdr);
+                ELF64Phdr *phdr = reinterpret_cast<ELF64Phdr *>(phdr_offset + i * hdr->e_phentsize);        
+                required_size += phdr->p_memsz;
         }
 
-        logger.debug("parsing section headers");
-        logger.debug("------------------------------");
-
-        Vector<ELF64Shdr *> shdrs;
-        phdrs.resize(hdr->e_phnum);
-
-        uptr shdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_shoff;
-        logger.debug("1st SHDR offset = 0x%x", shdr_offset);
-        for (elf64_half i = 0; i < hdr->e_shnum; i++) {
-                ELF64Shdr *shdr = reinterpret_cast<ELF64Shdr *>(shdr_offset + i * hdr->e_shentsize);
-                logger.debug("shdr#%u.addralign = 0x%x", i, shdr->sh_addralign);
-        
-                shdrs.push_back(shdr);
-        }
+        usize required_pages = (required_size + mem::vmm::PAGE_BYTES - 1) / mem::vmm::PAGE_BYTES;
+        logger.debug("pages needed: %u", required_pages);
 
         // since the buffer is allocated on the heap, the pages it is on are
         // not executable, so we need to copy its content to a new executable
         // page
-        uptr frame = mem::pmm::allocate_frame();
-        mem::vmm::map_page(pml4t, hdr->e_entry, frame, mem::vmm::PageFlag::ReadExec);
-        memcpy(reinterpret_cast<void *>(hhdm + frame), buf.get_data(), buf.size());
+        for (usize i = 1; i <= required_pages; i++) {
+                uptr frame = mem::pmm::allocate_frame();
+                mem::vmm::map_page(pml4t, hdr->e_entry, frame, mem::vmm::PageFlag::ReadExec);
+                memcpy(reinterpret_cast<void *>(hhdm + frame), buf.get_data() + mem::vmm::PAGE_BYTES * i, mem::vmm::PAGE_BYTES);
+        }
+
+        memcpy(addr, &hdr->e_entry, sizeof(*addr));
 
         return 0;
 }

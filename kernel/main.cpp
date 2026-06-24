@@ -182,11 +182,12 @@ extern "C" void kernel_main()
         __test_ls("I:/");
 
         u64 *test_proc_pml4t = vmm::create_pml4t(kernel::get_kernel_pml4t());
-        int res = elf::load_elf(test_proc_pml4t, "I:/bin/test", bootinfo.hhdm.offset);
+        uptr proc_addr = 0;
+        int res = elf::load_elf(test_proc_pml4t, "I:/bin/test", bootinfo.hhdm.offset, &proc_addr);
         if (res == -1)
-                logger.err("file is not valid");
+                logger.err("failed to load elf");
 
-        void (*test_entry)() = reinterpret_cast<void (*)()>(0x400000);
+        void (*test_entry)() = reinterpret_cast<void (*)()>(proc_addr);
         Process test_proc(allocate_pid(), test_entry, test_proc_pml4t);
         scheduler::add_process(&test_proc);
 
@@ -195,15 +196,15 @@ extern "C" void kernel_main()
         // Snippet to execute a process `p`.
         // This only needs to be done once.
         // --------------------------------------
-        // scheduler::set_current_process(&test_proc);
-        // Process *p = scheduler::get_current_process();
-        // p->load();
-        // __asm__ volatile (
-        //         "mov %0, %%rsp\n"
-        //         "iretq\n"
-        //         :
-        //         : "r"(p->rsp)
-        // );
+        scheduler::set_current_process(&test_proc);
+        Process *p = scheduler::get_current_process();
+        p->load();
+        __asm__ volatile (
+                "mov %0, %%rsp\n"
+                "iretq\n"
+                :
+                : "r"(p->rsp)
+        );
 
         unmount_initrd();
 

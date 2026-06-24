@@ -2,6 +2,9 @@
 
 section .text
 _start:
+        mov rax, [constant]
+        mov rbx, [random_qword]
+        
 ; just hang forever (interrupts are still received)
 hang:
         hlt
@@ -9,10 +12,6 @@ hang:
 
 section .rodata
 constant:               dd 42
-string:                 db "Hello, I am a string!", 13, 10, 0
 
 section .data
 random_qword:           dq 18
-
-section .bss
-buffer16:               resw 1
