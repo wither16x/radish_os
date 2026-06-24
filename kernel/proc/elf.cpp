@@ -13,7 +13,7 @@ using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
 using kernel::lib::getfilesz, kernel::lib::read_file;
-using kernel::lib::memcpy, kernel::lib::strlen;
+using kernel::lib::memcpy;
 
 namespace kernel::proc::elf {
 
@@ -81,21 +81,26 @@ int load_elf(u64 *pml4t, const String &path, uptr hhdm)
 
         read_file(path, reinterpret_cast<char *>(buf.get_data()), size);
 
+        // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
         
         int is_file_valid = elf_check(hdr);
         if (is_file_valid != 0)
                 return -1;
 
-        logger.debug("Parsing section names");
+        Vector<ELF64Phdr *> phdrs;
+        phdrs.resize(hdr->e_phnum);
+
+        logger.debug("parsing program headers");
         logger.debug("------------------------------");
-        int i = 0;
-        while (i < 50) /* hardcoded, need to figure out how to compute it */ {
-                char *str = lookup_string(hdr, i);
-                if (str) {
-                        logger.debug("section \"%s\"", str);
-                        i += strlen(str) + 1;
-                }
+
+        uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
+        logger.debug("1st PHDR offset = 0x%x", phdr_offset);
+        for (elf64_half i = 0; i < hdr->e_phnum; i++) {
+                ELF64Phdr *phdr = reinterpret_cast<ELF64Phdr *>(phdr_offset + i * hdr->e_phentsize);
+                logger.debug("phdr#%u.vaddr = 0x%x", i, phdr->p_vaddr);
+        
+                phdrs.push_back(phdr);
         }
 
         // since the buffer is allocated on the heap, the pages it is on are

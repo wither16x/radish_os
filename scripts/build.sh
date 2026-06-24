@@ -2,9 +2,6 @@
 
 set -e
 
-chmod +x scripts/symbols.sh
-./scripts/symbols.sh
-
 make -C kernel clean
 make -C kernel
 
