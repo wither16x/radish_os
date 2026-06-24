@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# If you want to update the symbols, then you need to build the kernel twice as the header containing all the symbols is
-# generated after
-
 set -e
 
 KERNEL_MAP=".symbols_data/kernel.map"
