@@ -14,6 +14,7 @@ gdt_flush:
         push rax
         retfq
 
+;; Reload the code segment.
 reload_cs:
         mov ax, DATA_SEGMENT
         mov ds, ax

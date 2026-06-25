@@ -12,8 +12,7 @@ extern irq_handler
 
 irq 0                   ; timer
 
-; state before jump:
-; - irqno
+;; Every IRQ stub should jump to this address.
 irq_common:
         push r15
         push r14

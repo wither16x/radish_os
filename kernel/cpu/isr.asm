@@ -23,9 +23,7 @@ isr_no_error_stub       3               ; breakpoint
 isr_error_stub          10              ; invalid tss
 isr_error_stub          14              ; page fault
 
-; stack before jump:
-; - error code
-; - isr number
+;; Every ISR stub should jump to this address.
 isr_common:
         push r15
         push r14

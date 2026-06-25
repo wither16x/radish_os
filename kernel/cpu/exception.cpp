@@ -8,7 +8,8 @@ namespace kernel::cpu {
 
 namespace {
 
-// Registers and values pushed before calling `exception_handler()`
+/// Registers and values pushed before calling the exception
+/// handler.
 struct [[gnu::packed]] CPUFrame {
 	u64 cr2;
 	u64 cr3;
@@ -38,6 +39,8 @@ struct [[gnu::packed]] CPUFrame {
 
 } /* anonymous namespace */
 
+/// Handle exceptions. Basically panic and display every
+/// available information.
 extern "C" [[gnu::noreturn]] void exception_handler(CPUFrame *f)
 {
         panic(

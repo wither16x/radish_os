@@ -13,11 +13,15 @@ namespace kernel::cpu {
 
 namespace {
 
+/// Handle the timer IRQ.
 void handle_irq0_timer(cpu::IRQFrame *f)
 {
+        // increase time and consider that the interrupt is
+        // finished
         drivers::pit::tick();
         drivers::pic::send_eoi(0);
 
+        // schedule
         if (!proc::scheduler::is_active())
                 return;
         proc::scheduler::tick(f);

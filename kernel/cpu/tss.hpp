@@ -12,8 +12,10 @@ struct [[gnu::packed]] TSS {
         lib::u64 __useless[21];
 };
 
+/// Initialize a TSS with a pointer to the top of the kernel
+/// stack.
 void init_tss(TSS *tss, lib::uptr krsp);
-// defined in tss_flush.asm
+/// Reload the task register.
 extern "C" void tss_flush();
 
 } /* namespace kernel::cpu */

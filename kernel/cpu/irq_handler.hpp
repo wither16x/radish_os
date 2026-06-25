@@ -4,7 +4,8 @@
 
 namespace kernel::cpu {
 
-// registers pushed before calling `irq_handler()`
+/// Registers and values pushed before calling the IRQ
+/// handler.
 struct [[gnu::packed]] IRQFrame {
         lib::u64 irqno;
 	lib::u64 cr2;

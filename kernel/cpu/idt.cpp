@@ -12,14 +12,18 @@ namespace {
 constexpr int MAX_GATES          = 255;
 constexpr u16 SEGMENT_SELECTOR   = 0x08;
 
+/// Reload the IDT.
 extern "C" void idt_flush(u64 *idtr);
 
+// ISR stubs
 extern "C" void __isr_stub3();
 extern "C" void __isr_stub14();
 extern "C" void __isr_stub10();
 
+// IRQ stubs
 extern "C" void __irq_stub0();
 
+/// Easy-to-use representation of a single IDT entry.
 struct [[gnu::packed]] IDTEntry {
         u16 isr_low;
         u16 selector;
@@ -30,6 +34,7 @@ struct [[gnu::packed]] IDTEntry {
         u32 __reserved;
 };
 
+/// Easy-to-use representation of the IDT register.
 struct [[gnu::packed]] IDTR {
         u16 size;
         u64 offset;
@@ -40,6 +45,7 @@ IDTR idtptr;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 IDT::IDT()
 {
         idtptr = {
@@ -56,14 +62,18 @@ IDT::IDT()
 
         logger.ok("initialized idt");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void IDT::load()
 {
         idt_flush(reinterpret_cast<u64 *>(&idtptr));
 
         logger.ok("loaded idt");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void IDT::set_gate(int vector, void (*isr)(), u8 flags)
 {
         idt[vector].isr_low     = reinterpret_cast<u64>(isr) & 0xffff;
@@ -74,5 +84,6 @@ void IDT::set_gate(int vector, void (*isr)(), u8 flags)
         idt[vector].isr_high    = (reinterpret_cast<u64>(isr) >> 32) & 0xffffffff;
         idt[vector].__reserved  = 0;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::cpu */

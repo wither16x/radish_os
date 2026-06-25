@@ -4,13 +4,22 @@
 
 namespace kernel::cpu {
 
+/// Object-oriented representation of an IDT, even though it
+/// uses an implicit state which is owned by the source file
+/// and not by the class itself.
 class IDT {
 public:
+        /// Initialize the IDT but do not load it, as this
+        /// should be done by the user (I mean the one who
+        /// calls the function: user, programmer... call it
+        /// however you want).
         IDT();
 
+        /// Load the IDT.
         void load();
 
 private:
+        /// Edit a gate in the table.
         void set_gate(int vector, void (*isr)(), lib::u8 flags);
 };
 

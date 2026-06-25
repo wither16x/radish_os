@@ -4,7 +4,8 @@
 
 namespace kernel::boot::limine {
 
-// Limine base revision
+/// Limine base revision representation using a structure
+/// instead of a raw array, which is what `limine.h` does.
 struct Revision {
         lib::u64 magic0;
         lib::u64 magic1;
@@ -13,7 +14,9 @@ struct Revision {
         bool is_supported(this volatile Revision &self);
 };
 
-// Limine requests start marker
+/// Limine requests start marker representation using a
+/// structure instead of a raw array, which is what `limine.h`
+/// does.
 struct StartMarker {
         lib::u64 magic0;
         lib::u64 magic1;
@@ -21,14 +24,22 @@ struct StartMarker {
         lib::u64 magic3;
 };
 
-// Limine requests end marker
+/// Limine requests end marker representation using a
+/// structure instead of a raw array, which is what 
+// `limine.h` does.
 struct EndMarker {
         lib::u64 magic0;
         lib::u64 magic1;
 };
 
+/// Wrapper around the `LIMINE_BASE_REVISION()` macro
+/// provided by `limine.h`.
 Revision base_revision(lib::u64 revision);
+/// Wrapper around the `LININE_REQUESTS_START_NARKER` macro
+/// provided by `limine.h`.
 StartMarker requests_start_marker();
+/// Wrapper around the `LININE_REQUESTS_END_NARKER` macro
+/// provided by `limine.h`.
 EndMarker requests_end_marker();
 
 } /* namespace kernel::boot::limine */

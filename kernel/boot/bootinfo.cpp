@@ -75,6 +75,7 @@ const char *memmap_type_str[] = {
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 BootInfo::BootInfo()
 {
         this->bootloader.name           = l_bootloader_info.response->name;
@@ -127,5 +128,6 @@ BootInfo::BootInfo()
 
         logger.ok("recovered boot info");
 }
+// --------------------------------------------------
 
 } /* namespace kernel::boot */

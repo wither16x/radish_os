@@ -10,10 +10,12 @@ namespace kernel::cpu {
 
 namespace {
 
+/// Reload the GDT.
 extern "C" void gdt_flush(u64 gdtr);
 
 constexpr int MAX_DESCRIPTORS = 7;
 
+/// Easy-to-use representation of a single GDT descriptor.
 struct [[gnu::packed]] GDTDescriptor {
         u16 limit_low;
         u16 base_low;
@@ -23,6 +25,7 @@ struct [[gnu::packed]] GDTDescriptor {
         u8  base_high;
 };
 
+/// Easy-to-use representation of the GDT register.
 struct [[gnu::packed]] GDTR {
         u16 size;
         u64 offset;
@@ -33,6 +36,7 @@ GDTR gdtptr;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 GDT::GDT()
 {
         gdtptr = {
@@ -57,15 +61,19 @@ GDT::GDT()
 
         logger.ok("initialized gdt");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void GDT::load()
 {
         gdt_flush(reinterpret_cast<u64>(&gdtptr));
 
         logger.ok("loaded gdt");
 }
+// --------------------------------------------------
 
-void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags) const
+// --------------------------------------------------
+void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)
 {
         gdt[n].limit_low        = limit & 0xffff;
         gdt[n].base_low         = base & 0xffff;
@@ -74,5 +82,6 @@ void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags) const
         gdt[n].limit_and_flags  = flags & 0xf0;
         gdt[n].base_high        = base >> 16;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::cpu */
