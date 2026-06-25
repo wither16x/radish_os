@@ -4,6 +4,8 @@
 
 namespace kernel {
 
+constexpr lib::uptr KERNEL_STACK_TOP = 0xfffffffffffff000;
+
 lib::u64 *get_kernel_pml4t();
 void set_kernel_pml4t(lib::u64 *pml4t);
 

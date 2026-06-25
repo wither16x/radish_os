@@ -1,4 +1,6 @@
 #include <cpu/gdt.hpp>
+#include <cpu/tss.hpp>
+#include <kernel.hpp>
 #include <lib/logging.hpp>
 
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64;
@@ -10,7 +12,7 @@ namespace {
 
 extern "C" void gdt_flush(u64 gdtr);
 
-constexpr int MAX_DESCRIPTORS = 3;
+constexpr int MAX_DESCRIPTORS = 7;
 
 struct [[gnu::packed]] GDTDescriptor {
         u16 limit_low;
@@ -38,9 +40,20 @@ GDT::GDT()
                 .offset = reinterpret_cast<u64>(&gdt)
         };
 
-        this->set_descriptor(0, 0, 0, 0, 0);
-        this->set_descriptor(1, 0, 0, 0x9a, 0xa0);
-        this->set_descriptor(2, 0, 0, 0x92, 0);
+        TSS tss;
+        init_tss(&tss, KERNEL_STACK_TOP);
+
+        this->set_descriptor(0, 0, 0, 0, 0); // null
+        this->set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
+        this->set_descriptor(2, 0, 0, 0x92, 0); // kernel data
+        this->set_descriptor(3, 0, 0, 0xfa, 0xa); // user code
+        this->set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
+        // in long mode the TSS takes two entries
+        this->set_descriptor(5, reinterpret_cast<u64>(&tss) & 0xffffffff, sizeof(tss) - 1, 0x89, 0);
+        u32 tss_addr_high = (reinterpret_cast<u64>(&tss) >> 32) & 0xffffffff;
+        gdt[6] = *reinterpret_cast<GDTDescriptor *>(
+                &tss_addr_high
+        );
 
         logger.ok("initialized gdt");
 }

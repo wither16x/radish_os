@@ -4,6 +4,7 @@
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
+#include <cpu/tss.hpp>
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
 #include <drivers/pic.hpp>
@@ -37,7 +38,7 @@ using kernel::boot::limine::Revision, kernel::boot::limine::base_revision;
 using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_marker;
 using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
 using kernel::boot::BootInfo;
-using kernel::cpu::GDT, kernel::cpu::IDT;
+using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::tss_flush, kernel::cpu::sti;
 using kernel::set_kernel_pml4t, kernel::set_kernel_hhdm_offset;
 
 namespace {
@@ -140,6 +141,8 @@ extern "C" void kernel_main()
         IDT idt;
         idt.load();
 
+        tss_flush();
+
         BootInfo bootinfo;
         set_kernel_hhdm_offset(bootinfo.hhdm.offset);
 
@@ -164,7 +167,7 @@ extern "C" void kernel_main()
         pic::irq_unmask(0);
         logger.ok("unmasked irq 0: timer");
 
-        kernel::cpu::sti();
+        sti();
 
         call_global_constructors();
 
