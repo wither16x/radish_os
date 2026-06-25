@@ -19,6 +19,7 @@ namespace {
 
 constexpr int BLOCK_SIZE = 512;
 
+/// Enumeration of the USTAR file types.
 enum class NodeType : char {
         NormalFile      = '0',
         HardLink        = '1',
@@ -31,7 +32,7 @@ enum class NodeType : char {
 
 // bruh why is everything in octal
 //
-// A single header is 512 bytes wide (only 500 bytes are actually used).
+/// A single header is 512 bytes wide (only 500 bytes are actually used).
 struct [[gnu::packed]] FileHeader {
         char name[100];
         char mode[8];           // octal
@@ -77,6 +78,7 @@ struct Dir {
 
 Node *root = nullptr;
 
+// --------------------------------------------------
 Node *find_dir(Node *parent, const String &name)
 {
         Node *existing = static_cast<Node *>(parent->lookup(name));
@@ -85,7 +87,9 @@ Node *find_dir(Node *parent, const String &name)
 
         return nullptr;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 Node *__create_dir(Node *parent, const String &name)
 {
         Node *dir       = new Node;
@@ -100,7 +104,9 @@ Node *__create_dir(Node *parent, const String &name)
 
         return dir;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void parse_archive(u8 *archive)
 {
         u8 *archive_p = archive;
@@ -156,9 +162,11 @@ void parse_archive(u8 *archive)
                 archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
         }
 }
+// --------------------------------------------------
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 int Node::read_file(char *buf, usize n)
 {
         if (this->hdr->type == static_cast<char>(NodeType::Directory))
@@ -175,7 +183,9 @@ int Node::read_file(char *buf, usize n)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::readdir(vfs::DirEntry *entry, usize n)
 {
         if (!this->dir_data)
@@ -187,7 +197,9 @@ int Node::readdir(vfs::DirEntry *entry, usize n)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *Node::lookup(const String &name)
 {
         if (!this->dir_data)
@@ -204,7 +216,9 @@ void *Node::lookup(const String &name)
 
         return nullptr;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::getfilesz(usize *buf)
 {
         if (this->hdr->type == static_cast<char>(NodeType::Directory))
@@ -215,7 +229,9 @@ int Node::getfilesz(usize *buf)
         
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::getdirentn(usize *buf)
 {
         if (!this->dir_data)
@@ -226,12 +242,16 @@ int Node::getdirentn(usize *buf)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 USTAR::USTAR(void *archive)
 {
         this->archive = static_cast<u8 *>(archive);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 vfs::VNode *USTAR::get_root()
 {
         if (!root) {
@@ -247,11 +267,14 @@ vfs::VNode *USTAR::get_root()
 
         return root;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void USTAR::unmount()
 {
         root->remove();
         root = nullptr;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::fs::ustar */

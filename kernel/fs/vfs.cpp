@@ -17,6 +17,7 @@ constexpr int MAX_DRIVES = 26;
 Drive drives[MAX_DRIVES];
 char current_drive_id = 'A';            // default drive
 
+/// Find a drive using its ID.
 Drive *get_drive_by_id(char id)
 {
         for (int i = 0; i < MAX_DRIVES; i++) {
@@ -27,6 +28,7 @@ Drive *get_drive_by_id(char id)
         return nullptr;
 }
 
+/// Check if a path is long enough to handle `D:/`.
 bool path_can_handle_drive(const String &path)
 {
         return path.length() >= 3;
@@ -34,65 +36,81 @@ bool path_can_handle_drive(const String &path)
 
 } /* anonymous namespace */
 
-// VNode methods (all virtuals)
 // --------------------------------------------------------------------
 int VNode::create_file(const String &name)
 {
         static_cast<void>(name);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::create_dir(const String &name)
 {
         static_cast<void>(name);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::remove()
 {
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::write_file(const char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::read_file(char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::readdir(DirEntry *entry, usize n)
 {
         static_cast<void>(entry);
         static_cast<void>(n);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *VNode::lookup(const String &name)
 {
         static_cast<void>(name);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::getfilesz(usize *buf)
 {
         static_cast<void>(buf);
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int VNode::getdirentn(lib::usize *buf)
 {
         static_cast<void>(buf);
         return 0;
 }
-// --------------------------------------------------------------------
+// --------------------------------------------------
 
+// --------------------------------------------------
 int mount(char id, FileSystem *fs)
 {
         Drive *drv = &drives[id - 'A'];
@@ -105,7 +123,9 @@ int mount(char id, FileSystem *fs)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int unmount(char id)
 {
         Drive *drv = &drives[id - 'A'];
@@ -119,7 +139,9 @@ int unmount(char id)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int chdrive(char id)
 {
         if (id >= 'A' && id <= 'Z') {
@@ -129,7 +151,9 @@ int chdrive(char id)
 
         return -1;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 VNode *lookup(const lib::String &path)
 {
         if (!path_can_handle_drive(path))
@@ -155,7 +179,9 @@ VNode *lookup(const lib::String &path)
 
         return curr_nd;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int create_file(const lib::String &path)
 {
         if (!path_can_handle_drive(path))
@@ -182,7 +208,9 @@ int create_file(const lib::String &path)
 
         return curr_nd->create_file(parts[parts.size() - 1]);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int create_dir(const lib::String &path)
 {
         if (!path_can_handle_drive(path))
@@ -208,7 +236,9 @@ int create_dir(const lib::String &path)
 
         return curr_nd->create_dir(parts[parts.size() - 1]);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int remove(const lib::String &path)
 {
         VNode *vnd = lookup(path);
@@ -217,7 +247,9 @@ int remove(const lib::String &path)
 
         return vnd->remove();
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int write_file(const String &path, const char *buf, usize n)
 {
         VNode *vnd = lookup(path);
@@ -226,7 +258,9 @@ int write_file(const String &path, const char *buf, usize n)
 
         return vnd->write_file(buf, n);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int read_file(const String &path, char *buf, usize n)
 {
         VNode *vnd = lookup(path);
@@ -238,7 +272,9 @@ int read_file(const String &path, char *buf, usize n)
                 delete vnd;
         return ret;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int readdir(const String &path, DirEntry *entry, usize n)
 {
         VNode *vnd = lookup(path);
@@ -252,7 +288,9 @@ int readdir(const String &path, DirEntry *entry, usize n)
 
         return ret;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int getfilesz(const lib::String &path, usize *buf)
 {
         VNode *vnd = lookup(path);
@@ -266,7 +304,9 @@ int getfilesz(const lib::String &path, usize *buf)
         
         return ret;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int getdirentn(const lib::String &path, lib::usize *buf)
 {
         VNode *vnd = lookup(path);
@@ -280,5 +320,6 @@ int getdirentn(const lib::String &path, lib::usize *buf)
 
         return ret;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::fs::vfs */

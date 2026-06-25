@@ -17,6 +17,7 @@ namespace kernel::fs::tmpfs {
 
 namespace {
 
+/// Enumeration of the TMPFS node types.
 enum class NodeType : int {
         File,
         Dir
@@ -55,7 +56,7 @@ struct Dir {
 
 Node *root = nullptr;
 
-// recursive on `NodeType::Dir`
+/// Recursive on `NodeType::Dir`.
 int remove_node(Node *node)
 {
         if (!node)
@@ -82,6 +83,7 @@ int remove_node(Node *node)
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 int Node::create_file(const String &name)
 {
         if (this->type != NodeType::Dir)
@@ -100,7 +102,9 @@ int Node::create_file(const String &name)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::create_dir(const String &name)
 {
         if (this->type != NodeType::Dir)
@@ -117,7 +121,9 @@ int Node::create_dir(const String &name)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::remove()
 {
         // detach the node before removing it so that the parent directory
@@ -135,7 +141,9 @@ int Node::remove()
 
         return remove_node(this);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::write_file(const char *buf, usize n)
 {
         if (this->type != NodeType::File)
@@ -151,7 +159,9 @@ int Node::write_file(const char *buf, usize n)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::read_file(char *buf, usize n)
 {
         if (this->type != NodeType::File)
@@ -165,7 +175,9 @@ int Node::read_file(char *buf, usize n)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::readdir(vfs::DirEntry *entry, usize n)
 {
         if (this->type != NodeType::Dir)
@@ -177,7 +189,9 @@ int Node::readdir(vfs::DirEntry *entry, usize n)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *Node::lookup(const String &name)
 {
         if (this->type != NodeType::Dir)
@@ -190,7 +204,9 @@ void *Node::lookup(const String &name)
 
         return nullptr;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::getfilesz(usize *buf)
 {
         if (this->type != NodeType::File)
@@ -200,7 +216,9 @@ int Node::getfilesz(usize *buf)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int Node::getdirentn(usize *buf)
 {
         if (this->type != NodeType::Dir)
@@ -211,7 +229,9 @@ int Node::getdirentn(usize *buf)
 
         return 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 vfs::VNode *TMPFS::get_root()
 {
         if (!root) {
@@ -226,11 +246,14 @@ vfs::VNode *TMPFS::get_root()
 
         return root;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void TMPFS::unmount()
 {
         root->remove();
         root = nullptr;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::fs::tmpfs */

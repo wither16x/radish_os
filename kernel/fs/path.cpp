@@ -9,6 +9,7 @@ using kernel::lib::Vector;
 
 namespace kernel::fs {
 
+// --------------------------------------------------
 Vector<String> parse_path(const String &path)
 {
         Vector<String> parts;
@@ -37,5 +38,6 @@ Vector<String> parse_path(const String &path)
 
         return parts;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::fs */

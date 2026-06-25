@@ -15,36 +15,42 @@
 
 namespace kernel::fs::vfs {
 
-// Virtual node, which represents an entry in the VFS tree.
-// "Real" nodes are the nodes from the "real" filesystems.
+/// Virtual node, which represents an entry in the VFS tree.
+/// "Real" nodes are the nodes from the "real" filesystems.
 struct VNode {
         bool owned;
 
         virtual ~VNode() = default;
 
+        /// Create a new file.
         virtual int create_file(const lib::String &name);
+        /// Create a new directory.
         virtual int create_dir(const lib::String &name);
+        /// Remove a file.
         virtual int remove();
+        /// Write bytes to a file.
         virtual int write_file(const char *buf, lib::usize n);
+        /// Read bytes from a file.
         virtual int read_file(char *buf, lib::usize n);
-        // `n` represents the 0-based index of the entry in the directory
+        /// `n` represents the 0-based index of the entry in the directory
         virtual int readdir(struct DirEntry *entry, lib::usize n);
+        /// Look for a file.
         virtual void *lookup(const lib::String &name);
+        /// Get the size of a file.
         virtual int getfilesz(lib::usize *buf);
-        // get the number of entries in a directory
+        /// Get the number of entries in a directory.
         virtual int getdirentn(lib::usize *buf);
 };
 
-// Representation of a directory entry.
-// Used in readdir().
+/// Representation of a single directory entry.
 struct DirEntry {
         lib::String name;
         bool is_dir;
 };
 
-// One per drive.
-// Used to execute an operation on the whole filesystem and not
-// on a single node.
+/// One per drive.
+/// Used to execute an operation on the whole filesystem and not
+/// on a single node.
 struct FileSystem {
         virtual ~FileSystem()           = default;
 
@@ -52,16 +58,18 @@ struct FileSystem {
         virtual void unmount()          = 0;
 };
 
-// Each drive has one filesystem
+/// Each drive has one filesystem.
 struct Drive {
         char id;
         FileSystem *fs;
         VNode *root;
 };
 
-// VFS functions
+/// Mount a filesystem to a drive,
 int mount(char id, FileSystem *fs);
+/// Unmount a drive.
 int unmount(char id);
+/// Set current drive.
 int chdrive(char id);
 
 VNode *lookup(const lib::String &path);
