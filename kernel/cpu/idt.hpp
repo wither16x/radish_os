@@ -9,10 +9,6 @@ namespace kernel::cpu {
 /// and not by the class itself.
 class IDT {
 public:
-        /// Initialize the IDT but do not load it, as this
-        /// should be done by the user (I mean the one who
-        /// calls the function: user, programmer... call it
-        /// however you want).
         IDT();
 
         /// Load the IDT.

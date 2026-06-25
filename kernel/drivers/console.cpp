@@ -19,6 +19,7 @@ namespace {
 
 constexpr u32 PSF2_MAGIC = 0x864ab572;
 
+/// Representation of a PSF2 header.
 struct PSF2Header {
         u32 magic;
         u32 version;            // currently always 0 (source: wikipedia)
@@ -34,9 +35,7 @@ Console current_console;
 
 } /* anonymous namespace */
 
-// Console methods
-// -------------------------------------------------------------------------
-
+// --------------------------------------------------
 Console::Console(u64 width, u64 height)
 {
         this->active    = false;
@@ -45,12 +44,18 @@ Console::Console(u64 width, u64 height)
         this->cursor_x  = 0;
         this->cursor_y  = 0;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 Console::~Console()
 {
         this->active = false;
 }
+// --------------------------------------------------
 
+/// Here we assume that the provided font is using the PSF2
+/// format and does not have an Unicode table.
+// --------------------------------------------------
 void Console::init_font(this Console &self, const String &font)
 {
         logger.set_context("console");
@@ -78,7 +83,9 @@ void Console::init_font(this Console &self, const String &font)
 
         logger.set_context("kernel");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void Console::draw_char(this Console &self, char ch, u32 color)
 {
         switch (ch) {
@@ -114,17 +121,23 @@ void Console::draw_char(this Console &self, char ch, u32 color)
         if (self.cursor_y + self.glyph_height > self.height)
                 self.scroll();
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 bool Console::is_active(this const Console &self)
 {
         return self.active;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 const Vector<u8> &Console::get_font_data(this const Console &self)
 {
         return self.font_data;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void Console::draw_char_at(this Console &self, char ch, int px, int py, u32 color)
 {
         u32 idx = static_cast<u8>(ch);
@@ -140,25 +153,28 @@ void Console::draw_char_at(this Console &self, char ch, int px, int py, u32 colo
                 }
         }
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void Console::scroll(this Console &self)
 {
         framebuffer::scroll(self.glyph_height);
         self.cursor_y -= self.glyph_height;
 }
-// -------------------------------------------------------------------------
+// --------------------------------------------------
 
-// Functions
-// -------------------------------------------------------------------------
+// --------------------------------------------------
 void set_console(const Console &console)
 {
         current_console = console;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 Console &get_console()
 {
         return current_console;
 }
-// -------------------------------------------------------------------------
+// --------------------------------------------------
 
 } /* kernel::drivers::console */

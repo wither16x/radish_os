@@ -8,6 +8,7 @@ namespace kernel::drivers::pit {
 
 namespace {
 
+/// Enumeration of the PIT ports.
 enum Port : u16 {
         PORT_COMMAND         = 0x43,
         PORT_CHANNEL_0       = 0x40
@@ -20,6 +21,7 @@ bool sleeping = false;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void init()
 {
         u16 tps = 1000; // tics per second
@@ -29,7 +31,9 @@ void init()
         cpu::output_byte_port(Port::PORT_CHANNEL_0, divider & 0xff);
         cpu::output_byte_port(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void tick()
 {
         tics++;
@@ -42,22 +46,29 @@ void tick()
                 seconds++;
         }
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void sleep(lib::u64 ms)
 {
         sleeping = true;
         while (tics < ms);
         sleeping = false;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 u64 get_tics()
 {
         return tics;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 u64 get_seconds()
 {
         return seconds;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::drivers::pit */

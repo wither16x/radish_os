@@ -14,6 +14,7 @@ constexpr u16 PIC_SLAVE         = 0xa0;
 constexpr u16 MASTER_OFFSET     = 0x20;
 constexpr u16 SLAVE_OFFSET      = 0x28;
 
+/// Enumeration of the PIC ports.
 enum Port : u16 {
         MASTER_COMMAND           = PIC_MASTER,
         MASTER_DATA              = PIC_MASTER + 1,
@@ -22,6 +23,7 @@ enum Port : u16 {
         SLAVE_DATA               = PIC_SLAVE + 1
 };
 
+/// Enumeration of the PIC commands.
 enum Command : u8 {
         // Note: ICW stands for Initialization Command Word
         ICW1_ICW4                = 0x01,
@@ -37,6 +39,7 @@ enum Command : u8 {
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void remap()
 {
         // start initialization
@@ -54,7 +57,9 @@ void remap()
         cpu::output_byte_port(Port::MASTER_DATA, Command::ICW4_8086);
         cpu::output_byte_port(Port::SLAVE_DATA, Command::ICW4_8086);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void send_eoi(u8 irq)
 {
         if (irq >= 8)
@@ -62,7 +67,9 @@ void send_eoi(u8 irq)
         else
                 cpu::output_byte_port(Port::MASTER_COMMAND, Command::EOI);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void irq_mask(lib::u8 irq)
 {
         Port port;
@@ -80,7 +87,9 @@ void irq_mask(lib::u8 irq)
         );
         cpu::output_byte_port(port, cmd);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void irq_unmask(lib::u8 irq)
 {
         Port port;
@@ -98,17 +107,22 @@ void irq_unmask(lib::u8 irq)
         );
         cpu::output_byte_port(port, cmd);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void irq_mask_all()
 {
         cpu::output_byte_port(Port::MASTER_DATA, Command::MASK_ALL);
         cpu::output_byte_port(Port::SLAVE_DATA, Command::MASK_ALL);
 }
+// --------------------------------------------------
 
-void irq_UNMASK_ALL()
+// --------------------------------------------------
+void irq_unmask_all()
 {
         cpu::output_byte_port(Port::MASTER_DATA, Command::UNMASK_ALL);
         cpu::output_byte_port(Port::SLAVE_DATA, Command::UNMASK_ALL);
 }
+// --------------------------------------------------
 
 } /* namespace kernel::drivers::pic */
