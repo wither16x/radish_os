@@ -129,7 +129,7 @@ extern "C" void kernel_main()
         if (!limine_base_revision.is_supported())
                 panic("limine base revision not supported"); // unprintable message
 
-        if (serial::init_port(serial::Port::COM1) != Status::Ok)
+        if (serial::init_port(serial::Port::SERIAL_COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
 
         logger.set_context("kernel");

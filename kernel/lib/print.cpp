@@ -87,7 +87,7 @@ void putchar(int ch)
         if (console.is_active())
                 console.draw_char(ch, color);
         else
-                drivers::serial::send_byte(drivers::serial::Port::COM1, ch);
+                drivers::serial::send_byte(drivers::serial::Port::SERIAL_COM1, ch);
 }
 
 void print_string(const char *s)

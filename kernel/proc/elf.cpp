@@ -24,15 +24,15 @@ enum PHDRType : elf64_word {
 
 int elf_check(ELF64Ehdr *hdr)
 {
-        if (hdr->e_ident[ELF64Magic::Index0] != ELF64Magic::Byte0
-        || hdr->e_ident[ELF64Magic::Index1] != ELF64Magic::Byte1
-        || hdr->e_ident[ELF64Magic::Index2] != ELF64Magic::Byte2
-        || hdr->e_ident[ELF64Magic::Index3] != ELF64Magic::Byte3
+        if (hdr->e_ident[ELF64Magic::EI_I0] != ELF64Magic::EI_BYTE0
+        || hdr->e_ident[ELF64Magic::EI_I1] != ELF64Magic::EI_BYTE1
+        || hdr->e_ident[ELF64Magic::EI_I2] != ELF64Magic::EI_BYTE2
+        || hdr->e_ident[ELF64Magic::EI_I3] != ELF64Magic::EI_BYTE3
         ) {
                 return -1; // invalid magic
         }
 
-        if (hdr->e_type != ELF64Type::ELF64TypeExec)
+        if (hdr->e_type != ELF64Type::ET_EXEC)
                 return -2; // invalid ELF type
 
         if (hdr->e_version != 1)

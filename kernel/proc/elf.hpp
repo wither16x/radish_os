@@ -8,14 +8,14 @@ namespace kernel::proc::elf {
 constexpr int EI_NIDENT = 16;
 
 enum ELF64Magic : unsigned char {
-        Index0          = 0,
-        Index1,
-        Index2,
-        Index3,
-        Byte0           = 0x7f,
-        Byte1           = 'E',
-        Byte2           = 'L',
-        Byte3           = 'F'
+        EI_I0              = 0,
+        EI_I1,
+        EI_I2,
+        EI_I3,
+        EI_BYTE0           = 0x7f,
+        EI_BYTE1           = 'E',
+        EI_BYTE2           = 'L',
+        EI_BYTE3           = 'F'
 };
 
 // ELF64 specific types
@@ -30,11 +30,11 @@ using elf64_section             = lib::u16;
 using elf64_versym              = elf64_half;
 
 enum ELF64Type : elf64_half {
-        ELF64TypeExec           = 2
+        ET_EXEC           = 2
 };
 
 enum SHN : int {
-        SHNUndef
+        SHN_UNDEF
 };
 
 // eh = ELF header

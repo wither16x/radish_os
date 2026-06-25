@@ -9,8 +9,8 @@ namespace kernel::drivers::pit {
 namespace {
 
 enum Port : u16 {
-        Command         = 0x43,
-        Channel0        = 0x40
+        PORT_COMMAND         = 0x43,
+        PORT_CHANNEL_0       = 0x40
 };
 
 u64 tics = 0;
@@ -25,9 +25,9 @@ void init()
         u16 tps = 1000; // tics per second
         u16 divider = 1193181 / tps;
 
-        cpu::output_byte_port(Port::Command, 0b00110100);
-        cpu::output_byte_port(Port::Channel0, divider & 0xff);
-        cpu::output_byte_port(Port::Channel0, (divider >> 8) & 0xff);
+        cpu::output_byte_port(Port::PORT_COMMAND, 0b00110100);
+        cpu::output_byte_port(Port::PORT_CHANNEL_0, divider & 0xff);
+        cpu::output_byte_port(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
 }
 
 void tick()
