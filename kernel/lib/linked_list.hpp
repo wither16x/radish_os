@@ -4,11 +4,14 @@
 
 namespace kernel::lib {
 
+/// Header of a block in a linked list. Every other header
+/// used in a `LinkedList` must inherit from it.
 struct LinkedListHeader {
         LinkedListHeader *next;
         LinkedListHeader *prev;
 };
 
+/// A list of blocks linked together.
 template<typename HDR>
         requires __is_base_of(LinkedListHeader, HDR)
 class LinkedList {
@@ -25,11 +28,13 @@ public:
                 this->hdr->prev = nullptr;
         }
 
+        /// Get the first block in the list.
         HDR *first(this LinkedList<HDR> &self)
         {
                 return self.hdr;
         }
 
+        /// Get the last block in the list.
         HDR *last(this LinkedList<HDR> &self)
         {
                 HDR *curr = self.hdr;
@@ -40,16 +45,19 @@ public:
                 return curr;
         }
 
+        /// Reset the list.
         void reset(this LinkedList<HDR> &self)
         {
                 self.hdr = nullptr;
         }
 
+        /// Reset the first block in the list.
         void set_base(this LinkedList<HDR> &self, uptr base)
         {
                 self.hdr = reinterpret_cast<HDR *>(base);
         }
 
+        /// Append a block to the list.
         void append(this LinkedList<HDR> &self, HDR *node)
         {
                 HDR *last = self.last();

@@ -5,9 +5,9 @@
 
 namespace kernel::lib {
 
-// Use this class if a heap allocator is available and if you need
-// dynamic strings.
-// Otherwise, please keep it simple and use char pointers.
+/// Use this class if a heap allocator is available and if you need
+/// dynamic strings.
+/// Otherwise, please keep it simple and use char pointers.
 class String {
 private:
         Vector<char> data;
@@ -20,8 +20,11 @@ public:
 
         ~String()                       = default;
 
+        /// Return a null-terminated string from this string.
         const char *raw(this const String &self);
+        /// Return the length of the string.
         usize length(this const String &self);
+        /// Split this string from `start`.
         String sub(this const String &self, usize start);
 
         String operator +(this const String &self, const String &other);

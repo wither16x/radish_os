@@ -4,7 +4,11 @@
 
 namespace kernel::lib {
 
+/// Allocate `n` bytes on the heap and return a pointer to the
+/// base address of the allocated area.
 void *malloc(usize n);
+/// Free a pointer which has been previously allocated on the
+/// heap.
 void free(void *p);
 
 } /* namespace kernel::lib */
@@ -19,6 +23,8 @@ void operator delete(void *ptr);
 
 void *operator new[](size_t size);
 void operator delete[](void *ptr);
+
+// below, placement new/delete
 
 inline void *operator new(size_t, void *p) noexcept
 {

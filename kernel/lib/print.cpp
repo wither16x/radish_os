@@ -30,7 +30,7 @@ u32 ansi_colors[ANSI_COLOR_COUNT] = {
         0xffffff  // white
 };
 
-// only supports regular colors
+/// Only supports regular colors.
 u32 process_ansi_sequence(int ch)
 {
         if (ch == '\033') {
@@ -73,6 +73,7 @@ u32 process_ansi_sequence(int ch)
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void putchar(int ch)
 {
         color = process_ansi_sequence(ch);
@@ -89,13 +90,17 @@ void putchar(int ch)
         else
                 drivers::serial::send_byte(drivers::serial::Port::SERIAL_COM1, ch);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void print_string(const char *s)
 {
         while (*s)
                 putchar(*s++);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void vprintf(const char *fmt, va_list args)
 {
         while (*fmt) {
@@ -162,7 +167,9 @@ void vprintf(const char *fmt, va_list args)
                 fmt++;
         }
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void printf(const char *fmt, ...)
 {
         va_list args;
@@ -170,7 +177,9 @@ void printf(const char *fmt, ...)
         vprintf(fmt, args);
         va_end(args);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void println(const char *fmt, ...)
 {
         va_list args;
@@ -179,5 +188,6 @@ void println(const char *fmt, ...)
         va_end(args);
         print_string("\r\n");
 }
+// --------------------------------------------------
 
 } /* namespace kernel::lib */

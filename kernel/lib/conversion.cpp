@@ -2,6 +2,7 @@
 
 namespace kernel::lib {
 
+// --------------------------------------------------
 char* itoa(isize n, int base)
 {
         static char str[65];
@@ -43,7 +44,9 @@ char* itoa(isize n, int base)
 
         return str;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 char* utoa(usize n, int base)
 {
         static char str[65];
@@ -73,7 +76,9 @@ char* utoa(usize n, int base)
 
         return str;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 usize atoi(const char *s, int base)
 {
         usize res = 0;
@@ -84,10 +89,13 @@ usize atoi(const char *s, int base)
 
         return res;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 usize ctoi(char ch)
 {
         return ch - '0';
 }
+// --------------------------------------------------
 
 } /* namespace kernel::lib */

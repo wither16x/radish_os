@@ -4,6 +4,7 @@ namespace kernel::lib {
 
 extern "C" {
 
+// --------------------------------------------------
 void *memcpy(void *__restrict dest, const void *__restrict src, usize n) {
         u8 *__restrict pdest = static_cast<u8 *__restrict>(dest);
         const u8 *__restrict psrc = static_cast<const u8 *__restrict>(src);
@@ -13,7 +14,9 @@ void *memcpy(void *__restrict dest, const void *__restrict src, usize n) {
 
         return dest;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *memset(void *s, int c, usize n) {
         u8 *p = static_cast<u8 *>(s);
 
@@ -22,7 +25,9 @@ void *memset(void *s, int c, usize n) {
 
         return s;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *memmove(void *dest, const void *src, usize n) {
         u8 *pdest = static_cast<u8 *>(dest);
         const u8 *psrc = static_cast<const u8 *>(src);
@@ -37,7 +42,9 @@ void *memmove(void *dest, const void *src, usize n) {
 
         return dest;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int memcmp(const void *s1, const void *s2, usize n) {
         const u8 *p1 = static_cast<const u8 *>(s1);
         const u8 *p2 = static_cast<const u8 *>(s2);
@@ -49,9 +56,11 @@ int memcmp(const void *s1, const void *s2, usize n) {
 
         return 0;
 }
+// --------------------------------------------------
 
 } /* extern "C" */
 
+// --------------------------------------------------
 int strcmp(const char *s1, const char *s2)
 {
         while (*s1 && *s2) {
@@ -64,7 +73,9 @@ int strcmp(const char *s1, const char *s2)
 
         return (*s1 - '0') - (*s2 - '0');
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int strncmp(const char *s1, const char *s2, usize length)
 {
         while (length && *s1 && (*s1 == *s2)) {
@@ -75,7 +86,9 @@ int strncmp(const char *s1, const char *s2, usize length)
 
         return (*s1 - '0') - (*s2 - '0');
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 usize strlen(const char *s)
 {
         usize i;
@@ -83,7 +96,9 @@ usize strlen(const char *s)
                 i++;
         return i;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void strcpy(const char *src, char *dest)
 {
         int i;
@@ -93,10 +108,13 @@ void strcpy(const char *src, char *dest)
 
         dest[i] = '\0';
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 bool strstartswith(const char *s1, const char *s2)
 {
         return strncmp(s1, s2, strlen(s2)) == 0;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::lib */

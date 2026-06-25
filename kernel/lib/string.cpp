@@ -3,15 +3,14 @@
 
 namespace kernel::lib {
 
-// -------------------------------------------------------------
-//
-// public
-// -------------------------------------------------------------
+// --------------------------------------------------
 String::String()
 {
         this->data.push_back('\0');
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 String::String(const char *buf)
 {
         while (*buf)
@@ -19,12 +18,16 @@ String::String(const char *buf)
 
         this->data.push_back('\0');
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 const char *String::raw(this const String &self)
 {
         return self.data.get_data();
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 usize String::length(this const String &self)
 {
         // avoid returning -1
@@ -33,7 +36,9 @@ usize String::length(this const String &self)
 
         return self.data.size() - 1;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 String String::sub(this const String &self, usize start)
 {
         String s;
@@ -50,7 +55,9 @@ String String::sub(this const String &self, usize start)
 
         return s;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 String String::operator +(this const String &self, const String &other)
 {
         String s = self;
@@ -63,7 +70,9 @@ String String::operator +(this const String &self, const String &other)
 
         return s;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 String String::operator +(this const String &self, char ch)
 {
         String s = self;
@@ -74,34 +83,42 @@ String String::operator +(this const String &self, char ch)
 
         return s;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 String &String::operator +=(this String &self, const String &other)
 {
         self = self + other;
         return self;
 }
+// --------------------------------------------------
 
 String &String::operator +=(this String &self, char ch)
 {
         self = self + ch;
         return self;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 char String::operator [](this String &self, usize index)
 {
         return self.data[index];
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 char String::operator [](this const String &self, usize index)
 {
         return self.data[index];
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 bool String::operator ==(this const String &self, const String &other)
 {
         return strcmp(self.data.get_data(), other.data.get_data()) == 0;
 }
-
-// -------------------------------------------------------------
+// --------------------------------------------------
 
 } /* namespace kernel::lib */

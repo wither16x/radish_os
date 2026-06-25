@@ -4,6 +4,8 @@
 
 namespace kernel::lib::log {
 
+/// A logger is used to output informations at different
+/// levels of importance.
 class Logger {
 private:
         static constexpr int MAX_CONTEXT_BYTES = 50;
@@ -11,12 +13,13 @@ private:
         char context[MAX_CONTEXT_BYTES];
 
 public:
-        // Debug                : information for the developer
-        // Info                 : information for everyone
-        // Ok                   : something has been done successfully
-        // Warn                 : some shit has been done but it is not an issue
-        // Err                  : some shit has been done and it is an issue
-        // Crit                 : something has been completely fucked up
+        /// Enumeration of log levels
+        /// Debug                : information for the developer
+        /// Info                 : information for everyone
+        /// Ok                   : something has been done successfully
+        /// Warn                 : some shit has been done but it is not an issue
+        /// Err                  : some shit has been done and it is an issue
+        /// Crit                 : something has been completely fucked up
         enum class LogLevel : int {
                 Debug,
                 Info,
@@ -26,6 +29,7 @@ public:
                 Crit
         };
 
+        /// Tell the logger who is logging.
         void set_context(this Logger &self, const char *ctx);
 
         void va_log(this Logger &self, LogLevel lv, const char *fmt, va_list args);
