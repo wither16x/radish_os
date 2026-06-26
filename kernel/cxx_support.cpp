@@ -2,6 +2,9 @@
 
 using namespace kernel;
 
+// The functions and variables below are required by the
+// Itanium C++ ABI.
+
 extern "C" {
 
 int __cxa_atexit(void (*)(void *), void *, void *)

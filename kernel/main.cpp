@@ -60,6 +60,8 @@ extern void (*__init_array_end[])();
 extern char __proc_test_start[];
 extern char __proc_test_end[];
 
+/// Call the global constructors to initialize them.
+/// A heap allocator is required.
 void call_global_constructors()
 {
         for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
@@ -70,6 +72,7 @@ void call_global_constructors()
         logger.ok("called global constructors");
 }
 
+/// Mount the initrd.
 void mount_initrd(BootInfo::ModuleInfo &info)
 {
         // 'I' for initrd
@@ -88,12 +91,14 @@ void mount_initrd(BootInfo::ModuleInfo &info)
         logger.ok("mounted initrd");
 }
 
+/// Unmount the initrd (do it at the end).
 void unmount_initrd()
 {
         vfs::unmount('I');
         logger.ok("unmounted initrd");
 }
 
+/// Setup the kernel console.
 void init_console()
 {
         console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
@@ -105,6 +110,8 @@ void init_console()
         logger.info("framebuffer should now be used for display");
 }
 
+/// Test function to display files and directories in the
+/// initrd.
 void __test_ls(const kernel::lib::String &path)
 {
         kernel::lib::usize count = 0;
@@ -120,11 +127,13 @@ void __test_ls(const kernel::lib::String &path)
         }
 }
 
+/// Idle.
 void kernel_hang()
 {
         panic("nothing to do");
 }
 
+/// Kernel entry point.
 extern "C" void kernel_main()
 {
         if (!limine_base_revision.is_supported())

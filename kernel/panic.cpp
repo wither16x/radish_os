@@ -17,13 +17,13 @@ namespace kernel {
 
 namespace {
 
-// Here we use __builtin_return_address() which is a compiler
-// builtin and is not available on every compiler. That is why
-// it is recommended to use clang to build the kernel.
-// Also, this function seems useless but is actually necessary
-// as __builtin_return_address() takes a parameter known at
-// conpile-time. And in C++ 23 you cannot create functions
-// with constexpr parameters.
+/// Here we use __builtin_return_address() which is a compiler
+/// builtin and is not available on every compiler. That is why
+/// it is recommended to use clang to build the kernel.
+/// Also, this function seems useless but is actually necessary
+/// as __builtin_return_address() takes a parameter known at
+/// conpile-time. And in C++ 23 you cannot create functions
+/// with constexpr parameters.
 void *get_return_address(int i)
 {
         switch (i) {
@@ -48,6 +48,7 @@ void *get_return_address(int i)
         }
 }
 
+/// Return the name of a symbol based on its address.
 const char *lookup_symbol(uptr addr)
 {
         const char *best_match = "???";
@@ -63,6 +64,7 @@ const char *lookup_symbol(uptr addr)
         return best_match;
 }
 
+/// Dump the kernel stack trace until a given point.
 void dump_stack_trace(u8 depth)
 {
         for (u8 i = 0; i < depth; i++) {
@@ -77,6 +79,7 @@ void dump_stack_trace(u8 depth)
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void panic(const char *fmt, ...)
 {
         cpu::cli();
@@ -97,5 +100,6 @@ void panic(const char *fmt, ...)
         while (true)
                 cpu::hlt();
 }
+// --------------------------------------------------
 
 } /* namespace kernel */
