@@ -26,17 +26,17 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
         u64 *stack_top = reinterpret_cast<u64 *>(
                 (reinterpret_cast<u64>(this->stack) + PROCESS_STACK_SIZE)
         );
-        // do as if the process started after irteq
-        *--stack_top = 0x23;                                    // SS
+        // simulate iretq
+        *--stack_top = 0x10;                                    // SS
         *--stack_top = reinterpret_cast<u64>(stack_top);        // RSP
         *--stack_top = (1 << 9);                                // flags
-        *--stack_top = 0x1b;                                    // CS
+        *--stack_top = 0x8;                                    // CS
         *--stack_top = reinterpret_cast<u64>(entry);            // RIP
         this->rsp = reinterpret_cast<u64>(stack_top);
         this->rip = reinterpret_cast<u64>(entry);
 
-        this->cs = 0x1b;
-        this->ss = 0x23;
+        this->cs = 0x8;
+        this->ss = 0x10;
         this->flags = (1 << 9);
 
         this->pml4t = pml4t;

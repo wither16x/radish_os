@@ -1,4 +1,3 @@
-#include "mem/pmm.hpp"
 #include <cpu/userspace.hpp>
 #include <kernel.hpp>
 #include <lib/logging.hpp>
@@ -40,12 +39,8 @@ int exec(const lib::String &path)
 
         scheduler::set_current_process(&proc);
         Process *p = scheduler::get_current_process();
-        mem::vmm::map_page(p->pml4t, 
-                (uptr)p->stack, 
-                mem::pmm::allocate_frame(),
-                mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
-        );
         p->load();
+        logger.debug("rsp = 0x%x", (uptr)p->stack);
         logger.debug("preparing to jump at 0x%x", p->entry);
         cpu::enter_userspace(
                 reinterpret_cast<void *>(p->entry),
