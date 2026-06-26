@@ -1,9 +1,10 @@
+#include "lib/typing.hpp"
 #include <cpu/gdt.hpp>
 #include <cpu/tss.hpp>
 #include <kernel.hpp>
 #include <lib/logging.hpp>
 
-using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64;
+using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::log::logger;
 
 namespace kernel::cpu {
@@ -45,7 +46,7 @@ GDT::GDT()
         };
 
         TSS tss;
-        init_tss(&tss, KERNEL_STACK_TOP);
+        init_tss(&tss, reinterpret_cast<uptr>(KERNEL_STACK_TOP - 8));
 
         this->set_descriptor(0, 0, 0, 0, 0); // null
         this->set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code

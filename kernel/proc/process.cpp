@@ -24,7 +24,7 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
 
         // prepare stack and registers
         u64 *stack_top = reinterpret_cast<u64 *>(
-                (reinterpret_cast<u64>(this->stack) + PROCESS_STACK_SIZE)
+                (reinterpret_cast<u64>(KERNEL_STACK_TOP) + PROCESS_STACK_SIZE)
         );
         // simulate iretq
         *--stack_top = 0x10;                                    // SS

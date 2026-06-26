@@ -1,3 +1,4 @@
+#include "kernel.hpp"
 #include <boot/bootinfo.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
@@ -36,6 +37,14 @@ void map_kernel(u64 *pml4t)
         for (u64 i = 0; i < ksize; i++) {
                 map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWriteUser);
                 phys_addr += PAGE_BYTES;
+                virt_addr += PAGE_BYTES;
+        }
+
+        u64 stack_pages = KERNEL_STACK_SIZE / PAGE_BYTES;
+        virt_addr = KERNEL_STACK_BOTTOM / PAGE_BYTES;
+        
+        for (usize i = 0; i < stack_pages; i++) {
+                map_page(pml4t, virt_addr, pmm::allocate_frame(), PageFlag::ReadWrite | PageFlag::NoExec);
                 virt_addr += PAGE_BYTES;
         }
 }

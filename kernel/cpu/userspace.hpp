@@ -4,6 +4,8 @@
 
 namespace kernel::cpu {
 
+constexpr lib::usize USER_STACK = 0x80000000000;
+
 extern "C" void enter_userspace(void *addr, void *rsp);
 
 } /* namespace kernel::cpu */

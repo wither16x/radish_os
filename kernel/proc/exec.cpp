@@ -3,6 +3,7 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <proc/elf.hpp>
 #include <proc/exec.hpp>
@@ -39,8 +40,16 @@ int exec(const lib::String &path)
 
         scheduler::set_current_process(&proc);
         Process *p = scheduler::get_current_process();
+
+        mem::vmm::map_page(p->pml4t,
+                cpu::USER_STACK - PROCESS_STACK_SIZE,
+                mem::pmm::allocate_frame(),
+                mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
+        );
+        p->rsp = cpu::USER_STACK;
+
         p->load();
-        logger.debug("rsp = 0x%x", (uptr)p->stack);
+        logger.debug("p->stack = 0x%x", (uptr)p->stack);
         logger.debug("preparing to jump at 0x%x", p->entry);
         cpu::enter_userspace(
                 reinterpret_cast<void *>(p->entry),
