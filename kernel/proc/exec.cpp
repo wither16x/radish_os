@@ -33,27 +33,18 @@ int exec(const lib::String &path)
 
         // create the process
         void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
-        Process proc(allocate_pid(), proc_entry, proc_pml4t);
+        Process *proc = new Process(allocate_pid(), proc_entry, proc_pml4t);
 
         // tell the scheduler that the process exists
-        scheduler::add_process(&proc);
+        scheduler::add_process(proc);
 
-        scheduler::set_current_process(&proc);
+        scheduler::set_current_process(proc);
         Process *p = scheduler::get_current_process();
-
-        mem::vmm::map_page(p->pml4t,
-                cpu::USER_STACK - PROCESS_STACK_SIZE,
-                mem::pmm::allocate_frame(),
-                mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
-        );
-        p->rsp = cpu::USER_STACK;
-
         p->load();
-        logger.debug("p->stack = 0x%x", (uptr)p->stack);
-        logger.debug("preparing to jump at 0x%x", p->entry);
+
         cpu::enter_userspace(
-                reinterpret_cast<void *>(p->entry),
-                reinterpret_cast<void *>(p->stack)
+                reinterpret_cast<void *>(p->rip),
+                reinterpret_cast<void *>(p->rsp)
         );
 
         return 0;

@@ -33,8 +33,6 @@ public:
         lib::u64 ss;
         lib::u64 cr2, cr3;
 
-        // each process has its own stack
-        lib::u8 stack[PROCESS_STACK_SIZE];
         // each process has its own page tables
         lib::uptr *pml4t;
 };

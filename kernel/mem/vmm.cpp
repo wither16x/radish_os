@@ -126,10 +126,6 @@ u64 *create_pml4t(u64 *parent)
 /// --------------------------------------------------
 void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
-        // 0x1 = present
-        // 0x03 = rw cpl0
-        // (gonna add constants for this later)
-
         // create intermediate page tables containing informations
         // that tell the CPU where the corresponding frame is
 
@@ -142,7 +138,7 @@ void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 
         // now map the page to the given frame
         if (!(pml4t[pml4t_idx] & 1)) {
-                pml4t[pml4t_idx] = pmm::allocate_frame() + 0x03;
+                pml4t[pml4t_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,
@@ -152,7 +148,7 @@ void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 
         u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdpt[pdpt_idx] & 1)) {
-                pdpt[pdpt_idx] = pmm::allocate_frame() + 0x03;
+                pdpt[pdpt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,
@@ -162,7 +158,7 @@ void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 
         u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
         if (!(pdt[pdt_idx] & 1)) {
-                pdt[pdt_idx] = pmm::allocate_frame() + 0x03;
+                pdt[pdt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm),
                         0,

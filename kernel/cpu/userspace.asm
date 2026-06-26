@@ -6,6 +6,8 @@ global enter_userspace
 ;; RSI = stack pointer
 ;; RDI = return address
 enter_userspace:
+        cli
+
         xor rax, rax
 
         mov ax, 0x23

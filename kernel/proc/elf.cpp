@@ -8,7 +8,7 @@
 #include <proc/elf.hpp>
 
 using kernel::lib::String;
-using kernel::lib::u8, kernel::lib::u16, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
+using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
 using kernel::lib::getfilesz, kernel::lib::read_file;
 using kernel::lib::memcpy, kernel::lib::memset;
@@ -77,7 +77,14 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
                         // to new RX pages
                         uptr frame = mem::pmm::allocate_frame();
                         uptr vaddr = phdr->p_vaddr + j * mem::vmm::PAGE_BYTES;
-                        mem::vmm::map_page(pml4t, vaddr, frame, mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::ReadExecUser);
+
+                        u32 pflags = phdr->p_flags;
+                        u64 flag;
+                        if (pflags & 0x1) // PF_X
+                                flag = mem::vmm::PageFlag::ReadExecUser;
+                        else
+                                flag = mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec;
+                        mem::vmm::map_page(pml4t, vaddr, frame, flag);
 
                         memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::vmm::PAGE_BYTES);
 
