@@ -25,6 +25,7 @@ allocators::DynamicBitmapAllocator<uptr> allocator_stage2;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void init_stage1(boot::BootInfo::MemmapInfo &memmap)
 {
         allocator_stage1.get_bitmap().set_all();
@@ -41,7 +42,9 @@ void init_stage1(boot::BootInfo::MemmapInfo &memmap)
 
         logger.ok("initialized pmm stage 1");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void init_stage2()
 {
         allocator_stage2.get_bitmap().init(allocator_stage1.get_bitmap().size());
@@ -56,7 +59,9 @@ void init_stage2()
 
         logger.ok("initialized pmm stage 2");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 uptr allocate_frame()
 {
         if (stage2_enabled)
@@ -64,7 +69,9 @@ uptr allocate_frame()
         else
                 return allocator_stage1.allocate(1) * FRAME_BYTES;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void free_frame(uptr addr)
 {
         if (stage2_enabled)
@@ -72,5 +79,6 @@ void free_frame(uptr addr)
         else
                 allocator_stage1.free(addr / FRAME_BYTES);
 }
+// --------------------------------------------------
 
 } /* namespace kernel::mem::pmm */

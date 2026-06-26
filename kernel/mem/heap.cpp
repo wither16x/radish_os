@@ -16,20 +16,26 @@ allocators::HeapAllocator<void *> allocator;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void init()
 {
         allocator.init(HEAP_START, 16);
         logger.ok("initialized heap");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void *allocate(lib::usize n)
 {
         return allocator.allocate(n);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void free(void *p)
 {
         allocator.free(p);
 }
+// --------------------------------------------------
 
 } /* namespace kernel::mem::heap */

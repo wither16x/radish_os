@@ -11,6 +11,8 @@
 
 namespace kernel::mem::allocators {
 
+/// Allocator designed to manage memory on a heap or any
+/// other extensible memory area.
 template<typename T>
 class HeapAllocator : public Allocator<T> {
 private:
@@ -27,7 +29,7 @@ private:
         lib::LinkedList<BlockHeader> block_list;
         BlockHeader *curr_block;
 
-        // Map more pages to handle more blocks
+        /// Map more pages to handle more blocks.
         void extend(this HeapAllocator<T> &self)
         {
                 lib::uptr new_page = self.base + vmm::PAGE_BYTES * self.pages;
@@ -49,7 +51,7 @@ private:
                 }
         }
 
-        // Unmap empty pages
+        /// Unmap empty pages.
         bool shorten(this HeapAllocator<T> &self)
         {
                 if (self.pages <= 1)
@@ -89,7 +91,7 @@ private:
                 return true;
         }
 
-        // Split a block in two parts
+        /// Split a block in two smaller parts.
         void split_block(this HeapAllocator<T> &self, lib::usize base_size)
         {
                 lib::usize rem = self.curr_block->bytes - base_size;        // remaining bytes
@@ -106,7 +108,7 @@ private:
                 }
         }
 
-        // Find a free block which is big enough or bigger than `min_size` 
+        /// Find a free block which is big enough to handle `min_size`.
         BlockHeader *find_free_block(this HeapAllocator<T> &self, lib::usize min_size)
         {
                 BlockHeader *current_block = self.block_list.first();
@@ -121,7 +123,7 @@ private:
                 return nullptr;
         }
 
-        // Create a new block
+        /// Create a new block.
         BlockHeader *create_block(lib::uptr base, lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next)
         {
                 BlockHeader *block = reinterpret_cast<BlockHeader *>(base);
@@ -134,7 +136,7 @@ private:
         }
 
 public:
-        // Initialize the allocator
+        /// Initialize the allocator.
         void init(this HeapAllocator<T> &self, lib::uptr base, lib::usize alignment)
         {
                 self.base = base;
@@ -155,7 +157,6 @@ public:
                 new_list->free = true;
         }
 
-        // Allocate `n` bytes and return a pointer to the base region in the heap
         T allocate(lib::usize n) override
         {
                 n = lib::align_up(n, this->alignment);   // align `n` up
@@ -178,7 +179,6 @@ public:
                 return reinterpret_cast<void *>(reinterpret_cast<lib::u8 *>(block) + sizeof(BlockHeader));
         }
 
-        // Free an allocated pointer (panic if the pointer is already free)
         void free(T n) override
         {
                 BlockHeader *hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<lib::u8 *>(n) - sizeof(BlockHeader));

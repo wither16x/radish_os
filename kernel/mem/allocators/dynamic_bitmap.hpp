@@ -7,6 +7,7 @@
 
 namespace kernel::mem::allocators {
 
+/// Allocator based on a dynamic bitmap.
 template<typename T>
 class DynamicBitmapAllocator : public Allocator<T> {
 private:
@@ -45,6 +46,7 @@ public:
                 this->bitmap.clear(n);
         }
 
+        /// Return the `DynamicBitmap` instance.
         lib::DynamicBitmap &get_bitmap(this DynamicBitmapAllocator<T> &self)
         {
                 return self.bitmap;

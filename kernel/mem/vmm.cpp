@@ -24,6 +24,7 @@ u64 executable_phys = 0;
 u64 executable_virt = 0;
 boot::BootInfo::MemmapInfo memmap_info;
 
+/// Map the kernel in memory.
 void map_kernel(u64 *pml4t)
 {
         u64 kstart      = reinterpret_cast<u64>(*&_lds_kernel_start);
@@ -39,6 +40,7 @@ void map_kernel(u64 *pml4t)
         }
 }
 
+/// Map the working memory in higher half.
 void map_hhdm(u64 *pml4t)
 {
 	for (u64 index = 0; index < memmap_info.entry_count; index++) {
@@ -66,6 +68,7 @@ void map_hhdm(u64 *pml4t)
 
 } /* anonymous namespace */
 
+/// --------------------------------------------------
 u64 *init(lib::u64 hhdm_base,
         boot::BootInfo::ExecutableInfo &exec_info,
         boot::BootInfo::MemmapInfo &_memmap_info
@@ -85,12 +88,16 @@ u64 *init(lib::u64 hhdm_base,
 
         return pml4t;
 }
+/// --------------------------------------------------
 
+/// --------------------------------------------------
 void load(u64 *pml4t)
 {
         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(pml4t) - hhdm));
 }
+/// --------------------------------------------------
 
+/// --------------------------------------------------
 u64 *create_pml4t(u64 *parent)
 {
         uptr frame = pmm::allocate_frame();
@@ -105,7 +112,9 @@ u64 *create_pml4t(u64 *parent)
 
         return pml4t;
 }
+/// --------------------------------------------------
 
+/// --------------------------------------------------
 void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
         // 0x1 = present
@@ -156,7 +165,9 @@ void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
 }
+/// --------------------------------------------------
 
+/// --------------------------------------------------
 void unmap_page(u64 *pml4t, uptr virt)
 {
         u64 pml4t_idx   = (virt >> 39) & 0x1ff;
@@ -205,5 +216,6 @@ void unmap_page(u64 *pml4t, uptr virt)
         pmm::free_frame(pml4t[pml4t_idx] & PHYS_ADDR_MASK);
         pml4t[pml4t_idx] = 0;
 }
+/// --------------------------------------------------
 
 } /* namespace kernel::mem::vmm */
