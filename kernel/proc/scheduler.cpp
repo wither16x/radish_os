@@ -19,6 +19,7 @@ bool active = false;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 void init()
 {
         curr_proc_idx = 0;
@@ -27,14 +28,18 @@ void init()
 
         logger.ok("initialized scheduler");
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void add_process(Process *p)
 {
         // this function only adds the process to the vector:
         // it must have been initialized before
         processes.push_back(p);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void tick(cpu::IRQFrame *frame)
 {
         if (!active || processes.size() == 0 || !curr_proc)
@@ -99,20 +104,27 @@ void tick(cpu::IRQFrame *frame)
         curr_proc = new_proc;
         new_proc->load();
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 bool is_active()
 {
         return active;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 Process *get_current_process()
 {
         return curr_proc;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void set_current_process(Process *p)
 {
         curr_proc = p;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::proc::scheduler */

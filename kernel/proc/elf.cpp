@@ -18,10 +18,12 @@ namespace kernel::proc::elf {
 
 namespace {
 
+/// Supported program header types.
 enum PHDRType : elf64_word {
         PHDRTypeLoad            = 1
 };
 
+/// Check if an ELF is valid or not.
 int elf_check(ELF64Ehdr *hdr)
 {
         if (hdr->e_ident[ELF64Magic::EI_I0] != ELF64Magic::EI_BYTE0
@@ -43,6 +45,7 @@ int elf_check(ELF64Ehdr *hdr)
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 int load_elf(u64 *pml4t, const String &path, uptr *addr)
 {
         uptr hhdm = get_kernel_hhdm_offset();
@@ -97,5 +100,6 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
 
         return 0;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::proc::elf */

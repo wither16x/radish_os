@@ -7,12 +7,14 @@ namespace kernel::proc {
 
 constexpr lib::usize PROCESS_STACK_SIZE = 0x1000;       // 4 KiB
 
+/// Representation of a process.
 class Process {
 public:
-        // It is recommended to use `allocate_pid()` instead
-        // of assigning a PID manually
+        /// It is recommended to use `allocate_pid()` instead
+        /// of assigning a PID manually
         Process(int id, void (*entry)(), lib::u64 *pml4t);
 
+        /// Load the process' PML4 table.
         void load(this Process &self);
 
         void (*entry)();
@@ -36,7 +38,7 @@ public:
         lib::uptr *pml4t;
 };
 
-// // Return a PID choosen automatically
+/// Return a PID choosen automatically.
 int allocate_pid();
 
 } /* namespace kernel::proc */

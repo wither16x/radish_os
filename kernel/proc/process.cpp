@@ -16,6 +16,7 @@ int curr_pid = 0;
 
 } /* anonymous namespace */
 
+// --------------------------------------------------
 Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
 {
         this->id = id;
@@ -40,15 +41,20 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
 
         this->pml4t = pml4t;
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 void Process::load(this Process &self)
 {
         mem::vmm::load(self.pml4t);
 }
+// --------------------------------------------------
 
+// --------------------------------------------------
 int allocate_pid()
 {
         return curr_pid++;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::proc */

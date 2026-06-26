@@ -14,6 +14,7 @@ using kernel::lib::log::logger;
 
 namespace kernel::proc {
 
+// --------------------------------------------------
 int exec(const lib::String &path)
 {
         // create the process' pml4t
@@ -42,5 +43,6 @@ int exec(const lib::String &path)
 
         return 0;
 }
+// --------------------------------------------------
 
 } /* namespace kernel::proc */

@@ -7,6 +7,7 @@ namespace kernel::proc::elf {
 
 constexpr int EI_NIDENT = 16;
 
+/// Magic bytes of an ELF file and their indexes.
 enum ELF64Magic : unsigned char {
         EI_I0              = 0,
         EI_I1,
@@ -19,6 +20,7 @@ enum ELF64Magic : unsigned char {
 };
 
 // ELF64 specific types
+
 using elf64_half                = lib::u16;
 using elf64_word                = lib::u32;
 using elf64_sword               = lib::i32;
@@ -29,10 +31,12 @@ using elf64_off                 = lib::u64;
 using elf64_section             = lib::u16;
 using elf64_versym              = elf64_half;
 
+/// Enumeration of supported ELF types.
 enum ELF64Type : elf64_half {
         ET_EXEC           = 2
 };
 
+/// Handled symbol states.
 enum SHN : int {
         SHN_UNDEF
 };
@@ -41,6 +45,7 @@ enum SHN : int {
 // ph = program header
 // sh = section header
 
+/// Header of an ELF.
 struct ELF64Ehdr {
         unsigned char   e_ident[EI_NIDENT];
         elf64_half      e_type;
@@ -58,6 +63,7 @@ struct ELF64Ehdr {
         elf64_half      e_shstrndx;
 };
 
+/// Header of a section.
 struct ELF64Shdr {
         elf64_word      sh_name;
         elf64_word      sh_type;
@@ -71,6 +77,7 @@ struct ELF64Shdr {
         elf64_xword     sh_entsize;
 };
 
+/// Header of a program.
 struct ELF64Phdr {
         elf64_word      p_type;
         elf64_word      p_flags;
@@ -82,6 +89,7 @@ struct ELF64Phdr {
         elf64_xword     p_align;
 };
 
+/// Representation of a symbol.
 struct ELF64Sym {
         elf64_word      st_name;
         unsigned char   st_info;
@@ -91,8 +99,8 @@ struct ELF64Sym {
         elf64_xword     st_size;
 };
 
-// pml4t: pml4 table of the process
-// hhdm: hhdm offset
+/// Load an ELF and map it in higher-half in a process'
+/// PML4 table.
 int load_elf(lib::u64 *pml4t, const lib::String &path, lib::uptr *addr);
 
 } /* namespace kernel::proc::elf */
