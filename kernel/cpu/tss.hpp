@@ -9,7 +9,11 @@ struct [[gnu::packed]] TSS {
         lib::u64 rsp0;
         lib::u64 rsp1;
         lib::u64 rsp2;
-        lib::u64 __useless[21];
+        lib::u64 __reserved1;
+        lib::u64 ist[7];
+        lib::u64 __reserved2;
+        lib::u64 __reserved3;
+        lib::u16 iobp;
 };
 
 /// Initialize a TSS with a pointer to the top of the kernel

@@ -1,4 +1,5 @@
-#include "lib/typing.hpp"
+#include "lib/memory.hpp"
+#include <lib/typing.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/tss.hpp>
 #include <kernel.hpp>
@@ -35,6 +36,8 @@ struct [[gnu::packed]] GDTR {
 GDTDescriptor gdt[MAX_DESCRIPTORS];
 GDTR gdtptr;
 
+TSS tss;
+
 } /* anonymous namespace */
 
 // --------------------------------------------------
@@ -45,7 +48,6 @@ GDT::GDT()
                 .offset = reinterpret_cast<u64>(&gdt)
         };
 
-        TSS tss;
         init_tss(&tss, reinterpret_cast<uptr>(KERNEL_STACK_TOP - 8));
 
         this->set_descriptor(0, 0, 0, 0, 0); // null
@@ -55,10 +57,8 @@ GDT::GDT()
         this->set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
         // in long mode the TSS takes two entries
         this->set_descriptor(5, reinterpret_cast<u64>(&tss) & 0xffffffff, sizeof(tss) - 1, 0x89, 0);
-        u32 tss_addr_high = (reinterpret_cast<u64>(&tss) >> 32) & 0xffffffff;
-        gdt[6] = *reinterpret_cast<GDTDescriptor *>(
-                &tss_addr_high
-        );
+        lib::memset(&gdt[6], 0, sizeof(GDTDescriptor));
+        *reinterpret_cast<u32 *>(&gdt[6]) = (reinterpret_cast<u64>(&tss) >> 32) & 0xffffffff;
 
         logger.ok("initialized gdt");
 }
@@ -80,8 +80,8 @@ void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)
         gdt[n].base_low         = base & 0xffff;
         gdt[n].base_middle      = (base >> 16) & 0xff;
         gdt[n].access           = access;
-        gdt[n].limit_and_flags  = flags & 0xf0;
-        gdt[n].base_high        = base >> 16;
+        gdt[n].limit_and_flags  = (flags & 0xf0) | ((limit >> 16) & 0x0f);
+        gdt[n].base_high        = base >> 24;
 }
 // --------------------------------------------------
 
