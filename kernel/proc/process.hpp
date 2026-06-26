@@ -35,6 +35,7 @@ public:
 
         // each process has its own stack
         lib::u8 stack[PROCESS_STACK_SIZE];
+        // each process has its own page tables
         lib::uptr *pml4t;
 };
 

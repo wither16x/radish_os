@@ -24,3 +24,5 @@
 
 # backup files
 *.bak
+
+/*.log
