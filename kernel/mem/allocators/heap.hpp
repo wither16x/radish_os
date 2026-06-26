@@ -37,7 +37,7 @@ private:
                         get_kernel_pml4t(),
                         self.base + vmm::PAGE_BYTES * self.pages,
                         pmm::allocate_frame(),
-                        vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec
+                        vmm::PageFlag::ReadWriteUser | vmm::PageFlag::NoExec
                 );
                 self.pages++;
 

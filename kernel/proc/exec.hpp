@@ -4,7 +4,7 @@
 
 namespace kernel::proc {
 
-/// Execute a program as a kernel process.
+/// Execute a program as a user process.
 int exec(const lib::String &path);
 
 } /* namespace kernel::proc */

@@ -12,6 +12,7 @@ gdt_flush:
         push CODE_SEGMENT
         lea rax, [rel reload_cs]
         push rax
+        
         retfq
 
 ;; Reload the code segment.
@@ -22,4 +23,5 @@ reload_cs:
         mov fs, ax
         mov gs, ax
         mov ss, ax
+
         ret

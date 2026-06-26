@@ -34,7 +34,7 @@ void map_kernel(u64 *pml4t)
         u64 virt_addr   = executable_virt;
 
         for (u64 i = 0; i < ksize; i++) {
-                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWrite);
+                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWriteUser);
                 phys_addr += PAGE_BYTES;
                 virt_addr += PAGE_BYTES;
         }
@@ -58,7 +58,7 @@ void map_hhdm(u64 *pml4t)
                         u64 virt_addr = memmap_info.entries[index].base + hhdm;
                         
                         for (u64 i = 0; i < section_size; i++) {
-                                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWrite);
+                                map_page(pml4t, virt_addr, phys_addr, PageFlag::ReadWriteUser);
                                 virt_addr += PAGE_BYTES;
                                 phys_addr += PAGE_BYTES;
                         }

@@ -9,7 +9,6 @@ _start:
         
 ; just hang forever (interrupts are still received)
 hang:
-        hlt
         jmp hang
 
 section .rodata

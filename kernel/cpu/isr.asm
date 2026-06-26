@@ -21,6 +21,7 @@ extern exception_handler
 
 isr_no_error_stub       3               ; breakpoint
 isr_error_stub          10              ; invalid tss
+isr_error_stub          13              ; general protection fault
 isr_error_stub          14              ; page fault
 
 ;; Every ISR stub should jump to this address.

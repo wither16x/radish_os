@@ -197,7 +197,7 @@ extern "C" void kernel_main()
         scheduler::init();
 
         exec("I:/bin/test");
-
+        
         unmount_initrd();
 
         kernel_hang();

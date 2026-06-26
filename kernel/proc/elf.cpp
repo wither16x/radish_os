@@ -77,7 +77,7 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
                         // to new RX pages
                         uptr frame = mem::pmm::allocate_frame();
                         uptr vaddr = phdr->p_vaddr + j * mem::vmm::PAGE_BYTES;
-                        mem::vmm::map_page(pml4t, vaddr, frame, mem::vmm::PageFlag::ReadExec);
+                        mem::vmm::map_page(pml4t, vaddr, frame, mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::ReadExecUser);
 
                         memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::vmm::PAGE_BYTES);
 
