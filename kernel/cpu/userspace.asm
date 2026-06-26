@@ -8,7 +8,7 @@ global enter_userspace
 enter_userspace:
         xor rax, rax
 
-        mov ax, 0x20
+        mov ax, 0x23
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -17,7 +17,7 @@ enter_userspace:
         push rax
         push rsi
         pushf
-        push 0x18
+        push 0x1b
         push rdi
 
         mov rbp, rsi

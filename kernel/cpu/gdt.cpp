@@ -50,7 +50,7 @@ GDT::GDT()
         this->set_descriptor(0, 0, 0, 0, 0); // null
         this->set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
         this->set_descriptor(2, 0, 0, 0x92, 0); // kernel data
-        this->set_descriptor(3, 0, 0, 0xfa, 0xa); // user code
+        this->set_descriptor(3, 0, 0, 0xfa, 0xa0); // user code
         this->set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
         // in long mode the TSS takes two entries
         this->set_descriptor(5, reinterpret_cast<u64>(&tss) & 0xffffffff, sizeof(tss) - 1, 0x89, 0);

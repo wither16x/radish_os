@@ -1,7 +1,7 @@
 #include <kernel.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::u64;
+using kernel::lib::u8, kernel::lib::u64;
 
 namespace kernel {
 
