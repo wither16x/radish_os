@@ -41,7 +41,7 @@ void map_kernel(u64 *pml4t)
         }
 
         u64 stack_pages = KERNEL_STACK_SIZE / PAGE_BYTES;
-        virt_addr = KERNEL_STACK_BOTTOM / PAGE_BYTES;
+        virt_addr = KERNEL_STACK_BOTTOM;
         
         for (usize i = 0; i < stack_pages; i++) {
                 map_page(pml4t, virt_addr, pmm::allocate_frame(), PageFlag::ReadWrite | PageFlag::NoExec);

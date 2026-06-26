@@ -17,6 +17,9 @@ enter_userspace:
         push rax
         push rsi
         pushf
+        pop rax
+        or rax, 0x200
+        push rax
         push 0x1b
         push rdi
 
