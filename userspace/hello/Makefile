@@ -21,6 +21,7 @@ CFLAGS := -ffreestanding \
 	-mcmodel=kernel \
 	-std=c23 \
 	-fno-builtin \
+	--target=x86_64-unknown-none \
 	-fvisibility=hidden
 
 LDFLAGS := -fuse-ld=lld \

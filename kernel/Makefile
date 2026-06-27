@@ -39,6 +39,7 @@ COMMON_FLAGS := \
 	-nostdlib \
 	-nostdinc \
 	-mcmodel=kernel \
+	--target=x86_64-unknown-none \
 	-I.
 
 CXXFLAGS := $(COMMON_FLAGS) \
