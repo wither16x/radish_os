@@ -19,10 +19,14 @@
 # iso structure
 /iso_root/
 
+# initrd
+/initrd/bin/
+
 # for clangd
 /compile_commands.json
 
 # backup files
 *.bak
 
+# log files
 /*.log
