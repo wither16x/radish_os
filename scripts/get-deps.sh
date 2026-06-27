@@ -27,4 +27,4 @@ make -C "$DEPENDENCIES_DIR/Limine"
 
 # copy stuff
 cp -v "$DEPENDENCIES_DIR/limine-protocol/include/limine.h" \
-      kernel/limine.h
+      kernel/include/limine.h

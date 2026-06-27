@@ -40,7 +40,7 @@ COMMON_FLAGS := \
 	-nostdinc \
 	-mcmodel=kernel \
 	--target=x86_64-unknown-none \
-	-I.
+	-Iinclude
 
 CXXFLAGS := $(COMMON_FLAGS) \
 	-std=c++23 \
