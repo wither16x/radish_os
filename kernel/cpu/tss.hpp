@@ -4,6 +4,8 @@
 
 namespace kernel::cpu {
 
+/// Representation of a task state segment.
+/// Note that we only use RSP0.
 struct [[gnu::packed]] TSS {
         lib::u32 __reserved0;
         lib::u64 rsp0;

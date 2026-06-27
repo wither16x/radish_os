@@ -24,6 +24,9 @@ extern "C" void __isr_stub14();
 // IRQ stubs
 extern "C" void __irq_stub0();
 
+// Syscall
+extern "C" void syscall_common();
+
 /// Easy-to-use representation of a single IDT entry.
 struct [[gnu::packed]] IDTEntry {
         u16 isr_low;
@@ -61,6 +64,8 @@ IDT::IDT()
         this->set_gate(14, __isr_stub14, 0x8e);
         // irq
         this->set_gate(32, __irq_stub0, 0x8e);
+        // syscall
+        this->set_gate(128, syscall_common, 0xef);
 
         logger.ok("initialized idt");
 }

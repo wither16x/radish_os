@@ -9,6 +9,7 @@ constexpr lib::uptr USER_STACK_TOP    = 0x7fffffffe000;
 constexpr lib::uptr USER_STACK_SIZE   = 64 * mem::vmm::PAGE_BYTES;
 constexpr lib::uptr USER_STACK_BOTTOM = USER_STACK_TOP - USER_STACK_SIZE;
 
+/// Switch the CPU to ring 3.
 extern "C" void enter_userspace(void *addr, void *rsp);
 
 } /* namespace kernel::cpu */
