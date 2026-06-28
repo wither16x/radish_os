@@ -9,6 +9,7 @@
 #include <drivers/framebuffer.hpp>
 #include <drivers/pic.hpp>
 #include <drivers/pit.hpp>
+#include <drivers/keyboard.hpp>
 #include <drivers/ps2kbd.hpp>
 #include <drivers/serial.hpp>
 #include <fs/ustar.hpp>
@@ -166,6 +167,8 @@ extern "C" void kernel_main()
         pic::irq_unmask(1);
         logger.ok("unmasked irq 1: timer");
         
+        keyboard::init();
+
         sti();
 
         call_global_constructors();
