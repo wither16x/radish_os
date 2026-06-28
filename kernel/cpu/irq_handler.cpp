@@ -15,18 +15,13 @@ namespace kernel::cpu {
 
 namespace {
 
-enum IRQType : u64 {
-        IRQ_TIMER,
-        IRQ_KEYBOARD
-};
-
 /// Handle the timer IRQ.
 void handle_irq0_timer(cpu::IRQFrame *f)
 {
         // increase time and consider that the interrupt is
         // finished
         drivers::pit::tick();
-        drivers::pic::send_eoi(IRQ_TIMER);
+        drivers::pic::send_eoi(drivers::pic::IRQ_TIMER);
 
         // schedule
         if (!proc::scheduler::is_active())
@@ -44,7 +39,7 @@ void handle_irq1_keyboard()
                 logger.debug("0x%x", k);
         }
 
-        drivers::pic::send_eoi(IRQ_KEYBOARD);
+        drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
 }
 
 } /* anonymous namespace */
@@ -52,11 +47,11 @@ void handle_irq1_keyboard()
 extern "C" void irq_handler(IRQFrame *f)
 {
         switch (f->irqno) {
-        case IRQ_TIMER:
+        case drivers::pic::IRQ_TIMER:
                 handle_irq0_timer(f);
                 break;
 
-        case IRQ_KEYBOARD:
+        case drivers::pic::IRQ_KEYBOARD:
                 handle_irq1_keyboard();
                 break;
 

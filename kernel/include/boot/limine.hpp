@@ -41,5 +41,6 @@ StartMarker requests_start_marker();
 /// Wrapper around the `LININE_REQUESTS_END_NARKER` macro
 /// provided by `limine.h`.
 EndMarker requests_end_marker();
+volatile Revision &get_base_revision();
 
 } /* namespace kernel::boot::limine */

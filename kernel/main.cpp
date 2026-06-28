@@ -34,32 +34,16 @@ using namespace kernel::proc;
 using kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::Status;
 using kernel::lib::log::logger;
-using kernel::panic;
-using kernel::boot::limine::Revision, kernel::boot::limine::base_revision;
-using kernel::boot::limine::StartMarker, kernel::boot::limine::requests_start_marker;
-using kernel::boot::limine::EndMarker, kernel::boot::limine::requests_end_marker;
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::tss_flush, kernel::cpu::sti;
-using kernel::set_kernel_pml4t, kernel::set_kernel_hhdm_offset;
-
-namespace {
-
-[[gnu::used, gnu::section(".limine_requests")]]
-volatile Revision limine_base_revision = base_revision(6);
-
-[[gnu::used, gnu::section(".limine_requests_start")]]
-volatile StartMarker limine_requests_start_marker = requests_start_marker();
-
-[[gnu::used, gnu::section(".limine_requests_end")]]
-volatile EndMarker limine_requests_end_marker = requests_end_marker();
-
-} /* anonymous namespace */
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
 
 extern char __proc_test_start[];
 extern char __proc_test_end[];
+
+namespace kernel {
 
 /// Call the global constructors to initialize them.
 /// A heap allocator is required.
@@ -137,8 +121,8 @@ void kernel_hang()
 /// Kernel entry point.
 extern "C" void kernel_main()
 {
-        if (!limine_base_revision.is_supported())
-                panic("limine base revision not supported"); // unprintable message
+        if (!boot::limine::get_base_revision().is_supported())
+                panic("limine base revsion not supported"); // you wont see the message
 
         if (serial::init_port(serial::Port::SERIAL_COM1) != Status::Ok)
                 panic("no display device"); // so the message cannot be printed lol
@@ -208,3 +192,5 @@ extern "C" void kernel_main()
 
         kernel_hang();
 }
+
+} /* namespace kernel */

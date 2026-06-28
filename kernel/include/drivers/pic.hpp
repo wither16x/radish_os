@@ -4,6 +4,11 @@
 
 namespace kernel::drivers::pic {
 
+enum IRQType : lib::u64 {
+        IRQ_TIMER,
+        IRQ_KEYBOARD
+};
+
 /// Remap the PIC at automatically given offsets.
 void remap();
 /// Send "END OF INTERRUPT" to an IRQ.
