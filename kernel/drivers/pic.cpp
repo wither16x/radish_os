@@ -43,18 +43,26 @@ enum Command : u8 {
 void remap()
 {
         // start initialization
+        cpu::io_wait();
         cpu::output_byte_port(Port::MASTER_COMMAND, Command::ICW1_INIT | Command::ICW1_ICW4);
+        cpu::io_wait();
         cpu::output_byte_port(Port::SLAVE_COMMAND, Command::ICW1_INIT | Command::ICW1_ICW4);
 
+        cpu::io_wait();
         cpu::output_byte_port(Port::MASTER_DATA, MASTER_OFFSET);
+        cpu::io_wait();
         cpu::output_byte_port(Port::SLAVE_DATA, SLAVE_OFFSET);
 
         // tell the master that it has a slave
+        cpu::io_wait();
         cpu::output_byte_port(Port::MASTER_DATA, Command::ICW3_MASTER);
+        cpu::io_wait();
         cpu::output_byte_port(Port::SLAVE_DATA, Command::ICW3_SLAVE);
 
         // enable 8086 mode
+        cpu::io_wait();
         cpu::output_byte_port(Port::MASTER_DATA, Command::ICW4_8086);
+        cpu::io_wait();
         cpu::output_byte_port(Port::SLAVE_DATA, Command::ICW4_8086);
 }
 // --------------------------------------------------
@@ -73,7 +81,7 @@ void send_eoi(u8 irq)
 void irq_mask(lib::u8 irq)
 {
         Port port;
-        Command cmd;
+        u8 cmd;
 
         if (irq < 8) {
                 port = Port::MASTER_DATA;
@@ -82,9 +90,7 @@ void irq_mask(lib::u8 irq)
                 irq -= 8;
         }
 
-        cmd = static_cast<Command>(
-                cpu::input_byte_port(port) | (1 << irq)
-        );
+        cmd = cpu::input_byte_port(port) | (1 << irq);
         cpu::output_byte_port(port, cmd);
 }
 // --------------------------------------------------
@@ -93,7 +99,7 @@ void irq_mask(lib::u8 irq)
 void irq_unmask(lib::u8 irq)
 {
         Port port;
-        Command cmd;
+        u8 cmd;
 
         if (irq < 8) {
                 port = Port::MASTER_DATA;
@@ -102,9 +108,7 @@ void irq_unmask(lib::u8 irq)
                 irq -= 8;
         }
 
-        cmd = static_cast<Command>(
-                cpu::input_byte_port(port) & ~(1 << irq)
-        );
+        cmd = cpu::input_byte_port(port) & ~(1 << irq);
         cpu::output_byte_port(port, cmd);
 }
 // --------------------------------------------------

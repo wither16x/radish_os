@@ -23,6 +23,7 @@ extern "C" void __isr_stub14();
 
 // IRQ stubs
 extern "C" void __irq_stub0();
+extern "C" void __irq_stub1();
 
 // Syscall
 extern "C" void syscall_common();
@@ -64,6 +65,7 @@ IDT::IDT()
         this->set_gate(14, __isr_stub14, 0x8e);
         // irq
         this->set_gate(32, __irq_stub0, 0x8e);
+        this->set_gate(33, __irq_stub1, 0x8e);
         // syscall
         this->set_gate(128, syscall_common, 0xef);
 

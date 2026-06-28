@@ -7,7 +7,6 @@ namespace kernel::cpu {
 /// Registers and values pushed before calling the IRQ
 /// handler.
 struct [[gnu::packed]] IRQFrame {
-        lib::u64 irqno;
 	lib::u64 cr2;
 	lib::u64 cr3;
 	lib::u64 rax;
@@ -25,6 +24,7 @@ struct [[gnu::packed]] IRQFrame {
 	lib::u64 r13;
 	lib::u64 r14;
 	lib::u64 r15;
+        lib::u64 irqno;
 	lib::u64 rip;
 	lib::u64 cs;
 	lib::u64 flags;

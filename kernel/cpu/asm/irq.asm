@@ -11,6 +11,7 @@ section .text
 extern irq_handler
 
 irq 0                   ; timer
+irq 1                   ; keyboard
 
 ;; Every IRQ stub should jump to this address.
 irq_common:
