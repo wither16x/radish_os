@@ -98,8 +98,10 @@ void Console::draw_char(this Console &self, char ch, u32 color)
                 break;
 
         case '\b':
-                if (self.cursor_x > 0)
+                if (self.cursor_x > 0) {
                         self.cursor_x -= self.glyph_width;
+                        framebuffer::draw_rectangle(self.cursor_x, self.cursor_y, self.glyph_width, self.glyph_height, 0);
+                }
                 break;
 
         case '\t':

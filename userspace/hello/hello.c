@@ -1,6 +1,6 @@
 void _start()
 {
-        const char *msg = "Hello from syscall 0 in userspace!";
+        const char *msg = "Hello from syscall 0 in userspace!\r\n";
 
         __asm__ volatile (
                 "mov $0, %%rax\n"

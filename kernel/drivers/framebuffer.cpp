@@ -76,4 +76,14 @@ u64 get_height()
 }
 // --------------------------------------------------
 
+// --------------------------------------------------
+void draw_rectangle(u64 start_x, u64 start_y, u64 width, u64 height, u32 color)
+{
+        for (u64 y = start_y; y < start_y + height; y++) {
+                for (u64 x = start_x; x < start_x + width; x++)
+                        draw_pixel(x, y, color);
+        }
+}
+// --------------------------------------------------
+
 } /* namespace kernel::drivers::framebuffer */

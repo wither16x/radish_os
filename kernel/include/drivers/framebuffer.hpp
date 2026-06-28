@@ -14,5 +14,6 @@ void scroll(lib::u64 height);
 lib::u64 get_width();
 /// Get the framebuffer height.
 lib::u64 get_height();
+void draw_rectangle(lib::u64 start_x, lib::u64 start_y, lib::u64 width, lib::u64 height, lib::u32 color);
 
 } /* namespace kernel::drivers::framebuffer */
