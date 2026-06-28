@@ -51,7 +51,7 @@ IDTR idtptr;
 } /* anonymous namespace */
 
 // --------------------------------------------------
-IDT::IDT()
+void IDT::init(this IDT &self)
 {
         idtptr = {
                 .size = sizeof(idt) - 1,
@@ -59,15 +59,15 @@ IDT::IDT()
         };
 
         // isr
-        this->set_gate(3, __isr_stub3, 0x8e);
-        this->set_gate(10, __isr_stub10, 0x8e);
-        this->set_gate(13, __isr_stub13, 0x8e);
-        this->set_gate(14, __isr_stub14, 0x8e);
+        self.set_gate(3, __isr_stub3, 0x8e);
+        self.set_gate(10, __isr_stub10, 0x8e);
+        self.set_gate(13, __isr_stub13, 0x8e);
+        self.set_gate(14, __isr_stub14, 0x8e);
         // irq
-        this->set_gate(32, __irq_stub0, 0x8e);
-        this->set_gate(33, __irq_stub1, 0x8e);
+        self.set_gate(32, __irq_stub0, 0x8e);
+        self.set_gate(33, __irq_stub1, 0x8e);
         // syscall
-        this->set_gate(128, syscall_common, 0xef);
+        self.set_gate(128, syscall_common, 0xef);
 
         logger.ok("initialized idt");
 }

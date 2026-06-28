@@ -134,7 +134,10 @@ extern "C" void kernel_main()
         gdt.load();
 
         IDT idt;
-        idt.load();
+        idt.init();
+        set_kernel_idt(idt);
+        IDT &kidt = get_kernel_idt();
+        kidt.load();
 
         tss_flush();
 
@@ -157,16 +160,9 @@ extern "C" void kernel_main()
         logger.ok("masked all irq");
 
         pit::init();
-        logger.ok("initialized pit");
-
-        pic::irq_unmask(0);
-        logger.ok("unmasked irq 0: timer");
 
         ps2kbd::init();
 
-        pic::irq_unmask(1);
-        logger.ok("unmasked irq 1: timer");
-        
         keyboard::init();
 
         sti();

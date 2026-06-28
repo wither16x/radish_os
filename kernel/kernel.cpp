@@ -1,3 +1,4 @@
+#include <cpu/idt.hpp>
 #include <kernel.hpp>
 #include <lib/typing.hpp>
 
@@ -9,6 +10,7 @@ namespace {
 
 u64 *kpml4t = nullptr;
 u64 hhdm_offset;
+cpu::IDT kidt;
 
 } /* anonymous namespace */
 
@@ -37,6 +39,20 @@ u64 get_kernel_hhdm_offset()
 void set_kernel_hhdm_offset(lib::u64 offset)
 {
         hhdm_offset = offset;
+}
+// --------------------------------------------------
+
+// --------------------------------------------------
+cpu::IDT &get_kernel_idt()
+{
+        return kidt;
+}
+// --------------------------------------------------
+
+// --------------------------------------------------
+void set_kernel_idt(const cpu::IDT &idt)
+{
+        kidt = idt;
 }
 // --------------------------------------------------
 

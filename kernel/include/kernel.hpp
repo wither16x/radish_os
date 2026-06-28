@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpu/idt.hpp>
 #include <mem/vmm.hpp>
 #include <lib/typing.hpp>
 
@@ -17,5 +18,7 @@ void set_kernel_pml4t(lib::u64 *pml4t);
 lib::u64 get_kernel_hhdm_offset();
 /// Set the higher-half direct mapping offset.
 void set_kernel_hhdm_offset(lib::u64 offset);
+cpu::IDT &get_kernel_idt();
+void set_kernel_idt(const cpu::IDT &idt);
 
 } /* namespace kernel */

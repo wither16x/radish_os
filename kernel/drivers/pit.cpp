@@ -1,8 +1,13 @@
 #include <cpu/io.hpp>
+#include <cpu/irq.hpp>
+#include <drivers/pic.hpp>
 #include <drivers/pit.hpp>
+#include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <proc/scheduler.hpp>
 
 using kernel::lib::u16, kernel::lib::u64;
+using kernel::lib::log::logger;
 
 namespace kernel::drivers::pit {
 
@@ -19,6 +24,19 @@ u64 seconds = 0;
 
 bool sleeping = false;
 
+void handle_irq(cpu::IRQFrame *f)
+{
+        // increase time and consider that the interrupt is
+        // finished
+        tick();
+        drivers::pic::send_eoi(drivers::pic::IRQ_TIMER);
+
+        // schedule
+        if (!proc::scheduler::is_active())
+                return;
+        proc::scheduler::tick(f);
+}
+
 } /* anonymous namespace */
 
 // --------------------------------------------------
@@ -30,6 +48,10 @@ void init()
         cpu::output_byte_port(Port::PORT_COMMAND, 0b00110100);
         cpu::output_byte_port(Port::PORT_CHANNEL_0, divider & 0xff);
         cpu::output_byte_port(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
+
+        cpu::register_irq(drivers::pic::IRQType::IRQ_TIMER, reinterpret_cast<void *>(handle_irq));
+
+        logger.ok("initialized pit driver");
 }
 // --------------------------------------------------
 

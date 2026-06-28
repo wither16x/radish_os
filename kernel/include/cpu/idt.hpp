@@ -9,8 +9,7 @@ namespace kernel::cpu {
 /// and not by the class itself.
 class IDT {
 public:
-        IDT();
-
+        void init(this IDT &self);
         /// Load the IDT.
         void load();
 

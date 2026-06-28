@@ -1,4 +1,4 @@
-#include <cpu/irq_handler.hpp>
+#include <cpu/irq.hpp>
 #include <lib/logging.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>

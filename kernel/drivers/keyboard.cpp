@@ -1,9 +1,15 @@
 #include <cpu/io.hpp>
+#include <cpu/irq.hpp>
 #include <drivers/keyboard.hpp>
+#include <drivers/pic.hpp>
 #include <drivers/ps2kbd.hpp>
+#include <lib/print.hpp>
 #include <lib/typing.hpp>
+#include <lib/logging.hpp>
 
-using kernel::lib::u8, kernel::lib::usize;;
+using kernel::lib::u8, kernel::lib::usize;
+using kernel::lib::putchar;
+using kernel::lib::log::logger;
 
 namespace kernel::drivers::keyboard {
 
@@ -77,6 +83,16 @@ constexpr Key keys[] = {
 bool shift = false;
 bool expecting_break = false;
 
+void handle_irq()
+{
+        u8 k = handle_key_press();
+        char ch = scancode_to_key(k);
+        if (ch)
+                putchar(ch);
+
+        drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
+}
+
 } /* anonymous namespace */
 
 void init()
@@ -85,6 +101,10 @@ void init()
                 unshift_kbd_layout[k.scancode] = k.unshift;
                 shift_kbd_layout[k.scancode] = k.shift;
         }
+
+        cpu::register_irq(drivers::pic::IRQType::IRQ_KEYBOARD, reinterpret_cast<void *>(handle_irq));
+
+        logger.ok("initialized generic keyboard driver");
 }
 
 u8 handle_key_press()

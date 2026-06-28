@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cpu/irq_handler.hpp>
+#include <cpu/irq.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 #include <proc/process.hpp>
