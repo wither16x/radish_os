@@ -31,6 +31,14 @@ struct PSF2Header {
         u32 width;              // glyph width
 };
 
+enum Char : char {
+        CH_CR           = '\r',
+        CH_NL           = '\n',
+        CH_TAB          = '\t',
+        CH_BS           = '\b',
+        CH_DEL          = 0x7f
+};
+
 Console current_console;
 
 } /* anonymous namespace */
@@ -89,23 +97,28 @@ void Console::init_font(this Console &self, const String &font)
 void Console::draw_char(this Console &self, char ch, u32 color)
 {
         switch (ch) {
-        case '\r':
+        case Char::CH_CR:
                 self.cursor_x = 0;
                 break;
 
-        case '\n':
+        case Char::CH_NL:
                 self.cursor_y += self.glyph_height;
                 break;
 
-        case '\b':
+        case Char::CH_BS:
+                if (self.cursor_x > 0)
+                        self.cursor_x -= self.glyph_width;
+                break;
+
+        case Char::CH_TAB:
+                self.cursor_x += self.glyph_width * 4;
+                break;
+
+        case Char::CH_DEL:
                 if (self.cursor_x > 0) {
                         self.cursor_x -= self.glyph_width;
                         framebuffer::draw_rectangle(self.cursor_x, self.cursor_y, self.glyph_width, self.glyph_height, 0);
                 }
-                break;
-
-        case '\t':
-                self.cursor_x += self.glyph_width * 4;
                 break;
         
         default:
