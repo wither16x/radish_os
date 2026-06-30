@@ -5,7 +5,9 @@ SRC := ./hello.c
 OBJ := $(BUILD)/hello.o
 EXEC = $(BIN)/hello
 
-CC := clang
+CC := x86_64-elf-gcc
+LD := ld
+
 CFLAGS := -ffreestanding \
 	-fno-stack-protector \
 	-fno-stack-check \
@@ -18,18 +20,16 @@ CFLAGS := -ffreestanding \
 	-Wextra \
 	-nostdlib \
 	-nostdinc \
-	-mcmodel=kernel \
+	-mcmodel=small \
 	-std=c23 \
 	-fno-builtin \
-	--target=x86_64-unknown-none \
 	-fvisibility=hidden
 
-LDFLAGS := -fuse-ld=lld \
-	-static \
+LDFLAGS := -static \
 	-nostdlib \
-	-Wl,--Ttext=0x400000 \
-	-Wl,--build-id=none \
-	-Wl,-z,max-page-size=0x1000
+	-Ttext=0x400000 \
+	--build-id=none \
+	-z max-page-size=0x1000
 
 .PHONY: all clean
 
@@ -37,7 +37,7 @@ all: $(EXEC)
 
 $(EXEC): $(OBJ)
 	@mkdir -p $(BIN)
-	$(CC) $(LDFLAGS) $(OBJ) -o $(EXEC)
+	$(LD) $(LDFLAGS) $(OBJ) -o $(EXEC)
 
 $(OBJ): $(SRC)
 	@mkdir -p $(BUILD)

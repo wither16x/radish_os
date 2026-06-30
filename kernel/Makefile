@@ -1,7 +1,9 @@
+PREFIX := x86_64-elf
+
 # tools
-CXX      := clang++
-CC       := clang
-LD       := clang++
+CXX      := $(PREFIX)-g++
+CC       := $(PREFIX)-gcc
+LD       := ld
 ASM      := nasm
 
 # dirs
@@ -39,7 +41,6 @@ COMMON_FLAGS := \
 	-nostdlib \
 	-nostdinc \
 	-mcmodel=kernel \
-	--target=x86_64-unknown-none \
 	-Iinclude
 
 CXXFLAGS := $(COMMON_FLAGS) \
@@ -61,13 +62,11 @@ CFLAGS := $(COMMON_FLAGS) \
 
 ASMFLAGS := -f elf64
 
-LDFLAGS := \
-	-fuse-ld=lld \
-	-static \
+LDFLAGS := -static \
 	-nostdlib \
-	-Wl,--build-id=none \
-	-Wl,-z,max-page-size=0x1000 \
-	-Wl,-T,$(LDSCRIPT)
+	--build-id=none \
+	-z max-page-size=0x1000 \
+	-T $(LDSCRIPT)
 
 # build rules
 all: $(TARGET)
