@@ -1,4 +1,4 @@
-PREFIX := x86_64-elf
+PREFIX := x86_64-radishos
 
 # tools
 CXX      := $(PREFIX)-g++

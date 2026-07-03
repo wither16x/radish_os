@@ -11,17 +11,25 @@ if [ -d "$DIR/binutils-gdb" ]; then
         echo "$DIR/binutils-gdb already exists, assuming it contains the right sources"
 else
         git clone git://sourceware.org/git/binutils-gdb.git "$DIR/binutils-gdb" --depth=1
+        cd "$DIR/binutils-gdb"
+        git checkout 794f538c
+        git am patches/binutils-gdb/*.patch
+        cd -
 fi
 
 if [ -d "$DIR/gcc" ]; then
         echo "$DIR/gcc already exists, assuming it contains the right sources"
 else
-        git clone https://gcc.gnu.org/git/gcc.git "$DIR/gcc" --depth=1 
+        git clone https://gcc.gnu.org/git/gcc.git "$DIR/gcc" --depth=1
+        cd "$DIR/gcc"
+        git checkout 158250754
+        git am patches/gcc/*.patch
+        cd -
 fi
 
 # Prepare build
 export PREFIX="$HOME/opt/cross"
-export TARGET="x86_64-elf"
+export TARGET="x86_64-radishos"
 export PATH="$PREFIX/bin:$PATH"
 
 # Create source directory
@@ -30,7 +38,7 @@ cd $DIR/src
 
 # Build binutils
 if [ -d "build_binutils" ]; then
-        echo "It looks like binutils has already been built. If not, then please remove the build directory."
+       echo "It looks like binutils has already been built. If not, then please remove the build directory."
 else
         mkdir -p build_binutils
         cd build_binutils
@@ -52,7 +60,7 @@ else
 
         ../../gcc/configure --target="$TARGET" --prefix="$PREFIX" --disable-nls \
                 --enable-languages=c,c++ --without-headers --enable-initfini-array \
-                --disable-hosted-libstdcxx
+                --disable-hosted-libstdcxx --disable-multilib
 
         make all-gcc
         make all-target-libgcc

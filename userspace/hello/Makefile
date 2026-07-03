@@ -5,7 +5,7 @@ SRC := ./hello.c
 OBJ := $(BUILD)/hello.o
 EXEC = $(BIN)/hello
 
-CC := x86_64-elf-gcc
+CC := x86_64-radishos-gcc
 LD := ld
 
 CFLAGS := -ffreestanding \
