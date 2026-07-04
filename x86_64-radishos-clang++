@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -e
-
-clang++ --target="x86_64-unknown-none" \
-        -D__radishos__ \
-        -m64 \
-        $@

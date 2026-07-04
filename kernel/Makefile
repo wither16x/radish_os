@@ -34,7 +34,6 @@ COMMON_FLAGS := \
 	-fno-lto \
 	-fno-pic \
 	-fno-pie \
-	-m64 \
 	-mno-red-zone \
 	-Wall \
 	-Wextra \
