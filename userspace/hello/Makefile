@@ -5,8 +5,8 @@ SRC := ./hello.c
 OBJ := $(BUILD)/hello.o
 EXEC = $(BIN)/hello
 
-CC := x86_64-radishos-gcc
-LD := ld
+CC := $(PREFIX)-clang
+LD := $(PREFIX)-clang
 
 CFLAGS := -ffreestanding \
 	-fno-stack-protector \
@@ -27,9 +27,10 @@ CFLAGS := -ffreestanding \
 
 LDFLAGS := -static \
 	-nostdlib \
-	-Ttext=0x400000 \
-	--build-id=none \
-	-z max-page-size=0x1000
+	-Wl,-Ttext=0x400000 \
+	-Wl,--build-id=none \
+	-z max-page-size=0x1000 \
+	-fuse-ld=lld
 
 .PHONY: all clean
 

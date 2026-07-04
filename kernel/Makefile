@@ -1,9 +1,9 @@
 PREFIX := x86_64-radishos
 
 # tools
-CXX      := $(PREFIX)-g++
-CC       := $(PREFIX)-gcc
-LD       := ld
+CXX      := $(PREFIX)-clang++
+CC       := $(PREFIX)-clang
+LD       := $(PREFIX)-clang++
 ASM      := nasm
 
 # dirs
@@ -64,9 +64,10 @@ ASMFLAGS := -f elf64
 
 LDFLAGS := -static \
 	-nostdlib \
-	--build-id=none \
+	-Wl,--build-id=none \
 	-z max-page-size=0x1000 \
-	-T $(LDSCRIPT)
+	-T $(LDSCRIPT) \
+	-fuse-ld=lld
 
 # build rules
 all: $(TARGET)
