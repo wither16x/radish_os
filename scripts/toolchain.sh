@@ -5,6 +5,7 @@ set -e
 CLANG="x86_64-radishos-clang"
 CLANGXX="x86_64-radishos-clang++"
 
+# checks
 if [ -f $CLANG ]; then
         if [ "$1" == "--rebuild" ]; then
                 rm $CLANG

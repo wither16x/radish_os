@@ -11,5 +11,5 @@ chmod +x scripts/mkusr.sh
 chmod +x scripts/mkinitrd.sh
 ./scripts/mkinitrd.sh
 
-chmod +x scripts/mkiso.sh
-./scripts/mkiso.sh
+chmod +x scripts/mkimage.sh
+./scripts/mkimage.sh --iso
