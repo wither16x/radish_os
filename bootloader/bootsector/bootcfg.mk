@@ -1,0 +1,1 @@
+BOOT_DEVICE := floppy
