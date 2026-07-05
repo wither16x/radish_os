@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#set -e
-
 DEPENDENCIES_DIR=".dependencies"
 
 # $1: link to the repo
@@ -22,9 +20,16 @@ clone_repo https://github.com/Limine-Bootloader/Limine \
            "$DEPENDENCIES_DIR/Limine" \
            v11.x-binary
 
+clone_repo https://github.com/wither16x/tomato-libc \
+        "$DEPENDENCIES_DIR/tomato-libc" \
+        master
+
 # build stuff
 make -C "$DEPENDENCIES_DIR/Limine"
+make -C "$DEPENDENCIES_DIR/tomato-libc"
 
 # copy stuff
 cp -v "$DEPENDENCIES_DIR/limine-protocol/include/limine.h" \
       kernel/include/limine.h
+cp -v -r "$DEPENDENCIES_DIR/tomato-libc/sysroot" \
+        sysroot
