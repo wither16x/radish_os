@@ -36,7 +36,7 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
         this->cs = 0x1b;
         this->ss = 0x23;
         this->flags = 1 << 9;
-        this->rsp = cpu::USER_STACK_TOP - 8;
+        this->rsp = cpu::USER_STACK_TOP;
 
         this->rax = this->rbx = this->rcx = this->rdx = 0;
         this->rsi = this->rdi = this->rbp = 0;

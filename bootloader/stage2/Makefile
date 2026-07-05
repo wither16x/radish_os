@@ -7,7 +7,7 @@ BIN := bin
 
 TARGET := $(BIN)/stage2.bin
 LDSCRIPT := stage2.lds
-C_SRCS := $(shell find $(SRC_DIR) -type f -name "*.c")
+C_SRCS := $(shell find $(SRC) -type f -name "*.c")
 C_OBJS := $(patsubst ./%, $(BUILD)/%, $(C_SRCS:.c=.o))
 
 OBJS := $(C_OBJS)

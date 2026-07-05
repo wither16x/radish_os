@@ -1,13 +1,8 @@
-void _start()
+#include <stdio.h>
+
+int main()
 {
-        const char *msg = "Hello from syscall 0 in userspace!\r\n";
+        print("Hello libc!\r\n");
 
-        __asm__ volatile (
-                "mov $0, %%rax\n"
-                "int $0x80"
-                ::
-                "b"(msg)
-        );
-
-        while (1);
+        return 0;
 }

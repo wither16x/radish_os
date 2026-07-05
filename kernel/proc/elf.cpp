@@ -91,7 +91,13 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
                         uptr src_off = phdr->p_offset + j * mem::vmm::PAGE_BYTES;
                         // we need the offset between pages as it may not be mapped otherwise
                         uptr intra_offset = phdr->p_vaddr & (mem::vmm::PAGE_BYTES - 1);
-                        usize to_copy = min(mem::vmm::PAGE_BYTES, phdr->p_filesz - j * mem::vmm::PAGE_BYTES);
+
+                        usize to_copy;
+                        if (j * mem::vmm::PAGE_BYTES >= phdr->p_filesz)
+                                to_copy = 0;
+                        else
+                                to_copy = min(mem::vmm::PAGE_BYTES, phdr->p_filesz - j * mem::vmm::PAGE_BYTES);
+                        
                         if (to_copy > 0) {
                                 memcpy(
                                         reinterpret_cast<void *>(hhdm + frame + (j == 0 ? intra_offset : 0)),

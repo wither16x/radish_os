@@ -1,3 +1,5 @@
+PREFIX := x86_64-radishos
+
 BUILD := ./build
 BIN := ./bin
 
@@ -8,8 +10,7 @@ EXEC = $(BIN)/hello
 CC := $(PREFIX)-clang
 LD := $(PREFIX)-clang
 
-CFLAGS := -ffreestanding \
-	-fno-stack-protector \
+CFLAGS := -fno-stack-protector \
 	-fno-stack-check \
 	-fno-lto \
 	-fno-pic \
@@ -17,19 +18,14 @@ CFLAGS := -ffreestanding \
 	-mno-red-zone \
 	-Wall \
 	-Wextra \
-	-nostdlib \
-	-nostdinc \
-	-mcmodel=small \
-	-std=c23 \
-	-fno-builtin \
-	-fvisibility=hidden
+	-std=c23
 
 LDFLAGS := -static \
 	-nostdlib \
 	-Wl,-Ttext=0x400000 \
-	-Wl,--build-id=none \
 	-z max-page-size=0x1000 \
-	-fuse-ld=lld
+	-fuse-ld=lld \
+	-L../../sysroot/usr/lib
 
 .PHONY: all clean
 
@@ -37,7 +33,7 @@ all: $(EXEC)
 
 $(EXEC): $(OBJ)
 	@mkdir -p $(BIN)
-	$(LD) $(LDFLAGS) $(OBJ) -o $(EXEC)
+	$(LD) $(LDFLAGS) $(OBJ) -lc -o $(EXEC)
 
 $(OBJ): $(SRC)
 	@mkdir -p $(BUILD)

@@ -3,7 +3,7 @@
 namespace kernel::lib {
 
 /// Return the smallest value between `a` and `b`.
-inline int min(int a, int b)
+inline auto min(auto a, auto b)
 {
         if (a < b)
                 return a;
@@ -12,12 +12,17 @@ inline int min(int a, int b)
 }
 
 /// Return the biggest value between `a` and `b`.
-inline int max(int a, int b)
+inline auto max(auto a, auto b)
 {
         if (a > b)
                 return a;
         else
                 return b;
+}
+
+inline auto clamp(auto x, auto a, auto b)
+{
+        return max(a, min(x, b));
 }
 
 } /* namespace kernel::lib */
