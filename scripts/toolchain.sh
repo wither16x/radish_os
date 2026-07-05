@@ -10,7 +10,7 @@ mkdir -p sysroot
 mkdir -p sysroot/usr
 
 mkdir -p sysroot/usr/include
-cp -v libc/include/stdio.h sysroot/usr/include/stdio.h
+cp -v libc/include/syscall.h sysroot/usr/include/syscall.h
 
 mkdir -p sysroot/usr/lib
 cp -v libc/build/crt0.o sysroot/usr/lib/crt0.o

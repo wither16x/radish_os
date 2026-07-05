@@ -25,7 +25,7 @@ enum class NodeType : int {
 
 // Depending on the node type, `file_data` or `dir_data` is set
 // to `nullptr`
-struct Node : public vfs::VNode{
+struct Node : public vfs::VNode {
         Node *parent;
 
         NodeType type;
@@ -34,11 +34,11 @@ struct Node : public vfs::VNode{
         struct File *file_data;
         struct Dir *dir_data;
 
-        int create_file(const String &name) override;
-        int create_dir(const String &name) override;
+        int touch(const String &name) override;
+        int mkdir(const String &name) override;
         int remove() override;
-        int write_file(const char *buf, usize n) override;
-        int read_file(char *buf, usize n) override;
+        int write(const char *buf, usize n) override;
+        int read(char *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int getfilesz(usize *buf) override;
@@ -84,7 +84,7 @@ int remove_node(Node *node)
 } /* anonymous namespace */
 
 // --------------------------------------------------
-int Node::create_file(const String &name)
+int Node::touch(const String &name)
 {
         if (this->type != NodeType::Dir)
                 return -1;              // files can only be created in directories
@@ -105,7 +105,7 @@ int Node::create_file(const String &name)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int Node::create_dir(const String &name)
+int Node::mkdir(const String &name)
 {
         if (this->type != NodeType::Dir)
                 return -1;      // directories can only be created in directories
@@ -144,7 +144,7 @@ int Node::remove()
 // --------------------------------------------------
 
 // --------------------------------------------------
-int Node::write_file(const char *buf, usize n)
+int Node::write(const char *buf, usize n)
 {
         if (this->type != NodeType::File)
                 return -1;              // cannot write in directories like that
@@ -162,7 +162,7 @@ int Node::write_file(const char *buf, usize n)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int Node::read_file(char *buf, usize n)
+int Node::read(char *buf, usize n)
 {
         if (this->type != NodeType::File)
                 return -1;              // cannot read directories like that
@@ -196,6 +196,9 @@ void *Node::lookup(const String &name)
 {
         if (this->type != NodeType::Dir)
                 return nullptr;
+
+        if (name == "/")
+                return root;
 
         for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
                 if (this->dir_data->nodes[i]->name == name)

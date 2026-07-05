@@ -1,8 +1,8 @@
-#include <stdio.h>
+#include <syscall.h>
 
 int main()
 {
-        print("Hello libc!\r\n");
+        write("D:/console", "Hello from syscall write!\r\n", 27);
 
         return 0;
 }

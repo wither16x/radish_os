@@ -4,16 +4,16 @@
 namespace kernel::lib {
 
 // --------------------------------------------------
-int create_file(const String &path)
+int touch(const String &path)
 {
-        return fs::vfs::create_file(path);
+        return fs::vfs::touch(path);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int create_dir(const String &path)
+int mkdir(const String &path)
 {
-        return fs::vfs::create_dir(path);
+        return fs::vfs::mkdir(path);
 }
 // --------------------------------------------------
 
@@ -25,16 +25,16 @@ int remove(const String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int write_file(const String &path, const char *buf, usize n)
+int write(const String &path, const char *buf, usize n)
 {
-        return fs::vfs::write_file(path, buf, n);
+        return fs::vfs::write(path, buf, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int read_file(const String &path, char *buf, usize n)
+int read(const String &path, char *buf, usize n)
 {
-        return fs::vfs::read_file(path, buf, n);
+        return fs::vfs::read(path, buf, n);
 }
 // --------------------------------------------------
 

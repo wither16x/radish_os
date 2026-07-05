@@ -10,7 +10,7 @@
 using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
-using kernel::lib::getfilesz, kernel::lib::read_file;
+using kernel::lib::getfilesz, kernel::lib::read;
 using kernel::lib::memcpy, kernel::lib::memset;
 using kernel::lib::min;
 
@@ -55,7 +55,7 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
         usize size = 0;
         getfilesz(path, &size);
         buf.resize(size);
-        read_file(path, reinterpret_cast<char *>(buf.get_data()), size);
+        read(path, reinterpret_cast<char *>(buf.get_data()), size);
 
         // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());

@@ -61,7 +61,7 @@ struct Node : public vfs::VNode {
         struct File *file_data;
         struct Dir *dir_data;
 
-        int read_file(char *buf, usize n) override;
+        int read(char *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int getfilesz(usize *buf) override;
@@ -167,7 +167,7 @@ void parse_archive(u8 *archive)
 } /* anonymous namespace */
 
 // --------------------------------------------------
-int Node::read_file(char *buf, usize n)
+int Node::read(char *buf, usize n)
 {
         if (this->hdr->type == static_cast<char>(NodeType::Directory))
                 return -1;      // cannot read directories like that

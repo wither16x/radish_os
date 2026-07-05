@@ -37,7 +37,7 @@ bool path_can_handle_drive(const String &path)
 } /* anonymous namespace */
 
 // --------------------------------------------------------------------
-int VNode::create_file(const String &name)
+int VNode::touch(const String &name)
 {
         static_cast<void>(name);
         return 0;
@@ -45,7 +45,7 @@ int VNode::create_file(const String &name)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int VNode::create_dir(const String &name)
+int VNode::mkdir(const String &name)
 {
         static_cast<void>(name);
         return 0;
@@ -60,7 +60,7 @@ int VNode::remove()
 // --------------------------------------------------
 
 // --------------------------------------------------
-int VNode::write_file(const char *buf, usize n)
+int VNode::write(const char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
@@ -69,7 +69,7 @@ int VNode::write_file(const char *buf, usize n)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int VNode::read_file(char *buf, usize n)
+int VNode::read(char *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
@@ -153,6 +153,11 @@ int chdrive(char id)
 }
 // --------------------------------------------------
 
+char getdrive()
+{
+        return current_drive_id;
+}
+
 // --------------------------------------------------
 VNode *lookup(const lib::String &path)
 {
@@ -182,7 +187,7 @@ VNode *lookup(const lib::String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int create_file(const lib::String &path)
+int touch(const lib::String &path)
 {
         if (!path_can_handle_drive(path))
                 return -1;      // path is too small for D:/
@@ -206,12 +211,12 @@ int create_file(const lib::String &path)
                 curr_nd = static_cast<VNode *>(child);
         }
 
-        return curr_nd->create_file(parts[parts.size() - 1]);
+        return curr_nd->touch(parts[parts.size() - 1]);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int create_dir(const lib::String &path)
+int mkdir(const lib::String &path)
 {
         if (!path_can_handle_drive(path))
                 return -1;      // path is too small for D:/
@@ -234,7 +239,7 @@ int create_dir(const lib::String &path)
                 curr_nd = static_cast<VNode *>(child);
         }
 
-        return curr_nd->create_dir(parts[parts.size() - 1]);
+        return curr_nd->mkdir(parts[parts.size() - 1]);
 }
 // --------------------------------------------------
 
@@ -250,24 +255,24 @@ int remove(const lib::String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int write_file(const String &path, const char *buf, usize n)
+int write(const String &path, const char *buf, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
                 return -1;      // file not found
 
-        return vnd->write_file(buf, n);
+        return vnd->write(buf, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int read_file(const String &path, char *buf, usize n)
+int read(const String &path, char *buf, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
                 return -1;      // file not found
 
-        int ret = vnd->read_file(buf, n);
+        int ret = vnd->read(buf, n);
         if (vnd->owned)
                 delete vnd;
         return ret;

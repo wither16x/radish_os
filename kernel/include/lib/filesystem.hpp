@@ -7,15 +7,15 @@
 namespace kernel::lib {
 
 /// Create a new file.
-int create_file(const String &path);
+int touch(const String &path);
 /// Create a new directory. 
-int create_dir(const String &path);
+int mkdir(const String &path);
 /// Remove a file or a directory.
 int remove(const String &path);
 /// Write bytes to a file.
-int write_file(const String &path, const char *buf, usize n);
+int write(const String &path, const char *buf, usize n);
 /// Read bytes from a file.
-int read_file(const String &path, char *buf, usize n);
+int read(const String &path, char *buf, usize n);
 /// Get a single entry from a directory. 
 int getdirent(const String &path, fs::vfs::DirEntry *entry, usize n);
 /// Lookup a file.

@@ -1,5 +1,6 @@
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
+#include <fs/devfs.hpp>
 #include <lib/filesystem.hpp>
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
@@ -7,7 +8,7 @@
 #include <lib/vector.hpp>
 
 using kernel::lib::String;
-using kernel::lib::read_file, kernel::lib::getfilesz;
+using kernel::lib::read, kernel::lib::getfilesz;
 using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::usize;
 using kernel::lib::Vector;
 
@@ -51,6 +52,8 @@ Console::Console(u64 width, u64 height)
         this->height    = height;
         this->cursor_x  = 0;
         this->cursor_y  = 0;
+
+        fs::devfs::register_device(fs::devfs::DeviceType::Console, "D:/console");
 }
 // --------------------------------------------------
 
@@ -72,7 +75,7 @@ void Console::init_font(this Console &self, const String &font)
         getfilesz(font, &filesz);
         self.font_data.resize(filesz);
 
-        read_file(font, reinterpret_cast<char *>(self.font_data.get_data()), filesz);
+        read(font, reinterpret_cast<char *>(self.font_data.get_data()), filesz);
 
         PSF2Header *hdr = reinterpret_cast<PSF2Header *>(self.font_data.get_data());
 

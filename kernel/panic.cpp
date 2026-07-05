@@ -82,7 +82,7 @@ void dump_stack_trace(u8 depth)
 // --------------------------------------------------
 void panic(const char *fmt, ...)
 {
-        //cpu::cli();
+        cpu::cli();
 
         logger.set_context("panic handler");
 

@@ -12,6 +12,7 @@
 #include <drivers/keyboard.hpp>
 #include <drivers/ps2kbd.hpp>
 #include <drivers/serial.hpp>
+#include <fs/devfs.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
 #include <lib/filesystem.hpp>
@@ -74,7 +75,13 @@ void mount_initrd(BootInfo::ModuleInfo &info)
 
         vfs::mount('I', new ustar::USTAR(info.modules[idx].address));
 
-        logger.ok("mounted initrd");
+        logger.ok("mounted initrd as I");
+}
+
+void mount_devices()
+{
+        vfs::mount('D', new devfs::DEVFS());
+        logger.ok("mounted devfs as D");
 }
 
 /// Unmount the initrd (do it at the end).
@@ -169,6 +176,7 @@ extern "C" void kernel_main()
 
         call_global_constructors();
 
+        mount_devices();
         mount_initrd(bootinfo.modules);
 
         framebuffer::init(
@@ -181,13 +189,22 @@ extern "C" void kernel_main()
 
         init_console();
 
+        logger.info("-------------------------------------");
+        logger.info("list initrd content");
+        logger.info("-------------------------------------");
         __test_ls("I:/");
+        logger.info("-------------------------------------");
+        logger.info("list of devices");
+        logger.info("-------------------------------------");
+        __test_ls("D:/");
+        logger.info("-------------------------------------");
 
         scheduler::init();
 
         exec("I:/bin/hello");
         
         unmount_initrd();
+        vfs::unmount('D');
 
         kernel_hang();
 }
