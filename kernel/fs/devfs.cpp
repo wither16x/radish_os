@@ -1,3 +1,4 @@
+#include <drivers/keyboard.hpp>
 #include <fs/devfs.hpp>
 #include <fs/vfs.hpp>
 #include <lib/memory.hpp>
@@ -32,6 +33,7 @@ struct Node : public vfs::VNode {
 
         int touch(const String &name) override;
         int remove() override;
+        int read(char *buf, usize n) override;
         int write(const char *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
@@ -96,18 +98,39 @@ int Node::remove()
         return remove_node(this);
 }
 
+int Node::read(char *buf, usize n)
+{
+        if (this->type != NodeType::Device)
+                return -1; // cannot read like that from the root
+
+        switch (this->devtype) {
+        case DeviceType::Input: {
+                for (usize i = 0; i < n; i++) {
+                        char ch = drivers::keyboard::read();
+                        buf[i] = ch;
+                        break;
+                }
+        }
+
+        default:
+                break;
+        }
+
+        return 0;
+}
+
 int Node::write(const char *buf, usize n)
 {
         if (this->type != NodeType::Device)
                 return -1;      // cannot write like that in the root
 
         switch (this->devtype) {
-        case DeviceType::None:
-                break;
-
         case DeviceType::Console:
                 for (usize i = 0; i < n; i++)
                         putchar(buf[i]);
+                break;
+
+        default:
                 break;
         }
 

@@ -1,15 +1,17 @@
+#include "lib/print.hpp"
 #include <cpu/io.hpp>
 #include <cpu/irq.hpp>
 #include <drivers/keyboard.hpp>
 #include <drivers/pic.hpp>
 #include <drivers/ps2kbd.hpp>
-#include <lib/print.hpp>
+#include <fs/devfs.hpp>
 #include <lib/typing.hpp>
 #include <lib/logging.hpp>
+#include <lib/queue.hpp>
 
 using kernel::lib::u8, kernel::lib::usize;
-using kernel::lib::putchar;
 using kernel::lib::log::logger;
+using kernel::lib::Queue;
 
 namespace kernel::drivers::keyboard {
 
@@ -83,12 +85,16 @@ constexpr Key keys[] = {
 bool shift = false;
 bool expecting_break = false;
 
+Queue<u8, 50> ringbuf;
+
 void handle_irq()
 {
-        u8 k = handle_key_press();
-        char ch = scancode_to_key(k);
-        if (ch)
-                putchar(ch);
+        u8 status = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_STATUS);
+
+        u8 scancode = 0;
+        if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS)
+                scancode = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
+        ringbuf.enqueue(scancode);
 
         drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
 }
@@ -103,19 +109,9 @@ void init()
         }
 
         cpu::register_irq(drivers::pic::IRQType::IRQ_KEYBOARD, reinterpret_cast<void *>(handle_irq));
+        fs::devfs::register_device(fs::devfs::DeviceType::Input, "D:/input");
 
         logger.ok("initialized generic keyboard driver");
-}
-
-u8 handle_key_press()
-{
-        u8 status = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_STATUS);
-
-        u8 k = 0;
-        if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS)
-                k = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
-
-        return k;
 }
 
 char scancode_to_key(lib::u8 scancode)
@@ -144,6 +140,15 @@ char scancode_to_key(lib::u8 scancode)
                 return shift_kbd_layout[scancode];
         else
                 return unshift_kbd_layout[scancode];
+}
+
+char read()
+{
+        u8 scancode;
+        ringbuf.dequeue(&scancode);
+        if (!scancode)
+                return '\0';
+        return scancode_to_key(scancode);
 }
 
 } /* namespace kernel::drivers::keyboard */

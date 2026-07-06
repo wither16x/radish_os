@@ -10,5 +10,6 @@ namespace kernel::drivers::keyboard {
 void init();
 lib::u8 handle_key_press();
 char scancode_to_key(lib::u8 scancode);
+char read();
 
 } /* namespace kernel::drivers::keyboard */

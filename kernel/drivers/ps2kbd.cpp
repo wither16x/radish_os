@@ -93,43 +93,6 @@ enum KeyboardResponse : u8 {
         KBD_RSP_INTERNAL_BUFFER_OVERRUN1        = 0xff
 };
 
-inline void wait_output_ready()
-{
-        while (!(cpu::input_byte_port(ControllerPort::PORT_STATUS) & ControllerStatus::ST_OUTPUT_BUFFER_STATUS));
-}
-
-inline void wait_input_ready()
-{
-        while (cpu::input_byte_port(ControllerPort::PORT_STATUS) & ControllerStatus::ST_INPUT_BUFFER_STATUS);
-}
-
-/// Send a byte to the controller's command port.
-inline void send_command(u8 command)
-{
-        wait_input_ready();
-        cpu::output_byte_port(ControllerPort::PORT_CMD, command);
-}
-
-/// Read a byte from the controller's data port.
-u8 read()
-{
-        wait_output_ready();
-        return cpu::input_byte_port(ControllerPort::PORT_DATA);
-}
-
-/// Write a byte to the controller's data port.
-void write(u8 byte)
-{
-        wait_input_ready();
-        cpu::output_byte_port(ControllerPort::PORT_DATA, byte);
-}
-
-void flush_output_buffer()
-{
-        while (cpu::input_byte_port(PORT_STATUS) & ST_OUTPUT_BUFFER_STATUS)
-                cpu::input_byte_port(ControllerPort::PORT_DATA);
-}
-
 int controller_perform_self_test()
 {
         send_command(ControllerCommand::CMD_TEST_CONTROLLER);
@@ -238,5 +201,23 @@ void init()
         logger.ok("initialized ps/2 controller and keyboard");
 }
 // --------------------------------------------------
+
+u8 read()
+{
+        wait_output_ready();
+        return cpu::input_byte_port(ControllerPort::PORT_DATA);
+}
+
+void write(u8 byte)
+{
+        wait_input_ready();
+        cpu::output_byte_port(ControllerPort::PORT_DATA, byte);
+}
+
+void flush_output_buffer()
+{
+        while (cpu::input_byte_port(PORT_STATUS) & ST_OUTPUT_BUFFER_STATUS)
+                cpu::input_byte_port(ControllerPort::PORT_DATA);
+}
 
 } /* namespace kernel::drivers::ps2kbd */

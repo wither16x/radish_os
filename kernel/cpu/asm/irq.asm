@@ -15,6 +15,7 @@ irq 1                   ; keyboard
 
 ;; Every IRQ stub should jump to this address.
 irq_common:
+        cli
         push r15
         push r14
         push r13
@@ -35,6 +36,7 @@ irq_common:
         mov rax, cr2
         push rax
 
+        cld
         mov rdi, rsp
         call irq_handler
 
@@ -57,5 +59,6 @@ irq_common:
         pop r15
         
         add rsp, 8
+        sti
 
         iretq

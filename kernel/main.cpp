@@ -1,4 +1,3 @@
-#include "lib/queue.hpp"
 #include <kernel.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
@@ -171,13 +170,14 @@ extern "C" void kernel_main()
 
         ps2kbd::init();
 
-        keyboard::init();
-
         sti();
 
         call_global_constructors();
 
         mount_devices();
+
+        keyboard::init();
+
         mount_initrd(bootinfo.modules);
 
         framebuffer::init(
@@ -201,21 +201,6 @@ extern "C" void kernel_main()
         logger.info("-------------------------------------");
 
         scheduler::init();
-
-        lib::Queue<u64, 5> ringbuf;
-        ringbuf.enqueue(1);
-        ringbuf.enqueue(2);
-        ringbuf.enqueue(3);
-        ringbuf.enqueue(4);
-        ringbuf.enqueue(5);
-        ringbuf.enqueue(6); // should restart from here
-        ringbuf.enqueue(7);
-
-        for (auto &e : ringbuf)
-                logger.debug("ringbuf contains: %u", e);
-
-        // should display "4"
-        logger.debug("ringbuf[3] = %u", ringbuf.get(3));
 
         exec("I:/bin/hello");
         
