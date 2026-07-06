@@ -1,4 +1,4 @@
-PREFIX := x86_64-radishos
+include ../../prefixes.mk
 
 BUILD := ./build
 BIN := ./bin
@@ -7,8 +7,8 @@ SRC := ./hello.c
 OBJ := $(BUILD)/hello.o
 EXEC = $(BIN)/hello
 
-CC := $(PREFIX)-clang
-LD := $(PREFIX)-clang
+CC := $(TOOL_PREFIX)-clang
+LD := $(TOOL_PREFIX)-clang
 
 CFLAGS := -fno-stack-protector \
 	-fno-stack-check \
@@ -25,7 +25,7 @@ LDFLAGS := -static \
 	-Wl,-Ttext=0x400000 \
 	-z max-page-size=0x1000 \
 	-fuse-ld=lld \
-	-L../../sysroot/usr/lib
+	-L$(LIBC_PREFIX)
 
 .PHONY: all clean
 

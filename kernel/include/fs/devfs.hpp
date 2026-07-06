@@ -16,7 +16,8 @@ struct DEVFS : public vfs::FileSystem {
 /// registered.
 enum class DeviceType : int {
         None,
-        Console
+        Console,
+        Input
 };
 
 void register_device(DeviceType type, const lib::String &path);

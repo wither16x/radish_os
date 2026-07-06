@@ -1,9 +1,9 @@
-PREFIX := x86_64-radishos
+include ../prefixes.mk
 
 # tools
-CXX      := $(PREFIX)-clang++
-CC       := $(PREFIX)-clang
-LD       := $(PREFIX)-clang++
+CXX      := $(TOOL_PREFIX)-clang++
+CC       := $(TOOL_PREFIX)-clang
+LD       := $(TOOL_PREFIX)-clang++
 ASM      := nasm
 
 # dirs

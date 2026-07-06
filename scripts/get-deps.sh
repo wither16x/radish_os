@@ -31,5 +31,3 @@ make -C "$DEPENDENCIES_DIR/tomato-libc"
 # copy stuff
 cp -v "$DEPENDENCIES_DIR/limine-protocol/include/limine.h" \
       kernel/include/limine.h
-cp -v -r "$DEPENDENCIES_DIR/tomato-libc/sysroot" \
-        sysroot
