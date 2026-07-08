@@ -29,9 +29,9 @@ struct VNode {
         /// Remove a file.
         virtual int remove();
         /// Write bytes to a file.
-        virtual int write(const char *buf, lib::usize n);
+        virtual int write(const void *buf, lib::usize n);
         /// Read bytes from a file.
-        virtual int read(char *buf, lib::usize n);
+        virtual int read(void *buf, lib::usize n);
         /// `n` represents the 0-based index of the entry in the directory
         virtual int readdir(struct DirEntry *entry, lib::usize n);
         /// Look for a file.
@@ -78,8 +78,8 @@ VNode *lookup(const lib::String &path);
 int touch(const lib::String &path);
 int mkdir(const lib::String &path);
 int remove(const lib::String &path);
-int write(const lib::String &path, const char *buf, lib::usize n);
-int read(const lib::String &path, char *buf, lib::usize n);
+int write(const lib::String &path, const void *buf, lib::usize n);
+int read(const lib::String &path, void *buf, lib::usize n);
 int readdir(const lib::String &path, DirEntry *entry, lib::usize n);
 int getfilesz(const lib::String &path, lib::usize *buf);
 int getdirentn(const lib::String &path, lib::usize *buf);
