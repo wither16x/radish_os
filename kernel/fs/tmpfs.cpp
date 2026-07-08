@@ -37,8 +37,8 @@ struct Node : public vfs::VNode {
         int touch(const String &name) override;
         int mkdir(const String &name) override;
         int remove() override;
-        int write(const char *buf, usize n) override;
-        int read(char *buf, usize n) override;
+        int write(const void *buf, usize n) override;
+        int read(void *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int getfilesz(usize *buf) override;
@@ -144,7 +144,7 @@ int Node::remove()
 // --------------------------------------------------
 
 // --------------------------------------------------
-int Node::write(const char *buf, usize n)
+int Node::write(const void *buf, usize n)
 {
         if (this->type != NodeType::File)
                 return -1;              // cannot write in directories like that
@@ -162,7 +162,7 @@ int Node::write(const char *buf, usize n)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int Node::read(char *buf, usize n)
+int Node::read(void *buf, usize n)
 {
         if (this->type != NodeType::File)
                 return -1;              // cannot read directories like that

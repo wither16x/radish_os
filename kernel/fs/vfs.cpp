@@ -60,7 +60,7 @@ int VNode::remove()
 // --------------------------------------------------
 
 // --------------------------------------------------
-int VNode::write(const char *buf, usize n)
+int VNode::write(const void *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
@@ -69,7 +69,7 @@ int VNode::write(const char *buf, usize n)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int VNode::read(char *buf, usize n)
+int VNode::read(void *buf, usize n)
 {
         static_cast<void>(buf);
         static_cast<void>(n);
@@ -255,7 +255,7 @@ int remove(const lib::String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int write(const String &path, const char *buf, usize n)
+int write(const String &path, const void *buf, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)
@@ -266,7 +266,7 @@ int write(const String &path, const char *buf, usize n)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int read(const String &path, char *buf, usize n)
+int read(const String &path, void *buf, usize n)
 {
         VNode *vnd = lookup(path);
         if (!vnd)

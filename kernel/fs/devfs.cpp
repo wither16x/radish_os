@@ -33,8 +33,8 @@ struct Node : public vfs::VNode {
 
         int touch(const String &name) override;
         int remove() override;
-        int read(char *buf, usize n) override;
-        int write(const char *buf, usize n) override;
+        int read(void *buf, usize n) override;
+        int write(const void *buf, usize n) override;
         int readdir(vfs::DirEntry *entry, usize n) override;
         void *lookup(const String &name) override;
         int getdirentn(usize *buf) override;
@@ -98,7 +98,7 @@ int Node::remove()
         return remove_node(this);
 }
 
-int Node::read(char *buf, usize n)
+int Node::read(void *buf, usize n)
 {
         if (this->type != NodeType::Device)
                 return -1; // cannot read like that from the root
@@ -106,8 +106,11 @@ int Node::read(char *buf, usize n)
         switch (this->devtype) {
         case DeviceType::Input: {
                 for (usize i = 0; i < n; i++) {
-                        char ch = drivers::keyboard::read();
-                        buf[i] = ch;
+                        char ch = 0;
+                        while (!ch)
+                                ch = drivers::keyboard::read();
+
+                        static_cast<char *>(buf)[i] = ch;
                         break;
                 }
         }
@@ -119,7 +122,7 @@ int Node::read(char *buf, usize n)
         return 0;
 }
 
-int Node::write(const char *buf, usize n)
+int Node::write(const void *buf, usize n)
 {
         if (this->type != NodeType::Device)
                 return -1;      // cannot write like that in the root
@@ -127,7 +130,7 @@ int Node::write(const char *buf, usize n)
         switch (this->devtype) {
         case DeviceType::Console:
                 for (usize i = 0; i < n; i++)
-                        putchar(buf[i]);
+                        putchar(static_cast<const char *>(buf)[i]);
                 break;
 
         default:

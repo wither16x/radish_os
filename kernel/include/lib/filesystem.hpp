@@ -13,9 +13,9 @@ int mkdir(const String &path);
 /// Remove a file or a directory.
 int remove(const String &path);
 /// Write bytes to a file.
-int write(const String &path, const char *buf, usize n);
+int write(const String &path, const void *buf, usize n);
 /// Read bytes from a file.
-int read(const String &path, char *buf, usize n);
+int read(const String &path, void *buf, usize n);
 /// Get a single entry from a directory. 
 int getdirent(const String &path, fs::vfs::DirEntry *entry, usize n);
 /// Lookup a file.

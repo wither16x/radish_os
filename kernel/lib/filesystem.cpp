@@ -25,14 +25,14 @@ int remove(const String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-int write(const String &path, const char *buf, usize n)
+int write(const String &path, const void *buf, usize n)
 {
         return fs::vfs::write(path, buf, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int read(const String &path, char *buf, usize n)
+int read(const String &path, void *buf, usize n)
 {
         return fs::vfs::read(path, buf, n);
 }
