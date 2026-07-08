@@ -7,10 +7,12 @@
 #include <lib/typing.hpp>
 #include <lib/logging.hpp>
 #include <lib/queue.hpp>
+#include <lib/print.hpp>
 
 using kernel::lib::u8, kernel::lib::usize;
 using kernel::lib::log::logger;
 using kernel::lib::Queue;
+using kernel::lib::putchar;
 
 namespace kernel::drivers::keyboard {
 
@@ -94,6 +96,9 @@ void handle_irq()
         if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS) {
                 scancode = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
                 ringbuf.enqueue(scancode);
+                char ch = scancode_to_key(scancode);
+                if (ch)
+                        putchar(ch);
         }
 
         drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
@@ -149,6 +154,7 @@ char read()
 
         ringbuf.dequeue(&scancode);
         ch = scancode_to_key(scancode);
+
         return ch;
 }
 
