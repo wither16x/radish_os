@@ -5,7 +5,8 @@ namespace kernel::lib {
 extern "C" {
 
 // --------------------------------------------------
-void *memcpy(void *__restrict dest, const void *__restrict src, usize n) {
+void *memcpy(void *__restrict dest, const void *__restrict src, usize n)
+{
         u8 *__restrict pdest = static_cast<u8 *__restrict>(dest);
         const u8 *__restrict psrc = static_cast<const u8 *__restrict>(src);
 
@@ -17,7 +18,8 @@ void *memcpy(void *__restrict dest, const void *__restrict src, usize n) {
 // --------------------------------------------------
 
 // --------------------------------------------------
-void *memset(void *s, int c, usize n) {
+void *memset(void *s, int c, usize n)
+{
         u8 *p = static_cast<u8 *>(s);
 
         for (usize i = 0; i < n; i++)
@@ -28,7 +30,8 @@ void *memset(void *s, int c, usize n) {
 // --------------------------------------------------
 
 // --------------------------------------------------
-void *memmove(void *dest, const void *src, usize n) {
+void *memmove(void *dest, const void *src, usize n)
+{
         u8 *pdest = static_cast<u8 *>(dest);
         const u8 *psrc = static_cast<const u8 *>(src);
 
@@ -45,7 +48,8 @@ void *memmove(void *dest, const void *src, usize n) {
 // --------------------------------------------------
 
 // --------------------------------------------------
-int memcmp(const void *s1, const void *s2, usize n) {
+int memcmp(const void *s1, const void *s2, usize n)
+{
         const u8 *p1 = static_cast<const u8 *>(s1);
         const u8 *p2 = static_cast<const u8 *>(s2);
 
