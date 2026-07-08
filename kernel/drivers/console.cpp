@@ -106,6 +106,7 @@ void Console::draw_char(this Console &self, char ch, u32 color)
 
         case Char::CH_NL:
                 self.cursor_y += self.glyph_height;
+                self.cursor_x = 0;
                 break;
 
         case Char::CH_BS:
