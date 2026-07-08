@@ -23,16 +23,16 @@ extern "C" void syscall_handler(SyscallFrame *frame)
         switch (frame->rax) {
         case SC_WRITE: {
                 const char *path = reinterpret_cast<const char *>(frame->rbx);
-                const char *s = reinterpret_cast<const char *>(frame->rcx);
+                const void *buf = reinterpret_cast<const void *>(frame->rcx);
                 usize n = frame->rdx;
-                int res = write(path, s, n);
+                int res = write(path, buf, n);
                 frame->rax = res;
                 break;
         }
 
         case SC_READ: {
                 const char *path = reinterpret_cast<const char *>(frame->rbx);
-                char *buf = reinterpret_cast<char *>(frame->rcx);
+                void *buf = reinterpret_cast<void *>(frame->rcx);
                 usize n = frame->rdx;
                 int res = read(path, buf, n);
                 frame->rax = res;
