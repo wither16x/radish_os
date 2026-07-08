@@ -18,7 +18,7 @@ CFLAGS := -fno-stack-protector \
 	-mno-red-zone \
 	-Wall \
 	-Wextra \
-	-std=c23
+	-std=c99
 
 LDFLAGS := -static \
 	-nostdlib \
