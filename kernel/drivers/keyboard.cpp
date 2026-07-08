@@ -1,4 +1,3 @@
-#include "lib/print.hpp"
 #include <cpu/io.hpp>
 #include <cpu/irq.hpp>
 #include <drivers/keyboard.hpp>
@@ -92,9 +91,10 @@ void handle_irq()
         u8 status = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_STATUS);
 
         u8 scancode = 0;
-        if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS)
+        if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS) {
                 scancode = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
-        ringbuf.enqueue(scancode);
+                ringbuf.enqueue(scancode);
+        }
 
         drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
 }
@@ -144,11 +144,12 @@ char scancode_to_key(lib::u8 scancode)
 
 char read()
 {
-        u8 scancode;
+        u8 scancode = 0;
+        char ch;
+
         ringbuf.dequeue(&scancode);
-        if (!scancode)
-                return '\0';
-        return scancode_to_key(scancode);
+        ch = scancode_to_key(scancode);
+        return ch;
 }
 
 } /* namespace kernel::drivers::keyboard */
