@@ -150,7 +150,7 @@ char scancode_to_key(lib::u8 scancode)
 char read()
 {
         u8 scancode = 0;
-        char ch;
+        char ch = 0;
 
         ringbuf.dequeue(&scancode);
         ch = scancode_to_key(scancode);

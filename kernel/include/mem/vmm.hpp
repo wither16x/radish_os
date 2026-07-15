@@ -26,6 +26,8 @@ lib::u64 *init(
 void load(lib::u64 *pml4t);
 /// Allocate a new PML4 table.
 lib::u64 *create_pml4t(lib::u64 *parent);
+/// Free an existing PML4 table.
+void destroy_pml4t(lib::u64 *pml4t);
 /// Map a page in a given PML4 table.
 void map_page(lib::u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags);
 /// Unmap a page from a given PML4 table.

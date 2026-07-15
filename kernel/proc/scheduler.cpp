@@ -1,6 +1,5 @@
 #include <cpu/irq.hpp>
 #include <lib/logging.hpp>
-#include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
@@ -35,7 +34,11 @@ void add_process(Process *p)
 {
         // this function only adds the process to the vector:
         // it must have been initialized before
+        logger.debug("pushing process %d back...", p->id);
+        logger.debug("processes vector size = %u", processes.size());
+        logger.debug("processes vector capacity = %u", processes.capacity());
         processes.push_back(p);
+        logger.debug("checking current process...");
         if (!curr_proc)
                 curr_proc = p;
 }
@@ -57,53 +60,9 @@ void tick(cpu::IRQFrame *frame)
         Process *old_proc = curr_proc;
         Process *new_proc = processes[curr_proc_idx];
 
-        if (old_proc) {
-                old_proc->rax   = frame->rax;
-                old_proc->rbx   = frame->rbx;
-                old_proc->rcx   = frame->rcx;
-                old_proc->rdx   = frame->rdx;
-                old_proc->rsi   = frame->rsi;
-                old_proc->rdi   = frame->rdi;
-                old_proc->rbp   = frame->rbp;
-                old_proc->r8    = frame->r8;
-                old_proc->r9    = frame->r9;
-                old_proc->r10   = frame->r10;
-                old_proc->r11   = frame->r11;
-                old_proc->r12   = frame->r12;
-                old_proc->r13   = frame->r13;
-                old_proc->r14   = frame->r14;
-                old_proc->r15   = frame->r15;
-                old_proc->rip   = frame->rip;
-                old_proc->cs    = frame->cs;
-                old_proc->flags = frame->flags | (1 << 9);
-                old_proc->rsp   = frame->rsp;
-                old_proc->ss    = frame->ss;
-                old_proc->cr2   = frame->cr2;
-                old_proc->cr3   = frame->cr3;
-        }
-
-        frame->rax      = new_proc->rax;
-        frame->rbx      = new_proc->rbx;
-        frame->rcx      = new_proc->rcx;
-        frame->rdx      = new_proc->rdx;
-        frame->rsi      = new_proc->rsi;
-        frame->rdi      = new_proc->rdi;
-        frame->rbp      = new_proc->rbp;
-        frame->r8       = new_proc->r8;
-        frame->r9       = new_proc->r9;
-        frame->r10      = new_proc->r10;
-        frame->r11      = new_proc->r11;
-        frame->r12      = new_proc->r12;
-        frame->r13      = new_proc->r13;
-        frame->r14      = new_proc->r14;
-        frame->r15      = new_proc->r15;
-        frame->rip      = new_proc->rip;
-        frame->cs       = new_proc->cs;
-        frame->flags    = new_proc->flags | (1 << 9);
-        frame->rsp      = new_proc->rsp;
-        frame->ss       = new_proc->ss;
-        frame->cr2      = new_proc->cr2;
-        frame->cr3      = new_proc->cr3;
+        if (old_proc)
+                old_proc->save_context(frame);
+        new_proc->load_context(frame);
 
         curr_proc = new_proc;
         new_proc->load();

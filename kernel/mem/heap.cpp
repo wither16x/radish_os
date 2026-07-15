@@ -10,8 +10,6 @@ namespace kernel::mem::heap {
 
 namespace {
 
-constexpr uptr HEAP_START = 0xfffffe8000000000ull;
-
 allocators::HeapAllocator<void *> allocator;
 
 } /* anonymous namespace */

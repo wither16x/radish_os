@@ -1,7 +1,8 @@
 #pragma once
 
-#include <lib/alloc.hpp>
 #include <lib/typing.hpp>
+#include <lib/logging.hpp>
+using kernel::lib::log::logger;
 
 namespace kernel::lib {
 
@@ -90,7 +91,8 @@ public:
                 if (self.length == self.cap) {
                         if (self.cap == 0)
                                 self.cap = 1;
-                        self.cap *= 2;
+                        else
+                                self.cap *= 2;
                         T *new_data = new T[self.cap];
                         for (usize i = 0; i < self.length; ++i)
                                 new_data[i] = self.data[i];
@@ -99,7 +101,7 @@ public:
                 }
 
                 self.data[self.length] = n;
-                self.length++;
+                ++self.length;
         }
 
         /// Remove the last element from the vector.
@@ -108,7 +110,7 @@ public:
         void pop_back(this Vector<T> &self)
         {
                 if (self.length > 0)
-                        self.length--;
+                        --self.length;
         }
 
         /// Erase an element in the vector based on its
@@ -121,7 +123,7 @@ public:
                 for (usize i = index; i < self.length - 1; i++)
                         self.data[i] = self.data[i + 1];
 
-                self.length--;
+                --self.length;
         }
 
         /// Resize the vector.

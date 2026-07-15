@@ -84,7 +84,7 @@ class DynamicBitmap {
 public:
         void init(this DynamicBitmap &self, usize len)
         {
-                self.data.resize(len);
+                self.data.resize((len + BITS_PER_WORD - 1) / BITS_PER_WORD);
                 self.length = len;
         }
 

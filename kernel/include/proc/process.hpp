@@ -1,11 +1,10 @@
 #pragma once
 
+#include <cpu/irq.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 
 namespace kernel::proc {
-
-constexpr lib::usize PROCESS_STACK_SIZE = 0x1000;       // 4 KiB
 
 /// Representation of a process.
 class Process {
@@ -16,6 +15,8 @@ public:
 
         /// Load the process' PML4 table.
         void load(this Process &self);
+        void save_context(this Process &self, cpu::IRQFrame *frame);
+        void load_context(this Process &self, cpu::IRQFrame *frame);
 
         void (*entry)();
         int id;

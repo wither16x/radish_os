@@ -3,7 +3,6 @@
 #include <mem/allocators/allocator.hpp>
 #include <lib/bitmap.hpp>
 #include <lib/typing.hpp>
-#include <panic.hpp>
 
 namespace kernel::mem::allocators {
 

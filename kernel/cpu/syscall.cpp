@@ -1,6 +1,10 @@
 #include <cpu/syscall.hpp>
 #include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
+#include <proc/exec.hpp>
+
+#include <lib/logging.hpp>
+using kernel::lib::log::logger;
 
 using kernel::lib::write, kernel::lib::read;
 using kernel::lib::u64, kernel::lib::usize;
@@ -12,7 +16,8 @@ namespace {
 /// All types of syscalls.
 enum SyscallType : u64 {
         SC_WRITE,
-        SC_READ
+        SC_READ,
+        SC_EXEC
 };
 
 } /* anonymous namespace */
@@ -21,6 +26,10 @@ enum SyscallType : u64 {
 extern "C" void syscall_handler(SyscallFrame *frame)
 {
         switch (frame->rax) {
+        // write:
+        // RBX = path
+        // RCX = buffer
+        // RDX = bytes
         case SC_WRITE: {
                 const char *path = reinterpret_cast<const char *>(frame->rbx);
                 const void *buf = reinterpret_cast<const void *>(frame->rcx);
@@ -30,11 +39,24 @@ extern "C" void syscall_handler(SyscallFrame *frame)
                 break;
         }
 
+        // read:
+        // RBX = path
+        // RCX = buffer
+        // RDX = bytes
         case SC_READ: {
                 const char *path = reinterpret_cast<const char *>(frame->rbx);
                 void *buf = reinterpret_cast<void *>(frame->rcx);
                 usize n = frame->rdx;
                 int res = read(path, buf, n);
+                frame->rax = res;
+                break;
+        }
+
+        // exec:
+        // RBX = path
+        case SC_EXEC: {
+                const char *path = reinterpret_cast<const char *>(frame->rbx);
+                int res = proc::spawn(path);
                 frame->rax = res;
                 break;
         }

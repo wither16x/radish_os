@@ -7,6 +7,9 @@
 #include <mem/vmm.hpp>
 #include <proc/elf.hpp>
 
+#include <lib/logging.hpp>
+using kernel::lib::log::logger;
+
 using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
@@ -55,13 +58,15 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
         usize size = 0;
         getfilesz(path, &size);
         buf.resize(size);
-        read(path, reinterpret_cast<char *>(buf.get_data()), size);
+        read(path, buf.get_data(), size);
 
         // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
         int is_file_valid = elf_check(hdr);
-        if (is_file_valid != 0)
+        if (is_file_valid != 0) {
+                logger.debug("elf is not valid");
                 return -1;
+        }
 
         uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
 

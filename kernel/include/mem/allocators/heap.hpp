@@ -39,7 +39,7 @@ private:
                         pmm::allocate_frame(),
                         vmm::PageFlag::ReadWriteUser | vmm::PageFlag::NoExec
                 );
-                self.pages++;
+                ++self.pages;
 
                 BlockHeader *last_block = self.block_list.last();
 
@@ -73,20 +73,21 @@ private:
                         return false;
 
                 lib::uptr last_addr  = reinterpret_cast<lib::uptr>(last_block);
-                lib::uptr last_start = last_addr + sizeof(BlockHeader);
 
                 if (last_addr >= last_page) {
                         if (last_block->prev)
                                 last_block->prev->next = nullptr;
                         else
                                 self.block_list.reset();
+                } else if (last_addr + sizeof(BlockHeader) <= last_page) {
+                        last_block->bytes = last_page - (last_addr + sizeof(BlockHeader));
+                        last_block->next = nullptr;
                 } else {
-                        last_block->bytes = last_page - last_start;
-                        last_block->next  = nullptr;
+                        return false;
                 }
 
                 vmm::unmap_page(get_kernel_pml4t(), last_page);
-                self.pages--;
+                --self.pages;
                 
                 return true;
         }
@@ -141,16 +142,17 @@ public:
         {
                 self.base = base;
                 self.alignment = alignment;
-
-                self.block_list.set_base(self.base);
+                self.curr_block = nullptr;
 
                 vmm::map_page(
                         get_kernel_pml4t(),
                         self.base,
                         pmm::allocate_frame(),
-                        vmm::PageFlag::ReadWrite | vmm::PageFlag::NoExec
+                        vmm::PageFlag::ReadWriteUser | vmm::PageFlag::NoExec
                 );
                 self.pages = 1;
+
+                self.block_list.set_base(self.base);
 
                 BlockHeader *new_list = self.block_list.first();
                 new_list->bytes = vmm::PAGE_BYTES - sizeof(BlockHeader);

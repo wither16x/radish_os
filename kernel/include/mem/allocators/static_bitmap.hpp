@@ -43,6 +43,7 @@ public:
         {
                 if (!this->bitmap.test(n))
                         panic("double free");
+                        //return;
 
                 this->bitmap.clear(n);
         }

@@ -1,10 +1,11 @@
-#include "kernel.hpp"
+#include <kernel.hpp>
 #include <boot/bootinfo.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <mem/heap.hpp>
 
 using kernel::lib::u16, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::log::logger;
@@ -77,7 +78,7 @@ void map_hhdm(u64 *pml4t)
 
 } /* anonymous namespace */
 
-/// --------------------------------------------------
+// --------------------------------------------------
 u64 *init(lib::u64 hhdm_base,
         boot::BootInfo::ExecutableInfo &exec_info,
         boot::BootInfo::MemmapInfo &_memmap_info
@@ -97,16 +98,16 @@ u64 *init(lib::u64 hhdm_base,
 
         return pml4t;
 }
-/// --------------------------------------------------
+// --------------------------------------------------
 
-/// --------------------------------------------------
+// --------------------------------------------------
 void load(u64 *pml4t)
 {
         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(pml4t) - hhdm));
 }
-/// --------------------------------------------------
+// --------------------------------------------------
 
-/// --------------------------------------------------
+// --------------------------------------------------
 u64 *create_pml4t(u64 *parent)
 {
         uptr frame = pmm::allocate_frame();
@@ -121,9 +122,41 @@ u64 *create_pml4t(u64 *parent)
 
         return pml4t;
 }
-/// --------------------------------------------------
+// --------------------------------------------------
 
-/// --------------------------------------------------
+void destroy_pml4t(lib::u64 *pml4t)
+{
+        for (u64 pml4t_idx = 0; pml4t_idx < PT_ENTRIES / 2; pml4t_idx++) {
+                if (!(pml4t[pml4t_idx] & 1))
+                        continue;
+
+                if (pml4t_idx == mem::heap::HEAP_PML4T_IDX / 2)
+                        continue;
+
+                u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
+                for (u64 pdpt_idx = 0; pdpt_idx < PT_ENTRIES; pdpt_idx++) {
+                        if (!(pdpt[pdpt_idx] & 1))
+                                continue;
+
+                        u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
+                        for (u16 pdt_idx = 0; pdt_idx < PT_ENTRIES; pdt_idx++) {
+                                if (!(pdt[pdt_idx] & 1))
+                                        continue;
+
+                                u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
+                                pmm::free_frame(reinterpret_cast<u64>(pt) - hhdm);
+                        }
+
+                        pmm::free_frame(reinterpret_cast<u64>(pdt) - hhdm);
+                }
+
+                pmm::free_frame(reinterpret_cast<u64>(pdpt) - hhdm);
+        }
+
+        pmm::free_frame(reinterpret_cast<u64>(pml4t) - hhdm);
+}
+
+// --------------------------------------------------
 void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
 {
         // create intermediate page tables containing informations
@@ -170,9 +203,9 @@ void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
         if (!(pt[pt_idx] & 1))
                 pt[pt_idx] = phys | flags;
 }
-/// --------------------------------------------------
+// --------------------------------------------------
 
-/// --------------------------------------------------
+// --------------------------------------------------
 void unmap_page(u64 *pml4t, uptr virt)
 {
         u64 pml4t_idx   = (virt >> 39) & 0x1ff;
@@ -221,6 +254,6 @@ void unmap_page(u64 *pml4t, uptr virt)
         pmm::free_frame(pml4t[pml4t_idx] & PHYS_ADDR_MASK);
         pml4t[pml4t_idx] = 0;
 }
-/// --------------------------------------------------
+// --------------------------------------------------
 
 } /* namespace kernel::mem::vmm */

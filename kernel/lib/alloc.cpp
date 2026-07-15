@@ -22,7 +22,8 @@ void free(void *p)
 // --------------------------------------------------
 void *operator new(size_t size)
 {
-        return kernel::lib::malloc(size);
+        void *p = kernel::lib::malloc(size);
+        return p;
 }
 // --------------------------------------------------
 

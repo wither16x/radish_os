@@ -26,6 +26,8 @@ isr_error_stub          14              ; page fault
 
 ;; Every ISR stub should jump to this address.
 isr_common:
+        cli
+
         push r15
         push r14
         push r13
@@ -67,5 +69,7 @@ isr_common:
         pop r14
         pop r15
         add rsp, 16
+
+        sti
         
         iretq

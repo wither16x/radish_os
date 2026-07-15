@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/typing.hpp>
+#include <panic.hpp>
 
 namespace kernel::lib {
 
@@ -55,6 +56,8 @@ public:
         void set_base(this LinkedList<HDR> &self, uptr base)
         {
                 self.hdr = reinterpret_cast<HDR *>(base);
+                self.hdr->next = nullptr;
+                self.hdr->prev = nullptr;
         }
 
         /// Append a block to the list.

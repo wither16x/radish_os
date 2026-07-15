@@ -4,7 +4,6 @@
 #include <mem/allocators/static_bitmap.hpp>
 #include <mem/allocators/dynamic_bitmap.hpp>
 #include <mem/pmm.hpp>
-#include <panic.hpp>
 
 using kernel::lib::log::logger;
 using kernel::lib::u8,  kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
@@ -53,6 +52,8 @@ void init_stage2()
         for (usize i = 0; i < allocator_stage2.get_bitmap().size(); i++) {
                 if (allocator_stage1.get_bitmap().test(i))
                         allocator_stage2.get_bitmap().set(i);
+                else
+                        allocator_stage2.get_bitmap().clear(i);
         }
 
         stage2_enabled = true;

@@ -3,7 +3,6 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
-#include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <proc/elf.hpp>
 #include <proc/exec.hpp>
@@ -16,8 +15,7 @@ using kernel::lib::log::logger;
 
 namespace kernel::proc {
 
-// --------------------------------------------------
-int exec(const lib::String &path)
+Process *load_as_proc(const String &path)
 {
         // create the process' pml4t
         u64 *kpml4t = get_kernel_pml4t();
@@ -26,22 +24,37 @@ int exec(const lib::String &path)
         // load the file (assume ELF64)
         uptr proc_addr = 0;
         int load_res = elf::load_elf(proc_pml4t, path, &proc_addr);
-        if (load_res != 0) {
-                logger.err("failed to execute process: failed to load %s", path.raw());
-                return -1;
-        }
+        if (load_res != 0)
+                return nullptr; // could not load executable
 
         // create the process
         void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
         Process *proc = new Process(allocate_pid(), proc_entry, proc_pml4t);
 
+        return proc;
+}
+
+// --------------------------------------------------
+int spawn(const String &path)
+{
+        logger.debug("spawning %s...", path.raw());
+        Process *proc = load_as_proc(path);
+        if (!proc) {
+                logger.err("failed to spawn process: failed to load %s", path.raw());
+                return -1;
+        }
+
         // tell the scheduler that the process exists
+        logger.debug("adding process to scheduler...");
         scheduler::add_process(proc);
 
+        logger.debug("setting current process...");
         scheduler::set_current_process(proc);
         Process *p = scheduler::get_current_process();
+        logger.debug("loading process...");
         p->load();
 
+        logger.debug("entering userspace...");
         cpu::enter_userspace(
                 reinterpret_cast<void *>(p->rip),
                 reinterpret_cast<void *>(p->rsp)
