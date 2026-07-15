@@ -1,3 +1,4 @@
+#include <cpu/assembly.hpp>
 #include <cpu/userspace.hpp>
 #include <kernel.hpp>
 #include <lib/logging.hpp>
@@ -8,6 +9,7 @@
 #include <proc/exec.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
+#include <panic.hpp>
 
 using kernel::lib::String;
 using kernel::lib::u64, kernel::lib::uptr;
@@ -37,6 +39,8 @@ Process *load_as_proc(const String &path)
 // --------------------------------------------------
 int spawn(const String &path)
 {
+        cpu::cli();
+
         logger.debug("spawning %s...", path.raw());
         Process *proc = load_as_proc(path);
         if (!proc) {
@@ -54,11 +58,16 @@ int spawn(const String &path)
         logger.debug("loading process...");
         p->load();
 
+        if (!p->entry)
+                panic("failed to spawn process: null entry point");
+
         logger.debug("entering userspace...");
         cpu::enter_userspace(
                 reinterpret_cast<void *>(p->rip),
                 reinterpret_cast<void *>(p->rsp)
         );
+
+        cpu::sti();
 
         return 0;
 }
