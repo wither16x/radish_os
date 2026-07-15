@@ -40,7 +40,8 @@ COMMON_FLAGS := \
 	-nostdlib \
 	-nostdinc \
 	-mcmodel=kernel \
-	-Iinclude
+	-Iinclude \
+	-Itest
 
 CXXFLAGS := $(COMMON_FLAGS) \
 	-std=c++23 \

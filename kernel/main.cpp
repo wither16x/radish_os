@@ -1,4 +1,5 @@
 #include <kernel.hpp>
+#include <panic.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
@@ -7,9 +8,9 @@
 #include <cpu/tss.hpp>
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
+#include <drivers/keyboard.hpp>
 #include <drivers/pic.hpp>
 #include <drivers/pit.hpp>
-#include <drivers/keyboard.hpp>
 #include <drivers/ps2kbd.hpp>
 #include <drivers/serial.hpp>
 #include <fs/devfs.hpp>
@@ -23,10 +24,9 @@
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
-#include <panic.hpp>
-#include <proc/elf.hpp>
 #include <proc/exec.hpp>
 #include <proc/scheduler.hpp>
+#include <test.hpp>
 
 using namespace kernel::drivers;
 using namespace kernel::fs;
@@ -41,9 +41,6 @@ using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::tss_flush, kernel::cpu::s
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
-
-extern char __proc_test_start[];
-extern char __proc_test_end[];
 
 namespace kernel {
 
@@ -91,7 +88,7 @@ void unmount_initrd()
         logger.ok("unmounted initrd");
 }
 
-/// Setup the kernel console.
+/// Set up the kernel console.
 void init_console()
 {
         console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
@@ -202,7 +199,9 @@ extern "C" void kernel_main()
 
         scheduler::init();
 
-        exec("I:/bin/hello");
+        test::test_lib();
+
+        spawn("I:/bin/shell");
         
         unmount_initrd();
         vfs::unmount('D');
