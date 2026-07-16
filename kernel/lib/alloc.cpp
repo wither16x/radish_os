@@ -4,9 +4,9 @@
 namespace kernel::lib {
 
 // --------------------------------------------------
-void *malloc(usize n)
+void *malloc(usize n, bool debug)
 {
-        return mem::heap::allocate(n);
+        return mem::heap::allocate(n, debug);
 }
 // --------------------------------------------------
 
@@ -17,7 +17,7 @@ void free(void *p)
 }
 // --------------------------------------------------
 
-} /* namespace kernel::leab */
+} /* namespace kernel::lib */
 
 // --------------------------------------------------
 void *operator new(size_t size)
@@ -28,21 +28,21 @@ void *operator new(size_t size)
 // --------------------------------------------------
 
 // --------------------------------------------------
-void operator delete(void *ptr)
+void operator delete(void *ptr) noexcept
 {
-        return kernel::lib::free(ptr);
+        kernel::lib::free(ptr);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
 void *operator new[](size_t size)
 {
-        return kernel::lib::malloc(size);
+        return kernel::lib::malloc(size, kernel::lib::debug_new);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-void operator delete[](void *ptr)
+void operator delete[](void *ptr) noexcept
 {
         kernel::lib::free(ptr);
 }

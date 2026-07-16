@@ -23,9 +23,9 @@ void init()
 // --------------------------------------------------
 
 // --------------------------------------------------
-void *allocate(lib::usize n)
+void *allocate(lib::usize n, bool debug)
 {
-        return allocator.allocate(n);
+        return allocator.allocate(n, debug);
 }
 // --------------------------------------------------
 

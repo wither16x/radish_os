@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lib/logging.hpp"
 #include <kernel.hpp>
 #include <lib/bytes.hpp>
 #include <lib/linked_list.hpp>
@@ -100,25 +101,38 @@ private:
                 if (rem >= sizeof(BlockHeader) + self.alignment) {
                         lib::uptr block_base = reinterpret_cast<lib::uptr>(reinterpret_cast<lib::u8 *>(self.curr_block) + sizeof(BlockHeader) + base_size);
                         BlockHeader *new_block = self.create_block(block_base, rem, true, self.curr_block, static_cast<BlockHeader *>(self.curr_block->next));
+                        if (!new_block || (lib::uptr)new_block == 0xffffffffffffffff)
+                                panic("new_block is null");
 
                         if (self.curr_block->next)
                                 self.curr_block->next->prev = new_block;
 
                         self.curr_block->next = new_block;
+                        if (!self.curr_block->next || (lib::uptr)self.curr_block->next == 0xffffffffffffffff)
+                                panic("new block is null");
                         self.curr_block->bytes = base_size;
                 }
         }
 
         /// Find a free block which is big enough to handle `min_size`.
-        BlockHeader *find_free_block(this HeapAllocator<T> &self, lib::usize min_size)
+        BlockHeader *find_free_block(this HeapAllocator<T> &self, lib::usize min_size, bool debug)
         {
+                if (debug)logger.debug("alloc: looking for free block...");
+
                 BlockHeader *current_block = self.block_list.first();
 
                 while (current_block) {
+                        if (debug)logger.debug("alloc: checking if current block at 0x%x is right...", (lib::uptr)current_block);
                         if (current_block->free && current_block->bytes >= min_size)
                                 return current_block;
 
+                        if (debug) {
+                                logger.debug("alloc: bad block, looking for another one...");
+                                logger.debug("alloc: next block is at 0x%x", (lib::uptr)current_block->next);
+                                logger.debug("alloc: current block size = 0x%x", current_block->bytes);
+                        }
                         current_block = static_cast<BlockHeader *>(current_block->next);
+                        if (debug)logger.debug("alloc: current block is at 0x%x", (lib::uptr)current_block);
                 }
 
                 return nullptr;
@@ -159,17 +173,24 @@ public:
                 new_list->free = true;
         }
 
-        T allocate(lib::usize n) override
+        T allocate(lib::usize n, bool debug)// override
         {
-                n = lib::align_up(n, this->alignment);   // align `n` up
+                if (debug)logger.debug("alloc: requested %u bytes", n);
 
-                BlockHeader *block = this->find_free_block(n);
+                n = lib::align_up(n, this->alignment);   // align `n` up
+                if (debug)logger.debug("alloc: aligned up requested bytes to %u bytes", n);
+
+                BlockHeader *block = this->find_free_block(n, debug);
+                if (debug && block)
+                        logger.debug("alloc: free block of size %u found at 0x%x", block->bytes, (lib::uptr)block);
                 if (!block) {
+                        if (debug)logger.debug("alloc: no free block found, extending heap...");
                         lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), vmm::PAGE_BYTES) / vmm::PAGE_BYTES;
+                        if (debug)logger.debug("alloc: %u more page(s) needed", required_pages);
                         for (lib::usize i = 0; i < required_pages; i++)
                                 this->extend();
 
-                        block = this->find_free_block(n);
+                        block = this->find_free_block(n, debug);
                         if (!block)
                                 return nullptr; // out of memory
                 }

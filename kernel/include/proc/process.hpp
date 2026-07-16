@@ -35,7 +35,7 @@ public:
         lib::u64 cr2, cr3;
 
         // each process has its own page tables
-        lib::uptr *pml4t;
+        lib::u64 *pml4t;
 };
 
 /// Return a PID choosen automatically.

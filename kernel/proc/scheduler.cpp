@@ -1,3 +1,4 @@
+#include "lib/alloc.hpp"
 #include <cpu/irq.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
@@ -37,7 +38,12 @@ void add_process(Process *p)
         logger.debug("pushing process %d back...", p->id);
         logger.debug("processes vector size = %u", processes.size());
         logger.debug("processes vector capacity = %u", processes.capacity());
-        processes.push_back(p);
+        logger.debug("p->id = %d", p->id);
+        logger.debug("p->rsp = 0x%x", p->rsp);
+        logger.debug("p->rip = 0x%x", p->rip);
+        lib::debug_new = true;
+        processes.push_back(p, true);
+        lib::debug_new = false;
         logger.debug("checking current process...");
         if (!curr_proc)
                 curr_proc = p;

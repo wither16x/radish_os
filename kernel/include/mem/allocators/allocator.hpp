@@ -12,10 +12,10 @@ public:
         /// However, allocators do not always allocate
         /// bytes so the value represented by `n` is not
         /// fixed.
-        virtual T allocate(lib::usize n) = 0;
+        virtual T allocate(lib::usize n) {(void)n;};
         /// Free (usually, see documentation for `allocate()`)
         /// a pointer to an allocated area.
-        virtual void free(T n) = 0;
+        virtual void free(T n) {(void)n;};
 };
 
 } /* namespace kernel::mem::allocators */

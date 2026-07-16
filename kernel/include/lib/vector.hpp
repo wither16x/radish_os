@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/typing.hpp>
+
 #include <lib/logging.hpp>
 using kernel::lib::log::logger;
 
@@ -86,16 +87,28 @@ public:
         }
 
         /// Append an element to the vector.
-        void push_back(this Vector<T> &self, const T& n)
+        void push_back(this Vector<T> &self, const T& n, bool debug = false)
         {
+                if (debug) {
+                        logger.debug("self.length = %u", self.length);
+                        logger.debug("self.cap = %u", self.cap);
+                }
+
                 if (self.length == self.cap) {
+                        if (debug)logger.debug("resizing vector...");
                         if (self.cap == 0)
                                 self.cap = 1;
                         else
                                 self.cap *= 2;
+                        if (debug) {
+                                logger.debug("self.length = %u", self.length);
+                                logger.debug("self.cap = %u", self.cap);
+                        }
+
                         T *new_data = new T[self.cap];
                         for (usize i = 0; i < self.length; ++i)
                                 new_data[i] = self.data[i];
+
                         delete[] self.data;
                         self.data = new_data;
                 }
