@@ -7,6 +7,8 @@
 #include <mem/allocators/allocator.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <mem/pml4t.hpp>
+#include <mem/page.hpp>
 #include <panic.hpp>
 
 namespace kernel::mem::allocators {
@@ -32,21 +34,20 @@ private:
         /// Map more pages to handle more blocks.
         void extend(this HeapAllocator<T> &self)
         {
-                lib::uptr new_page = self.base + vmm::PAGE_BYTES * self.pages;
-                vmm::map_page(
-                        get_kernel_pml4t(),
-                        self.base + vmm::PAGE_BYTES * self.pages,
+                lib::uptr new_page = self.base + PAGE_SIZE * self.pages;
+                get_kernel_pml4t().map_page(
+                        self.base + PAGE_SIZE * self.pages,
                         pmm::allocate_frame(),
-                        vmm::PageFlag::ReadWriteUser | vmm::PageFlag::NoExec
+                        PageFlag::ReadWriteUser | PageFlag::NoExec
                 );
                 ++self.pages;
 
                 BlockHeader *last_block = self.block_list.last();
 
                 if (last_block->free) {
-                        last_block->bytes += vmm::PAGE_BYTES;
+                        last_block->bytes += PAGE_SIZE;
                 } else {
-                        BlockHeader *new_block = self.create_block(new_page, vmm::PAGE_BYTES, true, last_block, nullptr);
+                        BlockHeader *new_block = self.create_block(new_page, PAGE_SIZE, true, last_block, nullptr);
                         self.block_list.append(new_block);
                 }
         }
@@ -57,7 +58,7 @@ private:
                 if (self.pages <= 1)
                         return false;
 
-                lib::uptr last_page = self.base + vmm::PAGE_BYTES * (self.pages - 1);
+                lib::uptr last_page = self.base + PAGE_SIZE * (self.pages - 1);
 
                 BlockHeader *curr = self.block_list.first();
                 while (curr) {
@@ -86,7 +87,7 @@ private:
                         return false;
                 }
 
-                vmm::unmap_page(get_kernel_pml4t(), last_page);
+                get_kernel_pml4t().unmap_page(last_page);
                 --self.pages;
                 
                 return true;
@@ -146,18 +147,17 @@ public:
                 self.alignment = alignment;
                 self.curr_block = nullptr;
 
-                vmm::map_page(
-                        get_kernel_pml4t(),
+                get_kernel_pml4t().map_page(
                         self.base,
                         pmm::allocate_frame(),
-                        vmm::PageFlag::ReadWriteUser | vmm::PageFlag::NoExec
+                        PageFlag::ReadWriteUser | PageFlag::NoExec
                 );
                 self.pages = 1;
 
                 self.block_list.set_base(self.base);
 
                 BlockHeader *new_list = self.block_list.first();
-                new_list->bytes = vmm::PAGE_BYTES - sizeof(BlockHeader);
+                new_list->bytes = PAGE_SIZE - sizeof(BlockHeader);
                 new_list->free = true;
         }
 
@@ -168,7 +168,7 @@ public:
                 BlockHeader *block = this->find_free_block(n);
 
                 if (!block) {
-                        lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), vmm::PAGE_BYTES) / vmm::PAGE_BYTES;
+                        lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), PAGE_SIZE) / PAGE_SIZE;
                         for (lib::usize i = 0; i < required_pages; i++)
                                 this->extend();
 

@@ -1,3 +1,4 @@
+#include <mem/pml4t.hpp>
 #include <cpu/idt.hpp>
 #include <kernel.hpp>
 #include <lib/typing.hpp>
@@ -8,21 +9,21 @@ namespace kernel {
 
 namespace {
 
-u64 *kpml4t = nullptr;
+mem::PML4T kpml4t;
 u64 hhdm_offset;
 cpu::IDT kidt;
 
 } /* anonymous namespace */
 
 // --------------------------------------------------
-u64 *get_kernel_pml4t()
+mem::PML4T &get_kernel_pml4t()
 {
         return kpml4t;
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-void set_kernel_pml4t(lib::u64 *pml4t)
+void set_kernel_pml4t(mem::PML4T &pml4t)
 {
         kpml4t = pml4t;
 }

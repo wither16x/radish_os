@@ -1,8 +1,10 @@
+#include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
 #include <cpu/userspace.hpp>
 #include <lib/typing.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <mem/page.hpp>
 #include <proc/process.hpp>
 
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
@@ -16,16 +18,15 @@ int curr_pid = 0;
 } /* anonymous namespace */
 
 // --------------------------------------------------
-Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
+Process::Process(int id, void (*entry)(), mem::PML4T &pml4t)
 {
         this->id = id;
         this->entry = entry;
 
-        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::vmm::PAGE_BYTES) {
-                mem::vmm::map_page(pml4t,
-                        addr,
+        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
+                pml4t.map_page(addr,
                         mem::pmm::allocate_frame(),
-                        mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
+                        mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
                 );
         }
 
@@ -40,7 +41,7 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
         this->r8  = this->r9  = this->r10 = this->r11 = 0;
         this->r12 = this->r13 = this->r14 = this->r15 = 0;
         this->cr2 = 0;
-        this->cr3 = reinterpret_cast<u64>(pml4t);
+        this->cr3 = reinterpret_cast<u64>(&pml4t);
 
         this->pml4t = pml4t;
 }
@@ -49,13 +50,13 @@ Process::Process(int id, void (*entry)(), lib::u64 *pml4t)
 // --------------------------------------------------
 void Process::load(this Process &self)
 {
-        mem::vmm::load(self.pml4t);
+        self.pml4t.load();
 }
 // --------------------------------------------------
 
-void Process::switch_pml4t(this Process &self, u64 *pml4t)
+void Process::switch_pml4t(this Process &self, mem::PML4T &pml4t)
 {
-        mem::vmm::destroy_pml4t(self.pml4t);
+        self.pml4t.destroy();
         self.pml4t = pml4t;
 }
 
@@ -113,11 +114,10 @@ void Process::load_context(this Process &self, cpu::IRQFrame *frame)
 
 void Process::remap_stack(this Process &self)
 {
-        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::vmm::PAGE_BYTES) {
-                mem::vmm::map_page(self.pml4t,
-                        addr,
+        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
+                self.pml4t.map_page(addr,
                         mem::pmm::allocate_frame(),
-                        mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
+                        mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
                 );
         }
 }

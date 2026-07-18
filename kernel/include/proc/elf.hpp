@@ -2,6 +2,7 @@
 
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <mem/pml4t.hpp>
 
 namespace kernel::proc::elf {
 
@@ -101,6 +102,6 @@ struct ELF64Sym {
 
 /// Load an ELF and map it in higher-half in a process'
 /// PML4 table.
-int load_elf(lib::u64 *pml4t, const lib::String &path, lib::uptr *addr);
+int load_elf(mem::PML4T *pml4t, const lib::String &path, lib::uptr *addr);
 
 } /* namespace kernel::proc::elf */

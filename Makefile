@@ -7,7 +7,6 @@ PHONY: build-all build-kernel build-userspace build-initrd build-iso \
 build-all: build-kernel build-userspace build-initrd build-iso
 
 build-kernel:
-	./scripts/symbols.sh
 	$(MAKE) -C kernel clean
 	$(MAKE) -C kernel
 	./scripts/symbols.sh

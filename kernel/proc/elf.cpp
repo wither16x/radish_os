@@ -5,6 +5,8 @@
 #include <lib/vector.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <mem/pml4t.hpp>
+#include <mem/page.hpp>
 #include <proc/elf.hpp>
 
 #include <lib/logging.hpp>
@@ -49,7 +51,7 @@ int elf_check(ELF64Ehdr *hdr)
 } /* anonymous namespace */
 
 // --------------------------------------------------
-int load_elf(u64 *pml4t, const String &path, uptr *addr)
+int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
 {
         uptr hhdm = get_kernel_hhdm_offset();
 
@@ -75,33 +77,33 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
                 if (phdr->p_type != PHDRType::PHDRTypeLoad)
                         continue;
 
-                usize pages = (phdr->p_memsz + mem::vmm::PAGE_BYTES - 1) / mem::vmm::PAGE_BYTES;
+                usize pages = (phdr->p_memsz + mem::PAGE_SIZE - 1) / mem::PAGE_SIZE;
                 for (usize j = 0; j < pages; j++) {
                         // since the buffer containing the data is allocated on the heap, it cannot
                         // be executed as all heap pages are NX, so we copy the data from these pages
                         // to new RX pages
                         uptr frame = mem::pmm::allocate_frame();
-                        uptr vaddr = phdr->p_vaddr + j * mem::vmm::PAGE_BYTES;
+                        uptr vaddr = phdr->p_vaddr + j * mem::PAGE_SIZE;
 
                         u32 pflags = phdr->p_flags;
                         u64 flag;
                         if (pflags & 0x1) // PF_X
-                                flag = mem::vmm::PageFlag::ReadExecUser;
+                                flag = mem::PageFlag::ReadExecUser;
                         else
-                                flag = mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec;
-                        mem::vmm::map_page(pml4t, vaddr, frame, flag);
+                                flag = mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec;
+                        pml4t->map_page(vaddr, frame, flag);
 
-                        memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::vmm::PAGE_BYTES);
+                        memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::PAGE_SIZE);
 
-                        uptr src_off = phdr->p_offset + j * mem::vmm::PAGE_BYTES;
+                        uptr src_off = phdr->p_offset + j * mem::PAGE_SIZE;
                         // we need the offset between pages as it may not be mapped otherwise
-                        uptr intra_offset = phdr->p_vaddr & (mem::vmm::PAGE_BYTES - 1);
+                        uptr intra_offset = phdr->p_vaddr & (mem::PAGE_SIZE - 1);
 
                         usize to_copy;
-                        if (j * mem::vmm::PAGE_BYTES >= phdr->p_filesz)
+                        if (j * mem::PAGE_SIZE >= phdr->p_filesz)
                                 to_copy = 0;
                         else
-                                to_copy = min(mem::vmm::PAGE_BYTES, phdr->p_filesz - j * mem::vmm::PAGE_BYTES);
+                                to_copy = min(mem::PAGE_SIZE, phdr->p_filesz - j * mem::PAGE_SIZE);
                         
                         if (to_copy > 0) {
                                 memcpy(

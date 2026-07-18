@@ -3,6 +3,7 @@
 #include <cpu/irq.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
+#include <mem/pml4t.hpp>
 
 namespace kernel::proc {
 
@@ -11,11 +12,11 @@ class Process {
 public:
         /// It is recommended to use `allocate_pid()` instead
         /// of assigning a PID manually
-        Process(int id, void (*entry)(), lib::u64 *pml4t);
+        Process(int id, void (*entry)(), mem::PML4T &pml4t);
 
         /// Load the process' PML4 table.
         void load(this Process &self);
-        void switch_pml4t(this Process &self, lib::u64 *pml4t);
+        void switch_pml4t(this Process &self, mem::PML4T &pml4t);
 
         void save_context(this Process &self, cpu::IRQFrame *frame);
         void load_context(this Process &self, cpu::IRQFrame *frame);
@@ -42,7 +43,7 @@ public:
         lib::u64 cr2, cr3;
 
         // each process has its own page tables
-        lib::u64 *pml4t;
+        mem::PML4T pml4t;
 };
 
 /// Return a PID choosen automatically.

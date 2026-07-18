@@ -150,8 +150,8 @@ extern "C" void kernel_main()
 
         pmm::init(bootinfo.memmap);
 
-        u64 *kpml4t = vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
-        vmm::load(kpml4t);
+        PML4T kpml4t = vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+        kpml4t.load();
         set_kernel_pml4t(kpml4t);
 
         heap::init();

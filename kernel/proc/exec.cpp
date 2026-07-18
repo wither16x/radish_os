@@ -6,6 +6,7 @@
 #include <lib/typing.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
+#include <mem/pml4t.hpp>
 #include <proc/elf.hpp>
 #include <proc/exec.hpp>
 #include <proc/process.hpp>
@@ -23,12 +24,13 @@ namespace {
 Process *load_program_as_process(const String &path)
 {
         // create the process' pml4t
-        u64 *kpml4t = get_kernel_pml4t();
-        u64 *proc_pml4t = mem::vmm::create_pml4t(kpml4t);
+        mem::PML4T &kpml4t = get_kernel_pml4t();
+        mem::PML4T proc_pml4t;
+        proc_pml4t.init(kpml4t);
 
         // load the file (assume ELF64)
         uptr proc_addr = 0;
-        int load_res = elf::load_elf(proc_pml4t, path, &proc_addr);
+        int load_res = elf::load_elf(&proc_pml4t, path, &proc_addr);
         if (load_res != 0)
                 return nullptr; // could not load executable
 
@@ -81,10 +83,11 @@ int exec(const lib::String &path)
         Process *proc = scheduler::get_current_process();
 
         // Load the program located at `path`
-        u64 *kpml4t = get_kernel_pml4t();
-        u64 *proc_pml4t = mem::vmm::create_pml4t(kpml4t);
+        mem::PML4T &kpml4t = get_kernel_pml4t();
+        mem::PML4T proc_pml4t;
+        proc_pml4t.init(kpml4t);
         uptr proc_addr = 0;
-        int load_res = elf::load_elf(proc_pml4t, path, &proc_addr);
+        int load_res = elf::load_elf(&proc_pml4t, path, &proc_addr);
         if (load_res != 0)
                 return -1;
         void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
