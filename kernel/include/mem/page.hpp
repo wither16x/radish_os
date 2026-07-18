@@ -10,6 +10,7 @@ constexpr lib::u16 PAGE_TABLE_ENTRIES = 512;
 
 /// Enumeration of some page flags.
 enum PageFlag : lib::u64 {
+        Present         = 0x01,
         ReadWrite       = 0x03,
         ReadExecUser    = 0x05,
         NoExec          = 1ull << 63,
