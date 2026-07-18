@@ -2,9 +2,7 @@
 #include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
 #include <proc/exec.hpp>
-
-#include <lib/logging.hpp>
-using kernel::lib::log::logger;
+#include <proc/scheduler.hpp>
 
 using kernel::lib::write, kernel::lib::read;
 using kernel::lib::u64, kernel::lib::usize;
@@ -56,8 +54,13 @@ extern "C" void syscall_handler(SyscallFrame *frame)
         // RBX = path
         case SC_EXEC: {
                 const char *path = reinterpret_cast<const char *>(frame->rbx);
-                int res = proc::spawn(path);
+                int res = proc::exec(path);
                 frame->rax = res;
+                proc::Process *current_proc = proc::scheduler::get_current_process();
+                frame->rip = current_proc->rip;
+                frame->rsp = current_proc->rsp;
+                frame->flags = current_proc->flags;
+                frame->cr3 = current_proc->cr3;
                 break;
         }
 

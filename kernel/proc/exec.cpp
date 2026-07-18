@@ -4,6 +4,7 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <proc/elf.hpp>
 #include <proc/exec.hpp>
@@ -68,5 +69,46 @@ int spawn(const String &path)
         return 0;
 }
 // --------------------------------------------------
+
+int exec(const lib::String &path)
+{
+        cpu::cli();
+
+        Process *proc = scheduler::get_current_process();
+
+        u64 *kpml4t = get_kernel_pml4t();
+        u64 *proc_pml4t = mem::vmm::create_pml4t(kpml4t);
+
+        // load the file (assume ELF64)
+        uptr proc_addr = 0;
+        int load_res = elf::load_elf(proc_pml4t, path, &proc_addr);
+        if (load_res != 0)
+                return -1; // could not load executable
+
+        // create the process
+        void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
+
+        mem::vmm::destroy_pml4t(proc->pml4t);
+        proc->pml4t = proc_pml4t;
+
+        proc->rsp = cpu::USER_STACK_TOP;
+        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::vmm::PAGE_BYTES) {
+                mem::vmm::map_page(proc->pml4t,
+                        addr,
+                        mem::pmm::allocate_frame(),
+                        mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
+                );
+        }
+
+        proc->entry = proc_entry;
+        proc->flags = 1 << 9;
+        proc->rip = reinterpret_cast<u64>(proc_entry);
+
+        proc->load();
+
+        cpu::sti();
+
+        return 0;
+}
 
 } /* namespace kernel::proc */

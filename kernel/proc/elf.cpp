@@ -64,7 +64,7 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
         int is_file_valid = elf_check(hdr);
         if (is_file_valid != 0) {
-                logger.debug("elf is not valid");
+                logger.err("elf is not valid");
                 return -1;
         }
 
