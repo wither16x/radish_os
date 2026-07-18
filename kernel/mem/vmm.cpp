@@ -2,7 +2,6 @@
 #include <boot/bootinfo.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
-#include <lib/memory.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <mem/heap.hpp>
@@ -11,7 +10,6 @@
 
 using kernel::lib::u16, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::log::logger;
-using kernel::lib::memset;
 
 extern "C" u64 _lds_kernel_start[];
 extern "C" u64 _lds_kernel_end[];
@@ -19,8 +17,6 @@ extern "C" u64 _lds_kernel_end[];
 namespace kernel::mem::vmm {
 
 namespace {
-
-//constexpr u16   PT_ENTRIES         = 512;
 
 u64 hhdm = 0;
 u64 executable_phys = 0;
@@ -90,7 +86,6 @@ PML4T init(u64 hhdm_base,
         executable_virt = exec_info.virtual_base;
         memmap_info = _memmap_info;
 
-        //lib::u64 *pml4t = create_pml4t(nullptr);
         PML4T pml4t;
         pml4t.init();
 
@@ -102,161 +97,5 @@ PML4T init(u64 hhdm_base,
         return pml4t;
 }
 // --------------------------------------------------
-
-// // --------------------------------------------------
-// void load(u64 *pml4t)
-// {
-//         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(pml4t) - hhdm));
-// }
-// // --------------------------------------------------
-
-// // --------------------------------------------------
-// u64 *create_pml4t(u64 *parent)
-// {
-//         uptr frame = pmm::allocate_frame();
-//         u64 *pml4t = reinterpret_cast<u64 *>(frame + hhdm);
-//         memset(pml4t, 0, PAGE_BYTES);
-
-//         if (!parent)
-//                 return pml4t;
-
-//         for (int i = PT_ENTRIES / 2; i < PT_ENTRIES; i++)
-//                 pml4t[i] = parent[i];
-
-//         return pml4t;
-// }
-// // --------------------------------------------------
-
-// void destroy_pml4t(lib::u64 *pml4t)
-// {
-//         for (u64 pml4t_idx = 0; pml4t_idx < PT_ENTRIES / 2; pml4t_idx++) {
-//                 if (!(pml4t[pml4t_idx] & 1))
-//                         continue;
-
-//                 if (pml4t_idx == mem::heap::HEAP_PML4T_IDX / 2)
-//                         continue;
-
-//                 u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
-//                 for (u64 pdpt_idx = 0; pdpt_idx < PT_ENTRIES; pdpt_idx++) {
-//                         if (!(pdpt[pdpt_idx] & 1))
-//                                 continue;
-
-//                         u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
-//                         for (u16 pdt_idx = 0; pdt_idx < PT_ENTRIES; pdt_idx++) {
-//                                 if (!(pdt[pdt_idx] & 1))
-//                                         continue;
-
-//                                 u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
-//                                 pmm::free_frame(reinterpret_cast<u64>(pt) - hhdm);
-//                         }
-
-//                         pmm::free_frame(reinterpret_cast<u64>(pdt) - hhdm);
-//                 }
-
-//                 pmm::free_frame(reinterpret_cast<u64>(pdpt) - hhdm);
-//         }
-
-//         pmm::free_frame(reinterpret_cast<u64>(pml4t) - hhdm);
-// }
-
-// // --------------------------------------------------
-// void map_page(u64 *pml4t, lib::uptr virt, lib::uptr phys, lib::u64 flags)
-// {
-//         // create intermediate page tables containing informations
-//         // that tell the CPU where the corresponding frame is
-
-//         // split the virtual address to find the its indices in the
-//         // page tables
-//         usize pml4t_idx = (virt >> 39) & 0x1ff;
-//         usize pdpt_idx  = (virt >> 30) & 0x1ff;
-//         usize pdt_idx   = (virt >> 21) & 0x1ff;
-//         usize pt_idx    = (virt >> 12) & 0x1ff;
-
-//         // now map the page to the given frame
-//         if (!(pml4t[pml4t_idx] & 1)) {
-//                 pml4t[pml4t_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
-//                 memset(
-//                         reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm),
-//                         0,
-//                         PAGE_BYTES
-//                 );
-//         }
-
-//         u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pdpt[pdpt_idx] & 1)) {
-//                 pdpt[pdpt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
-//                 memset(
-//                         reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm),
-//                         0,
-//                         PAGE_BYTES
-//                 );
-//         }
-
-//         u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pdt[pdt_idx] & 1)) {
-//                 pdt[pdt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
-//                 memset(
-//                         reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm),
-//                         0,
-//                         PAGE_BYTES
-//                 );
-//         }
-
-//         u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pt[pt_idx] & 1))
-//                 pt[pt_idx] = phys | flags;
-// }
-// // --------------------------------------------------
-
-// // --------------------------------------------------
-// void unmap_page(u64 *pml4t, uptr virt)
-// {
-//         u64 pml4t_idx   = (virt >> 39) & 0x1ff;
-//         u64 pdpt_idx    = (virt >> 30) & 0x1ff;
-//         u64 pdt_idx     = (virt >> 21) & 0x1ff;
-//         u64 pt_idx      = (virt >> 12) & 0x1ff;
-
-//         if (!(pml4t[pml4t_idx] & 1))
-//                 return;
-
-//         u64 *pdpt = reinterpret_cast<u64 *>((pml4t[pml4t_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pdpt[pdpt_idx] & 1))
-//                 return;
-
-//         u64 *pdt = reinterpret_cast<u64 *>((pdpt[pdpt_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pdt[pdt_idx] & 1))
-//                 return;
-
-//         u64 *pt = reinterpret_cast<u64 *>((pdt[pdt_idx] & PHYS_ADDR_MASK) + hhdm);
-//         if (!(pt[pt_idx] & 1))
-//                 return;
-
-//         pt[pt_idx] = 0;
-//         cpu::invlpg(virt);
-
-//         // A table must have no mapped entries to be deleted
-
-//         for (u16 i = 0; i < PT_ENTRIES; i++) {
-//                 if (pt[i] & 1)
-//                         return;
-//         }
-//         pmm::free_frame(pdt[pdt_idx] & PHYS_ADDR_MASK);
-//         pdt[pdt_idx] = 0;
-
-//         for (u16 i = 0; i < PT_ENTRIES; i++) {
-//                 if (pdt[i] & 1)
-//                         return;
-//         }
-//         pmm::free_frame(pdpt[pdpt_idx] & PHYS_ADDR_MASK);
-//         pdpt[pdpt_idx] = 0;
-
-//         for (u16 i = 0; i < PT_ENTRIES; i++) {
-//                 if (pdpt[i] & 1)
-//                         return;
-//         }
-//         pmm::free_frame(pml4t[pml4t_idx] & PHYS_ADDR_MASK);
-//         pml4t[pml4t_idx] = 0;
-// }
-// // --------------------------------------------------
 
 } /* namespace kernel::mem::vmm */
