@@ -58,7 +58,6 @@ int spawn(const String &path)
         if (!p->entry)
                 panic("failed to spawn process: null entry point");
 
-        logger.debug("entering userspace...");
         cpu::enter_userspace(
                 reinterpret_cast<void *>(p->rip),
                 reinterpret_cast<void *>(p->rsp)
