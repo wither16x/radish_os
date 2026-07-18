@@ -41,7 +41,6 @@ int spawn(const String &path)
 {
         cpu::cli();
 
-        logger.debug("spawning %s...", path.raw());
         Process *proc = load_as_proc(path);
         if (!proc) {
                 logger.err("failed to spawn process: failed to load %s", path.raw());
@@ -49,13 +48,10 @@ int spawn(const String &path)
         }
 
         // tell the scheduler that the process exists
-        logger.debug("adding process to scheduler...");
         scheduler::add_process(proc);
 
-        logger.debug("setting current process...");
         scheduler::set_current_process(proc);
         Process *p = scheduler::get_current_process();
-        logger.debug("loading process...");
         p->load();
 
         if (!p->entry)

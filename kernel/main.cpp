@@ -148,15 +148,13 @@ extern "C" void kernel_main()
         BootInfo bootinfo;
         set_kernel_hhdm_offset(bootinfo.hhdm.offset);
 
-        pmm::init_stage1(bootinfo.memmap);
+        pmm::init(bootinfo.memmap);
 
         u64 *kpml4t = vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
         vmm::load(kpml4t);
         set_kernel_pml4t(kpml4t);
 
         heap::init();
-
-        //pmm::init_stage2();
 
         pic::remap();
         logger.ok("remapped 8259 pic");

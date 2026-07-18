@@ -5,8 +5,8 @@ namespace kernel::test {
 
 void test_lib()
 {
-        LibPackage::LibPackage package;
-        TARWI_RUN_PACKAGE(package);
+        LibPackage::LibPackage lib_package;
+        TARWI_RUN_PACKAGE(lib_package);
 }
 
 } /* namespace kernel::test */

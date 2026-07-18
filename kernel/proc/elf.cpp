@@ -1,4 +1,3 @@
-#include "lib/alloc.hpp"
 #include <kernel.hpp>
 #include <lib/filesystem.hpp>
 #include <lib/math.hpp>
@@ -58,11 +57,7 @@ int load_elf(u64 *pml4t, const String &path, uptr *addr)
         Vector<u8> buf;
         usize size = 0;
         getfilesz(path, &size);
-        logger.debug("elf: file size = %u", size);
-        logger.debug("elf: buf.get_data() = 0x%x, cap = %u", (uptr)buf.get_data(), buf.capacity());
         buf.resize(size);
-        logger.debug("elf: file size = %u", size);
-        logger.debug("elf: buf.get_data() = 0x%x, cap = %u", (uptr)buf.get_data(), buf.capacity());
         read(path, buf.get_data(), size);
 
         // parse the file

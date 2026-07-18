@@ -6,12 +6,10 @@ namespace kernel::lib {
 
 /// Allocate `n` bytes on the heap and return a pointer to the
 /// base address of the allocated area.
-void *malloc(usize n, bool debug = false);
+void *malloc(usize n);
 /// Free a pointer which has been previously allocated on the
 /// heap.
 void free(void *p);
-
-inline bool debug_new = false;
 
 } /* namespace kernel::lib */
 

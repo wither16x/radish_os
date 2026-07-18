@@ -7,6 +7,7 @@
 
 namespace kernel::mem::allocators {
 
+/// THIS ALLOCATOR IS DEPRECATED!!!
 /// Allocator based on a dynamic bitmap.
 template<typename T>
 class DynamicBitmapAllocator : public Allocator<T> {

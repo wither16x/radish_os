@@ -1,4 +1,3 @@
-#include "lib/alloc.hpp"
 #include <cpu/irq.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
@@ -35,16 +34,7 @@ void add_process(Process *p)
 {
         // this function only adds the process to the vector:
         // it must have been initialized before
-        logger.debug("pushing process %d back...", p->id);
-        logger.debug("processes vector size = %u", processes.size());
-        logger.debug("processes vector capacity = %u", processes.capacity());
-        logger.debug("p->id = %d", p->id);
-        logger.debug("p->rsp = 0x%x", p->rsp);
-        logger.debug("p->rip = 0x%x", p->rip);
-        lib::debug_new = true;
-        processes.push_back(p, true);
-        lib::debug_new = false;
-        logger.debug("checking current process...");
+        processes.push_back(p);
         if (!curr_proc)
                 curr_proc = p;
 }
