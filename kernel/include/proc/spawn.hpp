@@ -4,7 +4,7 @@
 
 namespace kernel::proc {
 
-/// Replace a process by another one.
-int exec(const lib::String &path);
+/// Execute a program as a user process.
+int spawn(const lib::String &path);
 
 } /* namespace kernel::proc */

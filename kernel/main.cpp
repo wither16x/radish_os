@@ -24,7 +24,7 @@
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
-#include <proc/exec.hpp>
+#include <proc/spawn.hpp>
 #include <proc/scheduler.hpp>
 #include <test.hpp>
 
