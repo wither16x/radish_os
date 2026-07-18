@@ -123,6 +123,7 @@ private:
 
                 while (current_block) {
                         if (debug)logger.debug("alloc: checking if current block at 0x%x is right...", (lib::uptr)current_block);
+
                         if (current_block->free && current_block->bytes >= min_size)
                                 return current_block;
 
@@ -146,6 +147,11 @@ private:
                 block->free = free;
                 block->prev = prev;
                 block->next = next;
+
+                if ((lib::uptr)block->prev == 0xffffffffffffffff)
+                        panic("block->prev = -1");
+                if ((lib::uptr)block->next == 0xffffffffffffffff)
+                        panic("block->next == -1");
 
                 return block;
         }

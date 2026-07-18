@@ -23,7 +23,7 @@ build-iso:
 	./scripts/mkimage.sh --iso
 
 # clean
-clean-all: clean-userspace
+clean-all: clean-kernel clean-userspace
 
 clean-kernel:
 	$(MAKE) -C kernel clean

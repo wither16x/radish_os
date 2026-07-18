@@ -156,7 +156,7 @@ extern "C" void kernel_main()
 
         heap::init();
 
-        pmm::init_stage2();
+        //pmm::init_stage2();
 
         pic::remap();
         logger.ok("remapped 8259 pic");
