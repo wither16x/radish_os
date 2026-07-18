@@ -17,6 +17,9 @@ enum PageFlag : lib::u64 {
         ReadExec        = 0x01
 };
 
+struct [[gnu::packed]] PageTable {
+        lib::u64 entries[PAGE_TABLE_ENTRIES];
+};
 
 inline lib::uptr page_align_down(lib::uptr base)
 {

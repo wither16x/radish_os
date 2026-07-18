@@ -1,11 +1,12 @@
 #pragma once
 
 #include <lib/typing.hpp>
+#include <mem/page.hpp>
 
 namespace kernel::mem {
 
 class PML4T {
-        lib::u64 *raw_pml4t;
+        PageTable *raw_pml4t;
 
 public:
         void init(this PML4T &self);
@@ -16,7 +17,7 @@ public:
         void map_page(this PML4T &self, lib::uptr vaddr, lib::uptr paddr, lib::u64 flags);
         void unmap_page(this PML4T &self, lib::uptr vaddr);
 
-        lib::u64 *raw(this const PML4T &self);
+        PageTable *raw(this const PML4T &self);
 };
 
 } /* namespace kernel::mem */
