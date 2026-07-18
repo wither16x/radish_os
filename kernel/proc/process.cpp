@@ -53,6 +53,12 @@ void Process::load(this Process &self)
 }
 // --------------------------------------------------
 
+void Process::switch_pml4t(this Process &self, u64 *pml4t)
+{
+        mem::vmm::destroy_pml4t(self.pml4t);
+        self.pml4t = pml4t;
+}
+
 void Process::save_context(this Process &self, cpu::IRQFrame *frame)
 {
         self.rax   = frame->rax;
@@ -103,6 +109,28 @@ void Process::load_context(this Process &self, cpu::IRQFrame *frame)
         frame->ss       = self.ss;
         frame->cr2      = self.cr2;
         frame->cr3      = self.cr3;
+}
+
+void Process::remap_stack(this Process &self)
+{
+        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::vmm::PAGE_BYTES) {
+                mem::vmm::map_page(self.pml4t,
+                        addr,
+                        mem::pmm::allocate_frame(),
+                        mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
+                );
+        }
+}
+
+void Process::reset_stack(this Process &self)
+{
+        self.rsp = cpu::USER_STACK_TOP;
+}
+
+void Process::switch_entry(this Process &self, void (*entry)())
+{
+        self.entry = entry;
+        self.rip = reinterpret_cast<u64>(entry);
 }
 
 // --------------------------------------------------

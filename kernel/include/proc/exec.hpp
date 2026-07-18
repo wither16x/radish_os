@@ -5,10 +5,9 @@
 
 namespace kernel::proc {
 
-/// Load an executable and create a process which uses it as its code.
-Process *load_as_proc(const lib::String &path);
 /// Execute a program as a user process.
 int spawn(const lib::String &path);
+/// Replace a process by another one.
 int exec(const lib::String &path);
 
 } /* namespace kernel::proc */

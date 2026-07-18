@@ -18,7 +18,9 @@ using kernel::lib::log::logger;
 
 namespace kernel::proc {
 
-Process *load_as_proc(const String &path)
+namespace {
+
+Process *load_program_as_process(const String &path)
 {
         // create the process' pml4t
         u64 *kpml4t = get_kernel_pml4t();
@@ -37,12 +39,14 @@ Process *load_as_proc(const String &path)
         return proc;
 }
 
+} /* anonymous namespace */
+
 // --------------------------------------------------
 int spawn(const String &path)
 {
         cpu::cli();
 
-        Process *proc = load_as_proc(path);
+        Process *proc = load_program_as_process(path);
         if (!proc) {
                 logger.err("failed to spawn process: failed to load %s", path.raw());
                 return -1;
@@ -73,36 +77,23 @@ int exec(const lib::String &path)
 {
         cpu::cli();
 
+        // We want to update the current process
         Process *proc = scheduler::get_current_process();
 
+        // Load the program located at `path`
         u64 *kpml4t = get_kernel_pml4t();
         u64 *proc_pml4t = mem::vmm::create_pml4t(kpml4t);
-
-        // load the file (assume ELF64)
         uptr proc_addr = 0;
         int load_res = elf::load_elf(proc_pml4t, path, &proc_addr);
         if (load_res != 0)
-                return -1; // could not load executable
-
-        // create the process
+                return -1;
         void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
 
-        mem::vmm::destroy_pml4t(proc->pml4t);
-        proc->pml4t = proc_pml4t;
-
-        proc->rsp = cpu::USER_STACK_TOP;
-        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::vmm::PAGE_BYTES) {
-                mem::vmm::map_page(proc->pml4t,
-                        addr,
-                        mem::pmm::allocate_frame(),
-                        mem::vmm::PageFlag::ReadWriteUser | mem::vmm::PageFlag::NoExec
-                );
-        }
-
-        proc->entry = proc_entry;
-        proc->flags = 1 << 9;
-        proc->rip = reinterpret_cast<u64>(proc_entry);
-
+        // Update the process
+        proc->switch_pml4t(proc_pml4t);
+        proc->reset_stack();
+        proc->remap_stack();
+        proc->switch_entry(proc_entry);
         proc->load();
 
         cpu::sti();

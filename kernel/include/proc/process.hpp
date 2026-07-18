@@ -15,8 +15,15 @@ public:
 
         /// Load the process' PML4 table.
         void load(this Process &self);
+        void switch_pml4t(this Process &self, lib::u64 *pml4t);
+
         void save_context(this Process &self, cpu::IRQFrame *frame);
         void load_context(this Process &self, cpu::IRQFrame *frame);
+
+        void remap_stack(this Process &self);
+        void reset_stack(this Process &self);
+
+        void switch_entry(this Process &self, void (*entry)());
 
         void (*entry)();
         int id;
