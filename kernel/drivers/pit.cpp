@@ -24,7 +24,7 @@ u64 seconds = 0;
 
 bool sleeping = false;
 
-void handle_irq(cpu::IRQFrame *f)
+void handle_irq()
 {
         // increase time and consider that the interrupt is
         // finished
@@ -34,7 +34,7 @@ void handle_irq(cpu::IRQFrame *f)
         // schedule
         if (!proc::scheduler::is_active())
                 return;
-        proc::scheduler::tick(f);
+        proc::scheduler::tick();
 }
 
 } /* anonymous namespace */

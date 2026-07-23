@@ -1,4 +1,4 @@
-#include "lib/memory.hpp"
+#include <lib/memory.hpp>
 #include <lib/typing.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/tss.hpp>
@@ -72,6 +72,11 @@ void GDT::load()
         logger.ok("loaded gdt");
 }
 // --------------------------------------------------
+
+void GDT::set_kernel_stack(uptr rsp)
+{
+        tss.rsp0 = rsp;
+}
 
 // --------------------------------------------------
 void GDT::set_descriptor(int n, u32 base, u32 limit, u8 access, u8 flags)

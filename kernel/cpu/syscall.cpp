@@ -2,7 +2,11 @@
 #include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
 #include <proc/exec.hpp>
+#include <proc/fork.hpp>
 #include <proc/scheduler.hpp>
+#include <proc/kill.hpp>
+#include <proc/process.hpp>
+#include <proc/wait.hpp>
 
 using kernel::lib::write, kernel::lib::read;
 using kernel::lib::u64, kernel::lib::usize;
@@ -15,7 +19,11 @@ namespace {
 enum SyscallType : u64 {
         SC_WRITE,
         SC_READ,
-        SC_EXEC
+        SC_EXEC,
+        SC_FORK,
+        SC_EXIT,
+        SC_GETPID,
+        SC_WAIT
 };
 
 } /* anonymous namespace */
@@ -57,10 +65,46 @@ extern "C" void syscall_handler(SyscallFrame *frame)
                 int res = proc::exec(path);
                 frame->rax = res;
                 proc::Process *current_proc = proc::scheduler::get_current_process();
-                frame->rip = current_proc->rip;
-                frame->rsp = current_proc->rsp;
-                frame->flags = current_proc->flags;
+                frame->rip = current_proc->frame->rip;
+                frame->rsp = current_proc->frame->rsp;
+                frame->flags = current_proc->frame->flags;
                 frame->cr3 = current_proc->cr3;
+                frame->cs = current_proc->frame->cs;
+                frame->ss = current_proc->frame->ss;
+                break;
+        }
+
+        // fork:
+        // no parameter
+        case SC_FORK: {
+                int pid = proc::fork();
+                frame->rax = pid;
+                break;
+        }
+
+        // exit:
+        // no parameter
+        case SC_EXIT: {
+                proc::Process *proc = proc::scheduler::get_current_process();
+                proc->status = proc::ProcessStatus::Dead;
+                frame->rax = 0;
+                proc::scheduler::yield();
+                break;
+        }
+
+        // getpid:
+        // no parameter
+        case SC_GETPID: {
+                int pid = proc::scheduler::get_current_process()->id;
+                frame->rax = pid;
+                break;
+        }
+
+        // wait:
+        // no parameter
+        case SC_WAIT: {
+                int res = proc::wait();
+                frame->rax = res;
                 break;
         }
 

@@ -77,13 +77,13 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
                 if (phdr->p_type != PHDRType::PHDRTypeLoad)
                         continue;
 
-                usize pages = (phdr->p_memsz + mem::PAGE_SIZE - 1) / mem::PAGE_SIZE;
+                usize pages = ((phdr->p_vaddr & (mem::PAGE_SIZE - 1)) + phdr->p_memsz + mem::PAGE_SIZE - 1) / mem::PAGE_SIZE;
                 for (usize j = 0; j < pages; j++) {
                         // since the buffer containing the data is allocated on the heap, it cannot
                         // be executed as all heap pages are NX, so we copy the data from these pages
                         // to new RX pages
                         uptr frame = mem::pmm::allocate_frame();
-                        uptr vaddr = phdr->p_vaddr + j * mem::PAGE_SIZE;
+                        uptr vaddr = (phdr->p_vaddr & ~(mem::PAGE_SIZE - 1)) + j * mem::PAGE_SIZE;
 
                         u32 pflags = phdr->p_flags;
                         u64 flag;
@@ -95,16 +95,19 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
 
                         memset(reinterpret_cast<void *>(hhdm + frame), 0, mem::PAGE_SIZE);
 
-                        uptr src_off = phdr->p_offset + j * mem::PAGE_SIZE;
                         // we need the offset between pages as it may not be mapped otherwise
                         uptr intra_offset = phdr->p_vaddr & (mem::PAGE_SIZE - 1);
+                        uptr src_off = phdr->p_offset + j * mem::PAGE_SIZE - (j == 0 ? 0 : intra_offset);
 
-                        usize to_copy;
-                        if (j * mem::PAGE_SIZE >= phdr->p_filesz)
-                                to_copy = 0;
-                        else
-                                to_copy = min(mem::PAGE_SIZE, phdr->p_filesz - j * mem::PAGE_SIZE);
-                        
+                        usize to_copy = 0;
+                        if (j == 0) {
+                                to_copy = min<usize>(mem::PAGE_SIZE - intra_offset, phdr->p_filesz);
+                        } else {
+                                uptr rel_off = j * mem::PAGE_SIZE - intra_offset;
+                                if (rel_off < phdr->p_filesz)
+                                        to_copy = min<usize>(mem::PAGE_SIZE, phdr->p_filesz - rel_off);                                
+                        }
+
                         if (to_copy > 0) {
                                 memcpy(
                                         reinterpret_cast<void *>(hhdm + frame + (j == 0 ? intra_offset : 0)),

@@ -17,6 +17,8 @@ public:
         void map_page(this PML4T &self, lib::uptr vaddr, lib::uptr paddr, lib::u64 flags);
         void unmap_page(this PML4T &self, lib::uptr vaddr);
 
+        bool is_mapped(this const PML4T &self, lib::uptr vaddr);
+
         PageTable *raw(this const PML4T &self);
 };
 

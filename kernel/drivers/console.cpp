@@ -163,8 +163,8 @@ void Console::draw_char_at(this Console &self, char ch, int px, int py, u32 colo
         u32 bytes_per_row = (self.glyph_width + 7) / 8;
         const u8 *glyph = self.font_data.get_data() + self.glyph_offset + idx * self.glyph_size;
 
-        for (u32 y = 0; y < self.glyph_height; y++) {
-                for (u32 x = 0; x < self.glyph_width; x++) {
+        for (u32 x = 0; x < self.glyph_width; x++) {
+                for (u32 y = 0; y < self.glyph_height; y++) {
                         u8 byte = glyph[y * bytes_per_row + x / 8];
 
                         if (byte & (0x80 >> (x % 8)))

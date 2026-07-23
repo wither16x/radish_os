@@ -13,6 +13,7 @@ public:
         
         /// Load the GDT.
         void load();
+        static void set_kernel_stack(lib::uptr rsp);
 
 private:
         /// Edit a descriptor in the table.

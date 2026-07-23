@@ -10,12 +10,9 @@ EXEC = $(BIN)/shell
 CC := $(TOOL_PREFIX)-clang
 LD := $(TOOL_PREFIX)-clang
 
-CFLAGS := -fno-stack-protector \
-	-fno-stack-check \
-	-fno-lto \
+CFLAGS := -fno-lto \
 	-fno-pic \
 	-fno-pie \
-	-mno-red-zone \
 	-Wall \
 	-Wextra \
 	-std=c99

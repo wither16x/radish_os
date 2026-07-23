@@ -60,8 +60,8 @@ int spawn(const String &path)
                 panic("failed to spawn process: null entry point");
 
         cpu::enter_userspace(
-                reinterpret_cast<void *>(p->rip),
-                reinterpret_cast<void *>(p->rsp)
+                reinterpret_cast<void *>(p->frame->rip),
+                reinterpret_cast<void *>(p->frame->rsp)
         );
 
         cpu::sti();

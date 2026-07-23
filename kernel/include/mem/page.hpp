@@ -22,6 +22,8 @@ struct [[gnu::packed]] PageTable {
         lib::u64 entries[PAGE_TABLE_ENTRIES];
 };
 
+lib::uptr pt_deep_copy(PageTable *src, int level);
+
 inline lib::uptr page_align_down(lib::uptr base)
 {
         return base / PAGE_SIZE * PAGE_SIZE;

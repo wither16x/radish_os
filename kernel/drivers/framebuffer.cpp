@@ -57,7 +57,7 @@ void scroll(u64 height)
                 u32 *dest = reinterpret_cast<u32 *>(base + y *fb_pitch);
 
                 for (u64 i = 0; i != fb_width; ++i)
-                        *dest++ = 0x000000;
+                        *dest++ = 0;
         }
 }
 // --------------------------------------------------

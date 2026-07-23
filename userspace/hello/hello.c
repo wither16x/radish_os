@@ -17,6 +17,6 @@ int main()
                 }
         }
         printf("Your name is %s.\n", buf);
-        
+
         return 0;
 }

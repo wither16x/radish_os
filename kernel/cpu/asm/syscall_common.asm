@@ -52,7 +52,7 @@ syscall_common:
 
         pop rax
         pop rax
-        add rsp, 8
+        pop rax
         pop rbx
         pop rcx
         pop rdx
