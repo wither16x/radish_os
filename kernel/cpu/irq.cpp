@@ -47,8 +47,8 @@ extern "C" void irq_handler(IRQFrame *f)
 
         switch (f->irqno) {
         case drivers::pic::IRQ_TIMER: {
-                void (*timer_handler)() = reinterpret_cast<void (*)()>(handler);
-                timer_handler();
+                void (*timer_handler)(IRQFrame *) = reinterpret_cast<void (*)(IRQFrame *)>(handler);
+                timer_handler(f);
                 break;
         }
 

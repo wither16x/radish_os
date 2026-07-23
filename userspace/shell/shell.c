@@ -21,7 +21,7 @@ int main()
                 }
 
                 int pid = fork();
-                printf("PID = %d\n", pid);
+                printf("fork() returned %d\n", pid);
                 if (pid == 0) {
                         printf("executing...\n");
                         exec(uinput);
@@ -31,10 +31,8 @@ int main()
                         int wait_res = wait();
                         if (wait_res == -1) {
                                 printf("there is no current process\n");
-                                return 1;
                         } else if (wait_res == -2) {
                                 printf("current process has no child\n");
-                                return 1;
                         } else if (wait_res == -3) {
                                 printf("no dead child found\n");
                         }

@@ -16,6 +16,8 @@ enum class ProcessStatus : int {
 };
 
 struct [[gnu::packed]] ProcessStackFrame {
+        lib::u64 cr2;
+        lib::u64 cr3;
         lib::u64 r15;
         lib::u64 r14;
         lib::u64 r13;
@@ -86,6 +88,6 @@ public:
 int allocate_pid();
 
 extern "C" void proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);
-extern "C" void proc_trampoline(lib::uptr *rsp);
+extern "C" void proc_trampoline();
 
 } /* namespace kernel::proc */

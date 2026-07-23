@@ -24,8 +24,10 @@ u64 seconds = 0;
 
 bool sleeping = false;
 
-void handle_irq()
+void handle_irq(cpu::IRQFrame *frame)
 {
+        (void)frame;
+
         // increase time and consider that the interrupt is
         // finished
         tick();

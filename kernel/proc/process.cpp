@@ -30,17 +30,19 @@ void Process::init_kernel_stack(this Process &self)
         self.kstack_top = self.kstack_frame + hhdm_offset + mem::PAGE_SIZE;
 
         uptr *sp = reinterpret_cast<uptr *>(self.kstack_top);
-
         sp -= sizeof(ProcessStackFrame) / sizeof(u64);
         self.frame = reinterpret_cast<ProcessStackFrame *>(sp);
         memset(self.frame, 0, sizeof(ProcessStackFrame));
         self.frame->cs = 0x1b;
         self.frame->ss = 0x23;
         self.frame->flags = 1 << 9;
-
+        *(--sp) = 0x23;                       // SS
+        *(--sp) = cpu::USER_STACK_TOP;        // RSP
+        *(--sp) = 1 << 9;                   // RFLAGS
+        *(--sp) = 0x1b;                       // CS
+        *(--sp) = reinterpret_cast<u64>(self.entry); // RIP
         *(--sp) = reinterpret_cast<u64>(&proc_trampoline);
-
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 15; i++)
                 *(--sp) = 0;
 
         self.krsp = reinterpret_cast<uptr>(sp);
@@ -58,8 +60,10 @@ Process::Process(int id, void (*entry)(), mem::PML4T &pml4t)
                         mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
                 );
         }
+
         this->pml4t = pml4t;
         this->status = ProcessStatus::Alive;
+        this->time = 0;
 
         this->init_kernel_stack();
         this->frame->rip = reinterpret_cast<u64>(entry);
@@ -74,9 +78,11 @@ Process::Process(int id, const Process &parent, mem::PML4T &pml4t)
         this->id = id;
         this->pml4t = pml4t;
         this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
+        this->time = 0;
 
         this->init_kernel_stack();
         memcpy(this->frame, parent.frame, sizeof(ProcessStackFrame));
+        this->frame->rax = 0;
 
         this->status = ProcessStatus::Alive;
 }
@@ -90,8 +96,11 @@ void Process::load(this Process &self)
 
 void Process::switch_pml4t(this Process &self, const mem::PML4T &pml4t)
 {
+        uptr hhdm_offset = get_kernel_hhdm_offset();
+
         self.pml4t.destroy();
         self.pml4t = pml4t;
+        self.cr3 = reinterpret_cast<u64>(self.pml4t.raw()) - hhdm_offset;
 }
 
 void Process::save_context(this Process &self, cpu::IRQFrame *frame)

@@ -18,12 +18,11 @@ int wait()
                 return -2; // process has no child
 
         Process *dead_child = nullptr;
-        while (true) {
+        while (!dead_child) {
                 for (auto &child : proc->children) {
                         if (child->status == ProcessStatus::Dead) {
                                 dead_child = child;
                                 proc->remove_child(child->id);
-                                delete child;
                                 return 0;
                         }
                 }
