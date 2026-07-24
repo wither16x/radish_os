@@ -139,10 +139,9 @@ extern "C" void kernel_main()
         get_kernel_gdt().load();
 
         IDT idt;
-        idt.init();
         set_kernel_idt(idt);
-        IDT &kidt = get_kernel_idt();
-        kidt.load();
+        get_kernel_idt().init();
+        get_kernel_idt().load();
 
         get_kernel_gdt().get_tss().flush();
 
