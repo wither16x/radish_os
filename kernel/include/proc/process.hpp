@@ -1,11 +1,12 @@
 #pragma once
 
-#include "cpu/syscall.hpp"
 #include <cpu/irq.hpp>
+#include <cpu/syscall.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 #include <mem/pml4t.hpp>
+#include <proc/pid.hpp>
 
 namespace kernel::proc {
 
@@ -47,31 +48,26 @@ class Process {
 
 public:
         /// Create a brand new process. 
-        Process(int id, void (*entry)(), mem::PML4T &pml4t);
+        Process(PID id, void (*entry)(), mem::PML4T &pml4t);
         /// Create a process from another.
-        Process(int id, const Process &parent, mem::PML4T &pml4t);
+        Process(PID id, const Process &parent, mem::PML4T &pml4t);
 
-        /// Load the process' PML4 table.
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
-
         void save_context(this Process &self, cpu::SyscallFrame *frame);
         void load_context(this Process &self, cpu::SyscallFrame *frame);
-
         void remap_stack(this Process &self);
         void reset_stack(this Process &self);
-
         void switch_entry(this Process &self, void (*entry)());
-
         int add_child(this Process &self, Process *child);
-        int remove_child(this Process &self, int id);
+        int remove_child(this Process &self, PID id);
 
         lib::Vector<Process *> children;
 
         ProcessStatus status;
 
         void (*entry)();
-        int id;
+        PID id;
         lib::u64 time;  // elapsed time in ms
 
         lib::u64 cr3;

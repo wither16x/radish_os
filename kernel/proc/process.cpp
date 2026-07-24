@@ -1,7 +1,7 @@
-#include "cpu/syscall.hpp"
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
+#include <cpu/syscall.hpp>
 #include <cpu/userspace.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
@@ -54,7 +54,7 @@ void Process::init_kernel_stack(this Process &self)
 }
 
 // --------------------------------------------------
-Process::Process(int id, void (*entry)(), mem::PML4T &pml4t)
+Process::Process(PID id, void (*entry)(), mem::PML4T &pml4t)
 {
         this->id = id;
         this->entry = entry;
@@ -82,7 +82,7 @@ Process::Process(int id, void (*entry)(), mem::PML4T &pml4t)
 }
 // --------------------------------------------------
 
-Process::Process(int id, const Process &parent, mem::PML4T &pml4t)
+Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
@@ -138,7 +138,7 @@ void Process::save_context(this Process &self, cpu::SyscallFrame *frame)
         self.frame->flags = frame->flags | (1 << 9);
         self.frame->rsp   = frame->rsp;
         self.frame->ss    = frame->ss;
-        self.cr3   = frame->cr3;
+        self.cr3          = frame->cr3;
 }
 
 void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
@@ -166,6 +166,7 @@ void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
         frame->cr3      = self.cr3;
 }
 
+/// Note that the stack wont be mapped if it is already mapped.
 void Process::remap_stack(this Process &self)
 {
         for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
@@ -199,7 +200,7 @@ int Process::add_child(this Process &self, Process *child)
         return 0;
 }
 
-int Process::remove_child(this Process &self, int id)
+int Process::remove_child(this Process &self, PID id)
 {
         for (usize i = 0; i < self.children.size(); i++) {
                 if (self.children[i]->id == id) {
