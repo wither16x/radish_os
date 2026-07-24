@@ -3,12 +3,14 @@
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
+#include <lib/memory.hpp>
 #include <lib/typing.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 
 using kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::log::logger;
+using kernel::lib::memcpy;
 using kernel::lib::Vector;
 
 namespace kernel::proc::scheduler {
@@ -39,6 +41,22 @@ void reap_pending_zombie()
         mem::pmm::free_frame(zombie->kernel_stack_frame());
         remove_process(zombie);
         delete zombie;
+}
+
+Process *find_next_runnable_process(Process *old_proc, usize *new_proc_idx)
+{
+        usize __new_proc_idx = ctx.current_process_index;
+
+        for (usize i = 0; i < ctx.processes.size(); i++) {
+                usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
+                if (!ctx.processes[idx]->is_dead() && ctx.processes[idx] != old_proc) {
+                        __new_proc_idx = idx;
+                        memcpy(new_proc_idx, &__new_proc_idx, sizeof(*new_proc_idx));
+                        return ctx.processes[idx];
+                }
+        }
+
+        return nullptr;
 }
 
 } /* anonymous namespace */
@@ -90,17 +108,8 @@ void tick()
         }
 
         Process *old_proc = ctx.current_process;
-        Process *new_proc = nullptr;
-        usize new_proc_idx = ctx.current_process_index;
-
-        for (usize i = 0; i < ctx.processes.size(); i++) {
-                usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
-                if (!ctx.processes[idx]->is_dead()) {
-                        new_proc = ctx.processes[idx];
-                        new_proc_idx = idx;
-                        break;
-                }
-        }
+        usize new_proc_idx = 0;
+        Process *new_proc = find_next_runnable_process(nullptr, &new_proc_idx);
 
         if (!new_proc) {
                 ctx.current_process = nullptr;
@@ -191,17 +200,8 @@ void yield()
                 return;
         }
 
-        Process *new_proc = nullptr;
-        usize start_idx = ctx.current_process_index;
-
-        for (usize i = 0; i < ctx.processes.size(); i++) {
-                usize idx = (start_idx + 1 + i) % ctx.processes.size();
-                if (!ctx.processes[idx]->is_dead() && ctx.processes[idx] != old_proc) {
-                        new_proc = ctx.processes[idx];
-                        ctx.current_process_index = idx;
-                        break;
-                }
-        }
+        usize start_idx = 0;
+        Process *new_proc = find_next_runnable_process(old_proc, &start_idx);
 
         if (!new_proc)
                 return;
