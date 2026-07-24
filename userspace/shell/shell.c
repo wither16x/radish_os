@@ -20,7 +20,7 @@ int main()
                         }
                 }
 
-                int pid = fork();
+                pid_t pid = fork();
                 if (pid == 0) {
                         exec(uinput);
                         return 1; // failed to launch program
