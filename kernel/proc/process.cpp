@@ -6,6 +6,7 @@
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
 #include <lib/memory.hpp>
+#include <lib/vector.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <mem/page.hpp>
@@ -14,6 +15,7 @@
 
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::memset, kernel::lib::memcpy;
+using kernel::lib::Vector;
 
 namespace kernel::proc {
 
@@ -225,6 +227,11 @@ void Process::consume_time(this Process &self, int ms)
 u64 Process::get_time(this const Process &self)
 {
         return self.time;
+}
+
+const Vector<Process *> &Process::get_children(this const Process &self)
+{
+        return self.children;
 }
 
 } /* namespace kernel::proc */

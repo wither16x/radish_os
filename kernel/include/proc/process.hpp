@@ -45,6 +45,7 @@ struct [[gnu::packed]] ProcessStackFrame {
 /// of assigning a PID manually when creating a new process.
 class Process {
         lib::u64 time;  // elapsed time in ms
+        lib::Vector<Process *> children;
 
         void init_kernel_stack(this Process &self);
 
@@ -67,8 +68,7 @@ public:
         void consume_time(this Process &self, int ms);
 
         lib::u64 get_time(this const Process &self);
-
-        lib::Vector<Process *> children;
+        const lib::Vector<Process *> &get_children(this const Process &self);
 
         ProcessStatus status;
 
