@@ -1,11 +1,12 @@
 #include <proc/fork.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
+#include <proc/pid.hpp>
 #include <mem/pml4t.hpp>
 
 namespace kernel::proc {
 
-int fork()
+PID fork()
 {
         Process *parent = scheduler::get_current_process();
 

@@ -2,6 +2,7 @@
 #include <proc/process.hpp>
 #include <proc/elf.hpp>
 #include <proc/scheduler.hpp>
+#include <proc/pid.hpp>
 #include <kernel.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>

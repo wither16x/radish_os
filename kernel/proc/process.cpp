@@ -17,12 +17,6 @@ using kernel::lib::memset, kernel::lib::memcpy;
 
 namespace kernel::proc {
 
-namespace {
-
-int curr_pid = 1;
-
-} /* anonymous namespace */
-
 void Process::init_kernel_stack(this Process &self)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
@@ -216,12 +210,5 @@ int Process::remove_child(this Process &self, int id)
 
         return -1; // no child found with this ID
 }
-
-// --------------------------------------------------
-int allocate_pid()
-{
-        return curr_pid++;
-}
-// --------------------------------------------------
 
 } /* namespace kernel::proc */

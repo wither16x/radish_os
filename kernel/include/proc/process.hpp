@@ -87,9 +87,6 @@ public:
         lib::uptr krsp;
 };
 
-/// Return a PID choosen automatically.
-int allocate_pid();
-
 extern "C" void proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);
 extern "C" void proc_trampoline();
 
