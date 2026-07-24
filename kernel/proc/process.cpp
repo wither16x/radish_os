@@ -212,4 +212,19 @@ int Process::remove_child(this Process &self, PID id)
         return -1; // no child found with this ID
 }
 
+void Process::reset_time(this Process &self)
+{
+        self.time = 0;
+}
+
+void Process::consume_time(this Process &self, int ms)
+{
+        self.time += ms;
+}
+
+u64 Process::get_time(this const Process &self)
+{
+        return self.time;
+}
+
 } /* namespace kernel::proc */
