@@ -175,7 +175,7 @@ const Vector<Process *> &get_processes()
 void undertaker(Process *p)
 {
         if (!p) {
-                logger.err("undertaker: process with PID %d does not exist", p->get_id());
+                logger.err("undertaker: process does not exist");
                 return;
         }
 
