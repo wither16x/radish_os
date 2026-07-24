@@ -64,14 +64,14 @@ void syscall_fork(SyscallFrame *frame)
 void syscall_exit(SyscallFrame *frame)
 {
         proc::Process *proc = proc::scheduler::get_current_process();
-        proc->status = proc::ProcessStatus::Dead;
+        proc->die();
         frame->rax = 0;
         proc::scheduler::yield();
 }
 
 void syscall_getpid(SyscallFrame *frame)
 {
-        int pid = proc::scheduler::get_current_process()->id;
+        int pid = proc::scheduler::get_current_process()->get_id();
         frame->rax = pid;
 }
 

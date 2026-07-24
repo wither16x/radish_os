@@ -118,6 +118,11 @@ void Process::switch_pml4t(this Process &self, const mem::PML4T &pml4t)
         self.cr3 = reinterpret_cast<u64>(self.pml4t.raw()) - hhdm_offset;
 }
 
+void Process::destroy_pml4t(this Process &self)
+{
+        self.pml4t.destroy();
+}
+
 void Process::save_context(this Process &self, cpu::SyscallFrame *frame)
 {
         self.frame->rax   = frame->rax;
@@ -232,6 +237,36 @@ u64 Process::get_time(this const Process &self)
 const Vector<Process *> &Process::get_children(this const Process &self)
 {
         return self.children;
+}
+
+ProcessStatus Process::get_status(this const Process &self)
+{
+        return self.status;
+}
+
+PID Process::get_id(this const Process &self)
+{
+        return self.id;
+}
+
+const void *Process::get_entry(this const Process &self)
+{
+        return reinterpret_cast<void *>(self.entry);
+}
+
+const mem::PML4T &Process::get_pml4t(this const Process &self)
+{
+        return self.pml4t;
+}
+
+bool Process::is_dead(this const Process &self)
+{
+        return self.status == ProcessStatus::Dead;
+}
+
+void Process::die(this Process &self)
+{
+        self.status = ProcessStatus::Dead;
 }
 
 } /* namespace kernel::proc */

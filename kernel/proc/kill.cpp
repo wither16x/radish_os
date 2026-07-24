@@ -10,10 +10,10 @@ int kill(int pid)
         if (!proc)
                 return -1; // process does not exit
 
-        if (proc->id == scheduler::get_current_process()->id)
+        if (proc->get_id() == scheduler::get_current_process()->get_id())
                 return -2; // process is currently using the CPU
 
-        scheduler::undertaker(proc->id);
+        scheduler::undertaker(proc->get_id());
 
         return 0;
 }

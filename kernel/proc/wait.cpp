@@ -20,9 +20,9 @@ int wait()
         Process *dead_child = nullptr;
         while (!dead_child) {
                 for (auto &child : proc->get_children()) {
-                        if (child->status == ProcessStatus::Dead) {
+                        if (child->get_status() == ProcessStatus::Dead) {
                                 dead_child = child;
-                                proc->remove_child(child->id);
+                                proc->remove_child(child->get_id());
                                 return 0;
                         }
                 }

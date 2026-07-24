@@ -57,7 +57,7 @@ int spawn(const String &path)
         Process *p = scheduler::get_current_process();
         p->load_pml4t();
 
-        if (!p->entry)
+        if (!p->get_entry())
                 panic("failed to spawn process: null entry point");
 
         cpu::enter_userspace(

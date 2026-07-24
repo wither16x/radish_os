@@ -38,7 +38,7 @@ void reap_pending_zombie()
         ctx.pending_zombie = nullptr;
 
         mem::pmm::free_frame(zombie->kstack_frame);
-        remove_process(zombie->id);
+        remove_process(zombie->get_id());
         delete zombie;
 }
 
@@ -69,7 +69,7 @@ void add_process(Process *p)
 void remove_process(PID pid)
 {
         for (usize i = 0; i < ctx.processes.size(); i++) {
-                if (ctx.processes[i]->id == pid) {
+                if (ctx.processes[i]->get_id() == pid) {
                         ctx.processes.erase(i);
                         break;
                 }
@@ -82,7 +82,7 @@ void tick()
         if (!ctx.is_active || ctx.processes.empty() || !ctx.current_process)
                 return;
 
-        if (ctx.current_process->status != ProcessStatus::Dead) {
+        if (ctx.current_process->get_status() != ProcessStatus::Dead) {
                 ctx.current_process->consume_time(1);
                 if (ctx.current_process->get_time() < TIME_PER_PROCESS)
                         return;
@@ -95,7 +95,7 @@ void tick()
 
         for (usize i = 0; i < ctx.processes.size(); i++) {
                 usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
-                if (ctx.processes[idx]->status != ProcessStatus::Dead) {
+                if (!ctx.processes[idx]->is_dead()) {
                         new_proc = ctx.processes[idx];
                         new_proc_idx = idx;
                         break;
@@ -104,8 +104,8 @@ void tick()
 
         if (!new_proc) {
                 ctx.current_process = nullptr;
-                if (old_proc->status == ProcessStatus::Dead)
-                        undertaker(old_proc->id);
+                if (old_proc->is_dead())
+                        undertaker(old_proc->get_id());
                 return;
         }
 
@@ -118,7 +118,7 @@ void tick()
         new_proc->load_pml4t();
         get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
 
-        if (old_proc->status == ProcessStatus::Dead) {
+        if (old_proc->is_dead()) {
                 uptr discard = 0;
                 ctx.pending_zombie = old_proc;
                 proc_switch(&discard, new_proc->krsp);
@@ -148,7 +148,7 @@ Process *get_current_process()
 Process *get_process_by_id(PID pid)
 {
         for (auto &proc : ctx.processes) {
-                if (proc->id == pid)
+                if (proc->get_id() == pid)
                         return proc;
         }
 
@@ -181,7 +181,7 @@ void undertaker(PID pid)
         }
 
         remove_process(pid);
-        proc->pml4t.destroy();
+        proc->destroy_pml4t();
 }
 
 void yield()
@@ -197,7 +197,7 @@ void yield()
 
         for (usize i = 0; i < ctx.processes.size(); i++) {
                 usize idx = (start_idx + 1 + i) % ctx.processes.size();
-                if (ctx.processes[idx]->status != ProcessStatus::Dead && ctx.processes[idx] != old_proc) {
+                if (!ctx.processes[idx]->is_dead() && ctx.processes[idx] != old_proc) {
                         new_proc = ctx.processes[idx];
                         ctx.current_process_index = idx;
                         break;

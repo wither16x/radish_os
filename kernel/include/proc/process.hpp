@@ -46,6 +46,12 @@ struct [[gnu::packed]] ProcessStackFrame {
 class Process {
         lib::u64 time;  // elapsed time in ms
         lib::Vector<Process *> children;
+        ProcessStatus status;
+        void (*entry)();
+        PID id;
+        lib::u64 cr3;
+        // each process has its own page tables
+        mem::PML4T pml4t;
 
         void init_kernel_stack(this Process &self);
 
@@ -57,6 +63,7 @@ public:
 
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
+        void destroy_pml4t(this Process &self);
         void save_context(this Process &self, cpu::SyscallFrame *frame);
         void load_context(this Process &self, cpu::SyscallFrame *frame);
         void remap_stack(this Process &self);
@@ -69,16 +76,13 @@ public:
 
         lib::u64 get_time(this const Process &self);
         const lib::Vector<Process *> &get_children(this const Process &self);
+        ProcessStatus get_status(this const Process &self);
+        PID get_id(this const Process &self);
+        const void *get_entry(this const Process &self);
+        const mem::PML4T &get_pml4t(this const Process &self);
 
-        ProcessStatus status;
-
-        void (*entry)();
-        PID id;
-
-        lib::u64 cr3;
-
-        // each process has its own page tables
-        mem::PML4T pml4t;
+        bool is_dead(this const Process &self);
+        void die(this Process &self);
 
         ProcessStackFrame *frame;
         ProcessStackFrame frame_storage;
