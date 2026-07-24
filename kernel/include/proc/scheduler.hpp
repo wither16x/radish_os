@@ -14,7 +14,7 @@ void init();
 /// Add a process to the scheduler's process vector.
 void add_process(Process *p);
 /// Remove a process from the scheduler's process vector.
-void remove_process(PID pid);
+void remove_process(Process *p);
 /// Try to switch processes.
 void tick();
 /// Check if the scheduler is active/has been initialized.
@@ -28,7 +28,8 @@ void set_current_process(Process *p);
 /// Return the scheduler's process vector.
 const lib::Vector<Process *> &get_processes();
 /// Clean the process with the ID `pid` if it is dead.
-void undertaker(PID pid);
+void undertaker(Process *p);
+/// Let other processes use the CPU. Use this to avoid locking the CPU.
 void yield();
 
 } /* namespace kernel::proc::scheduler */

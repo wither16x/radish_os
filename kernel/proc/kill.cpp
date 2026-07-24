@@ -4,7 +4,7 @@
 
 namespace kernel::proc {
 
-int kill(int pid)
+int kill(PID pid)
 {
         Process *proc = scheduler::get_process_by_id(pid);
         if (!proc)
@@ -13,7 +13,7 @@ int kill(int pid)
         if (proc->get_id() == scheduler::get_current_process()->get_id())
                 return -2; // process is currently using the CPU
 
-        scheduler::undertaker(proc->get_id());
+        scheduler::undertaker(proc);
 
         return 0;
 }

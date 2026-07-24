@@ -4,7 +4,6 @@
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
-#include <lib/queue.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 
@@ -38,7 +37,7 @@ void reap_pending_zombie()
         ctx.pending_zombie = nullptr;
 
         mem::pmm::free_frame(zombie->kernel_stack_frame());
-        remove_process(zombie->get_id());
+        remove_process(zombie);
         delete zombie;
 }
 
@@ -66,10 +65,11 @@ void add_process(Process *p)
 }
 // --------------------------------------------------
 
-void remove_process(PID pid)
+// void remove_process(PID pid)
+void remove_process(Process *p)
 {
         for (usize i = 0; i < ctx.processes.size(); i++) {
-                if (ctx.processes[i]->get_id() == pid) {
+                if (ctx.processes[i] == p) {
                         ctx.processes.erase(i);
                         break;
                 }
@@ -105,7 +105,7 @@ void tick()
         if (!new_proc) {
                 ctx.current_process = nullptr;
                 if (old_proc->is_dead())
-                        undertaker(old_proc->get_id());
+                        undertaker(old_proc);
                 return;
         }
 
@@ -172,16 +172,15 @@ const Vector<Process *> &get_processes()
 /// Step 1: remove the dead process from the scheduler
 /// Step 2: destroy the process' page tables
 /// Step 3: destroy the process itself
-void undertaker(PID pid)
+void undertaker(Process *p)
 {
-        Process *proc = get_process_by_id(pid);
-        if (!proc) {
-                logger.err("undertaker: process %d does not exist", pid);
+        if (!p) {
+                logger.err("undertaker: process with PID %d does not exist", p->get_id());
                 return;
         }
 
-        remove_process(pid);
-        proc->destroy_pml4t();
+        remove_process(p);
+        p->destroy_pml4t();
 }
 
 void yield()
