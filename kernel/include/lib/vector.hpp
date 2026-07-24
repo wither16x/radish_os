@@ -150,6 +150,11 @@ public:
                 self.length = new_size;
         }
 
+        bool empty(this const Vector<T> &self)
+        {
+                return self.length == 0;
+        }
+
         /// Return the data of the vector.
         const T *get_data(this const Vector<T> &self)
         {
