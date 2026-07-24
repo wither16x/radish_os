@@ -6,7 +6,7 @@ namespace kernel::cpu {
 
 /// Representation of a task state segment.
 /// Note that we only use RSP0.
-struct [[gnu::packed]] TSS {
+struct [[gnu::packed]] TSSData {
         lib::u32 __reserved0;
         lib::u64 rsp0;
         lib::u64 rsp1;
@@ -18,10 +18,15 @@ struct [[gnu::packed]] TSS {
         lib::u16 iobp;
 };
 
-/// Initialize a TSS with a pointer to the top of the kernel
-/// stack.
-void init_tss(TSS *tss, lib::uptr krsp);
-/// Reload the task register.
-extern "C" void tss_flush();
+class TSS {
+        TSSData data;
+
+public:
+        void init(this TSS &self, lib::uptr kernel_rsp);
+        void flush() const;
+        void reset_stack(this TSS &self, lib::uptr kernel_rsp);
+
+        const TSSData &get_data(this const TSS &self);
+};
 
 } /* namespace kernel::cpu */

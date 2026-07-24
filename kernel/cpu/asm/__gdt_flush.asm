@@ -4,9 +4,9 @@
 [bits 64]
 
 section .text
-global gdt_flush
+global __gdt_flush
 
-gdt_flush:
+__gdt_flush:
         lgdt [rdi]
 
         push CODE_SEGMENT

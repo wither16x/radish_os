@@ -1,9 +1,9 @@
 [bits 64]
 
 section .text
-global tss_flush
+global __tss_flush
 
-tss_flush:
+__tss_flush:
         mov ax, 0x28
         ltr ax
 

@@ -5,7 +5,6 @@
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
-#include <cpu/tss.hpp>
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
 #include <drivers/keyboard.hpp>
@@ -37,7 +36,7 @@ using kernel::lib::u64, kernel::lib::uptr;
 using kernel::lib::Status;
 using kernel::lib::log::logger;
 using kernel::boot::BootInfo;
-using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::tss_flush, kernel::cpu::sti;
+using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::sti;
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
@@ -135,7 +134,9 @@ extern "C" void kernel_main()
         logger.set_context("kernel");
 
         GDT gdt;
-        gdt.load();
+        set_kernel_gdt(gdt);
+        get_kernel_gdt().init();
+        get_kernel_gdt().load();
 
         IDT idt;
         idt.init();
@@ -143,7 +144,7 @@ extern "C" void kernel_main()
         IDT &kidt = get_kernel_idt();
         kidt.load();
 
-        tss_flush();
+        get_kernel_gdt().get_tss().flush();
 
         BootInfo bootinfo;
         set_kernel_hhdm_offset(bootinfo.hhdm.offset);

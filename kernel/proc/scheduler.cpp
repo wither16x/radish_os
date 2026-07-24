@@ -1,3 +1,4 @@
+#include "kernel.hpp"
 #include <mem/pmm.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
@@ -109,7 +110,7 @@ void tick()
         curr_proc_idx = new_proc_idx;
 
         new_proc->load();
-        cpu::GDT::set_kernel_stack(new_proc->kstack_top);
+        get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
 
         if (old_proc->status == ProcessStatus::Dead) {
                 uptr discard = 0;
@@ -205,7 +206,7 @@ void yield()
                 return;
 
         new_proc->load();
-        cpu::GDT::set_kernel_stack(new_proc->kstack_top);
+        get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
         curr_proc = new_proc;
 
         proc_switch(&old_proc->krsp, new_proc->krsp);
