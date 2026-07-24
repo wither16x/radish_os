@@ -1,4 +1,3 @@
-#include <kernel.hpp>
 #include <mem/pmm.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
@@ -125,7 +124,7 @@ void tick()
         ctx.current_process_index = new_proc_idx;
 
         new_proc->load_pml4t();
-        get_kernel_gdt().get_tss().reset_stack(new_proc->kernel_stack_top());
+        new_proc->use_kernel_stack();
 
         if (old_proc->is_dead()) {
                 uptr discard = 0;
@@ -207,7 +206,7 @@ void yield()
                 return;
 
         new_proc->load_pml4t();
-        get_kernel_gdt().get_tss().reset_stack(new_proc->kernel_stack_top());
+        new_proc->use_kernel_stack();
         ctx.current_process = new_proc;
 
         old_proc->switch_with(new_proc);

@@ -240,6 +240,11 @@ void Process::switch_with(this Process &self, const Process *other)
         __proc_switch(&self.krsp, other->krsp);
 }
 
+void Process::use_kernel_stack(this const Process &self)
+{
+        get_kernel_gdt().get_tss().reset_stack(self.krsp);
+}
+
 u64 Process::get_time(this const Process &self)
 {
         return self.time;

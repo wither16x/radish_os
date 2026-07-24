@@ -81,6 +81,7 @@ public:
         void reset_time(this Process &self);
         void consume_time(this Process &self, int ms);
         void switch_with(this Process &self, const Process *other);
+        void use_kernel_stack(this const Process &self);
 
         lib::u64 get_time(this const Process &self);
         const lib::Vector<Process *> &get_children(this const Process &self);
