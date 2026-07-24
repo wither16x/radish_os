@@ -1,4 +1,4 @@
-#include "kernel.hpp"
+#include <kernel.hpp>
 #include <mem/pmm.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
@@ -59,7 +59,7 @@ void add_process(Process *p)
 }
 // --------------------------------------------------
 
-void remove_process(int pid)
+void remove_process(PID pid)
 {
         for (usize i = 0; i < processes.size(); i++) {
                 if (processes[i]->id == pid) {
@@ -139,7 +139,7 @@ Process *get_current_process()
 }
 // --------------------------------------------------
 
-Process *get_process_by_id(int pid)
+Process *get_process_by_id(PID pid)
 {
         for (auto &proc : processes) {
                 if (proc->id == pid)
@@ -166,20 +166,16 @@ const Vector<Process *> &get_processes()
 /// Step 1: remove the dead process from the scheduler
 /// Step 2: destroy the process' page tables
 /// Step 3: destroy the process itself
-void undertaker(int pid)
+void undertaker(PID pid)
 {
-        logger.debug("undertaker: cleaning dead process %d", pid);
-
         Process *proc = get_process_by_id(pid);
         if (!proc) {
-                logger.err("process undertaker: process %d does not exist", pid);
+                logger.err("undertaker: process %d does not exist", pid);
                 return;
         }
 
         remove_process(pid);
         proc->pml4t.destroy();
-
-        logger.debug("undertaker: cleaned dead process %d", pid);
 }
 
 void yield()
