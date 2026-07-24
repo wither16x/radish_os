@@ -187,8 +187,9 @@ void undertaker(Process *p)
                 return;
         }
 
+        mem::pmm::free_frame(p->kernel_stack_frame());
         remove_process(p);
-        p->destroy_pml4t();
+        delete p;
 }
 
 void yield()
