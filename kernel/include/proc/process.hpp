@@ -44,6 +44,8 @@ struct [[gnu::packed]] ProcessStackFrame {
 /// It is recommended to use `allocate_pid()` instead
 /// of assigning a PID manually when creating a new process.
 class Process {
+        lib::u64 time;  // elapsed time in ms
+
         void init_kernel_stack(this Process &self);
 
 public:
@@ -61,6 +63,10 @@ public:
         void switch_entry(this Process &self, void (*entry)());
         int add_child(this Process &self, Process *child);
         int remove_child(this Process &self, PID id);
+        void reset_time(this Process &self);
+        void consume_time(this Process &self, int ms);
+
+        lib::u64 get_time(this const Process &self);
 
         lib::Vector<Process *> children;
 
@@ -68,7 +74,6 @@ public:
 
         void (*entry)();
         PID id;
-        lib::u64 time;  // elapsed time in ms
 
         lib::u64 cr3;
 
