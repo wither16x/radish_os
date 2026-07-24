@@ -23,7 +23,72 @@ enum SyscallType : u64 {
         SC_FORK,
         SC_EXIT,
         SC_GETPID,
-        SC_WAIT
+        SC_WAIT,
+
+        SC_LIMIT // number of syscalls, always at the end of the enumeration
+};
+
+void syscall_write(SyscallFrame *frame)
+{
+        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        const void *buf = reinterpret_cast<const void *>(frame->rcx);
+        usize n = frame->rdx;
+        int res = write(path, buf, n);
+        frame->rax = res;
+}
+
+void syscall_read(SyscallFrame *frame)
+{
+        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        void *buf = reinterpret_cast<void *>(frame->rcx);
+        usize n = frame->rdx;
+        int res = read(path, buf, n);
+        frame->rax = res;
+}
+
+void syscall_exec(SyscallFrame *frame)
+{
+        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        int res = proc::exec(path);
+        frame->rax = res;
+        proc::Process *current_proc = proc::scheduler::get_current_process();
+        current_proc->load_context(frame);
+}
+
+void syscall_fork(SyscallFrame *frame)
+{
+        int pid = proc::fork();
+        frame->rax = pid;
+}
+
+void syscall_exit(SyscallFrame *frame)
+{
+        proc::Process *proc = proc::scheduler::get_current_process();
+        proc->status = proc::ProcessStatus::Dead;
+        frame->rax = 0;
+        proc::scheduler::yield();
+}
+
+void syscall_getpid(SyscallFrame *frame)
+{
+        int pid = proc::scheduler::get_current_process()->id;
+        frame->rax = pid;
+}
+
+void syscall_wait(SyscallFrame *frame)
+{
+        int res = proc::wait();
+        frame->rax = res;
+}
+
+void (*syscalls[])(SyscallFrame *) = {
+        syscall_write,
+        syscall_read,
+        syscall_exec,
+        syscall_fork,
+        syscall_exit,
+        syscall_getpid,
+        syscall_wait
 };
 
 } /* anonymous namespace */
@@ -35,86 +100,11 @@ extern "C" void syscall_handler(SyscallFrame *frame)
         if (curr_proc)
                 curr_proc->save_context(frame);
 
-        switch (frame->rax) {
-        // write:
-        // RBX = path
-        // RCX = buffer
-        // RDX = bytes
-        case SC_WRITE: {
-                const char *path = reinterpret_cast<const char *>(frame->rbx);
-                const void *buf = reinterpret_cast<const void *>(frame->rcx);
-                usize n = frame->rdx;
-                int res = write(path, buf, n);
-                frame->rax = res;
-                break;
-        }
+        if (frame->rax >= SC_LIMIT)
+                return;
 
-        // read:
-        // RBX = path
-        // RCX = buffer
-        // RDX = bytes
-        case SC_READ: {
-                const char *path = reinterpret_cast<const char *>(frame->rbx);
-                void *buf = reinterpret_cast<void *>(frame->rcx);
-                usize n = frame->rdx;
-                int res = read(path, buf, n);
-                frame->rax = res;
-                break;
-        }
-
-        // exec:
-        // RBX = path
-        case SC_EXEC: {
-                const char *path = reinterpret_cast<const char *>(frame->rbx);
-                int res = proc::exec(path);
-                frame->rax = res;
-                proc::Process *current_proc = proc::scheduler::get_current_process();
-                frame->rip = current_proc->frame->rip;
-                frame->rsp = current_proc->frame->rsp;
-                frame->flags = current_proc->frame->flags;
-                frame->cr3 = current_proc->cr3;
-                frame->cs = current_proc->frame->cs;
-                frame->ss = current_proc->frame->ss;
-                break;
-        }
-
-        // fork:
-        // no parameter
-        case SC_FORK: {
-                int pid = proc::fork();
-                frame->rax = pid;
-                break;
-        }
-
-        // exit:
-        // no parameter
-        case SC_EXIT: {
-                proc::Process *proc = proc::scheduler::get_current_process();
-                proc->status = proc::ProcessStatus::Dead;
-                frame->rax = 0;
-                proc::scheduler::yield();
-                break;
-        }
-
-        // getpid:
-        // no parameter
-        case SC_GETPID: {
-                int pid = proc::scheduler::get_current_process()->id;
-                frame->rax = pid;
-                break;
-        }
-
-        // wait:
-        // no parameter
-        case SC_WAIT: {
-                int res = proc::wait();
-                frame->rax = res;
-                break;
-        }
-
-        default:
-                break;
-        }
+        void (*handler)(SyscallFrame *) = syscalls[frame->rax];
+        handler(frame);
 }
 
 } /* namespace kernel::cpu */
