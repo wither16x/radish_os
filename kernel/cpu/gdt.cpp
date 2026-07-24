@@ -41,9 +41,9 @@ void GDT::init(this GDT &self)
 // --------------------------------------------------
 
 // --------------------------------------------------
-void GDT::load()
+void GDT::load(this GDT &self)
 {
-        __gdt_flush(reinterpret_cast<u64>(&gdtptr));
+        __gdt_flush(reinterpret_cast<u64>(&self.gdtptr));
 
         logger.ok("loaded gdt");
 }

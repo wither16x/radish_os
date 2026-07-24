@@ -36,7 +36,7 @@ class GDT {
 public:
         void init(this GDT &self);
         /// Load the GDT.
-        void load();
+        void load(this GDT &self);
 
         TSS &get_tss(this GDT &self);
 };
