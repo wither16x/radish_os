@@ -109,7 +109,7 @@ void tick()
         curr_proc = new_proc;
         curr_proc_idx = new_proc_idx;
 
-        new_proc->load();
+        new_proc->load_pml4t();
         get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
 
         if (old_proc->status == ProcessStatus::Dead) {
@@ -205,7 +205,7 @@ void yield()
         if (!new_proc)
                 return;
 
-        new_proc->load();
+        new_proc->load_pml4t();
         get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
         curr_proc = new_proc;
 

@@ -40,17 +40,19 @@ struct [[gnu::packed]] ProcessStackFrame {
 };
 
 /// Representation of a process.
+/// It is recommended to use `allocate_pid()` instead
+/// of assigning a PID manually when creating a new process.
 class Process {
         void init_kernel_stack(this Process &self);
 
 public:
-        /// It is recommended to use `allocate_pid()` instead
-        /// of assigning a PID manually
+        /// Create a brand new process. 
         Process(int id, void (*entry)(), mem::PML4T &pml4t);
+        /// Create a process from another.
         Process(int id, const Process &parent, mem::PML4T &pml4t);
 
         /// Load the process' PML4 table.
-        void load(this Process &self);
+        void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
 
         void save_context(this Process &self, cpu::SyscallFrame *frame);

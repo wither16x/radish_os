@@ -54,7 +54,7 @@ int spawn(const String &path)
 
         scheduler::set_current_process(proc);
         Process *p = scheduler::get_current_process();
-        p->load();
+        p->load_pml4t();
 
         if (!p->entry)
                 panic("failed to spawn process: null entry point");

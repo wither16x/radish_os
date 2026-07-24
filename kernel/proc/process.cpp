@@ -107,7 +107,7 @@ Process::Process(int id, const Process &parent, mem::PML4T &pml4t)
 }
 
 // --------------------------------------------------
-void Process::load(this Process &self)
+void Process::load_pml4t(this Process &self)
 {
         self.pml4t.load();
 }

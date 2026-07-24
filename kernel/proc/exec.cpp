@@ -38,7 +38,7 @@ int exec(const lib::String &path)
         proc->reset_stack();
         proc->remap_stack();
         proc->switch_entry(proc_entry);
-        proc->load();
+        proc->load_pml4t();
 
         cpu::sti();
 
