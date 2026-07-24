@@ -16,10 +16,10 @@ namespace kernel::proc::scheduler {
 
 namespace {
 
-Vector<Process *> processes;
-
 struct SchedulerContext {
         bool is_active;
+
+        Vector<Process *> processes;
 
         Process *current_process;
         usize current_process_index;
@@ -58,9 +58,9 @@ void init()
 // --------------------------------------------------
 void add_process(Process *p)
 {
-        // this function only adds the process to the vector:
+        // this function only adds the process to the vector;
         // it must have been initialized before
-        processes.push_back(p);
+        ctx.processes.push_back(p);
         if (!ctx.current_process)
                 ctx.current_process = p;
 }
@@ -68,9 +68,9 @@ void add_process(Process *p)
 
 void remove_process(PID pid)
 {
-        for (usize i = 0; i < processes.size(); i++) {
-                if (processes[i]->id == pid) {
-                        processes.erase(i);
+        for (usize i = 0; i < ctx.processes.size(); i++) {
+                if (ctx.processes[i]->id == pid) {
+                        ctx.processes.erase(i);
                         break;
                 }
         }
@@ -79,25 +79,24 @@ void remove_process(PID pid)
 // --------------------------------------------------
 void tick()
 {
-        if (!ctx.is_active || processes.size() == 0 || !ctx.current_process)
+        if (!ctx.is_active || ctx.processes.empty() || !ctx.current_process)
                 return;
 
         if (ctx.current_process->status != ProcessStatus::Dead) {
-                ctx.current_process->time++;
-                if (ctx.current_process->time < TIME_PER_PROCESS)
+                ctx.current_process->consume_time(1);
+                if (ctx.current_process->get_time() < TIME_PER_PROCESS)
                         return;
-                ctx.current_process->time = 0;
+                ctx.current_process->reset_time();
         }
 
         Process *old_proc = ctx.current_process;
         Process *new_proc = nullptr;
-
         usize new_proc_idx = ctx.current_process_index;
 
-        for (usize i = 0; i < processes.size(); i++) {
-                usize idx = (ctx.current_process_index + 1 + i) % processes.size();
-                if (processes[idx]->status != ProcessStatus::Dead) {
-                        new_proc = processes[idx];
+        for (usize i = 0; i < ctx.processes.size(); i++) {
+                usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
+                if (ctx.processes[idx]->status != ProcessStatus::Dead) {
+                        new_proc = ctx.processes[idx];
                         new_proc_idx = idx;
                         break;
                 }
@@ -148,7 +147,7 @@ Process *get_current_process()
 
 Process *get_process_by_id(PID pid)
 {
-        for (auto &proc : processes) {
+        for (auto &proc : ctx.processes) {
                 if (proc->id == pid)
                         return proc;
         }
@@ -165,7 +164,7 @@ void set_current_process(Process *p)
 
 const Vector<Process *> &get_processes()
 {
-        return processes;
+        return ctx.processes;
 }
 
 /// The undertaker assumes that the process is NOT using the
@@ -196,10 +195,10 @@ void yield()
         Process *new_proc = nullptr;
         usize start_idx = ctx.current_process_index;
 
-        for (usize i = 0; i < processes.size(); i++) {
-                usize idx = (start_idx + 1 + i) % processes.size();
-                if (processes[idx]->status != ProcessStatus::Dead && processes[idx] != old_proc) {
-                        new_proc = processes[idx];
+        for (usize i = 0; i < ctx.processes.size(); i++) {
+                usize idx = (start_idx + 1 + i) % ctx.processes.size();
+                if (ctx.processes[idx]->status != ProcessStatus::Dead && ctx.processes[idx] != old_proc) {
+                        new_proc = ctx.processes[idx];
                         ctx.current_process_index = idx;
                         break;
                 }
