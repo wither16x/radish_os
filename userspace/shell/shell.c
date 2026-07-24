@@ -21,13 +21,10 @@ int main()
                 }
 
                 int pid = fork();
-                printf("fork() returned %d\n", pid);
                 if (pid == 0) {
-                        printf("executing...\n");
                         exec(uinput);
                         return 1; // failed to launch program
                 } else {
-                        printf("waiting...\n");
                         int wait_res = wait();
                         if (wait_res == -1) {
                                 printf("there is no current process\n");
