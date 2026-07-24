@@ -21,9 +21,7 @@ struct [[gnu::packed]] GDTR {
         lib::u64 offset;
 };
 
-/// Object-oriented representation of a GDT, even though it
-/// uses an implicit state which is owned by the source file
-/// and not by the class itself.
+/// Object-oriented representation of a GDT.
 class GDT {
         static constexpr int MAX_DESCRIPTORS = 7;
 
