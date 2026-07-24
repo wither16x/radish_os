@@ -121,12 +121,12 @@ void tick()
         if (old_proc->is_dead()) {
                 uptr discard = 0;
                 ctx.pending_zombie = old_proc;
-                proc_switch(&discard, new_proc->kernel_stack_pointer());
+                __proc_switch(&discard, new_proc->kernel_stack_pointer());
                 while (true)
                         cpu::hlt();
         }
 
-        proc_switch(const_cast<uptr *>(old_proc->kernel_stack_pointer_address()), new_proc->kernel_stack_pointer());
+        old_proc->switch_with(new_proc);
         reap_pending_zombie();
 }
 // --------------------------------------------------
@@ -211,7 +211,7 @@ void yield()
         get_kernel_gdt().get_tss().reset_stack(new_proc->kernel_stack_top());
         ctx.current_process = new_proc;
 
-        proc_switch(const_cast<uptr *>(old_proc->kernel_stack_pointer_address()), new_proc->kernel_stack_pointer());
+        old_proc->switch_with(new_proc);
 }
 
 } /* namespace kernel::proc::scheduler */

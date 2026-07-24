@@ -1,9 +1,9 @@
 [bits 64]
 
 section .text
-global proc_switch
+global __proc_switch
 
-proc_switch:
+__proc_switch:
         push rax
         push rbx
         push rcx

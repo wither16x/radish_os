@@ -19,6 +19,12 @@ using kernel::lib::Vector;
 
 namespace kernel::proc {
 
+namespace {
+
+extern "C" void __proc_trampoline();
+
+} /* anonymous namespace */
+
 void Process::init_kernel_stack(this Process &self)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
@@ -34,7 +40,7 @@ void Process::init_kernel_stack(this Process &self)
         *(--sp) = self.frame->cs;
         *(--sp) = self.frame->rip;
 
-        *(--sp) = reinterpret_cast<u64>(&proc_trampoline);
+        *(--sp) = reinterpret_cast<u64>(&__proc_trampoline);
 
         *(--sp) = self.frame->rax;
         *(--sp) = self.frame->rbx;
@@ -227,6 +233,11 @@ void Process::reset_time(this Process &self)
 void Process::consume_time(this Process &self, int ms)
 {
         self.time += ms;
+}
+
+void Process::switch_with(this Process &self, const Process *other)
+{
+        __proc_switch(&self.krsp, other->krsp);
 }
 
 u64 Process::get_time(this const Process &self)

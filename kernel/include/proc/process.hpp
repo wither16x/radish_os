@@ -80,6 +80,7 @@ public:
         int remove_child(this Process &self, PID id);
         void reset_time(this Process &self);
         void consume_time(this Process &self, int ms);
+        void switch_with(this Process &self, const Process *other);
 
         lib::u64 get_time(this const Process &self);
         const lib::Vector<Process *> &get_children(this const Process &self);
@@ -97,7 +98,6 @@ public:
         void die(this Process &self);
 };
 
-extern "C" void proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);
-extern "C" void proc_trampoline();
+extern "C" void __proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);
 
 } /* namespace kernel::proc */
