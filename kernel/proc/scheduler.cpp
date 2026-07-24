@@ -82,7 +82,6 @@ void tick()
         }
 
         Process *old_proc = curr_proc;
-        //old_proc->save_context(frame);
         Process *new_proc = nullptr;
 
         usize new_proc_idx = curr_proc_idx;
@@ -111,7 +110,6 @@ void tick()
 
         new_proc->load();
         cpu::GDT::set_kernel_stack(new_proc->kstack_top);
-        //new_proc->load_context(frame);
 
         if (old_proc->status == ProcessStatus::Dead) {
                 uptr discard = 0;
@@ -121,7 +119,7 @@ void tick()
                         cpu::hlt();
         }
 
-        //proc_switch(&old_proc->krsp, new_proc->krsp);
+        proc_switch(&old_proc->krsp, new_proc->krsp);
         reap_pending_zombie();
 }
 // --------------------------------------------------

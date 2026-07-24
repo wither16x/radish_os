@@ -1,3 +1,4 @@
+#include "cpu/syscall.hpp"
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
@@ -30,20 +31,30 @@ void Process::init_kernel_stack(this Process &self)
         self.kstack_top = self.kstack_frame + hhdm_offset + mem::PAGE_SIZE;
 
         uptr *sp = reinterpret_cast<uptr *>(self.kstack_top);
-        sp -= sizeof(ProcessStackFrame) / sizeof(u64);
-        self.frame = reinterpret_cast<ProcessStackFrame *>(sp);
-        memset(self.frame, 0, sizeof(ProcessStackFrame));
-        self.frame->cs = 0x1b;
-        self.frame->ss = 0x23;
-        self.frame->flags = 1 << 9;
-        *(--sp) = 0x23;                       // SS
-        *(--sp) = cpu::USER_STACK_TOP;        // RSP
-        *(--sp) = 1 << 9;                   // RFLAGS
-        *(--sp) = 0x1b;                       // CS
-        *(--sp) = reinterpret_cast<u64>(self.entry); // RIP
+
+        *(--sp) = self.frame->ss;
+        *(--sp) = self.frame->rsp;
+        *(--sp) = self.frame->flags;
+        *(--sp) = self.frame->cs;
+        *(--sp) = self.frame->rip;
+
         *(--sp) = reinterpret_cast<u64>(&proc_trampoline);
-        for (int i = 0; i < 15; i++)
-                *(--sp) = 0;
+
+        *(--sp) = self.frame->rax;
+        *(--sp) = self.frame->rbx;
+        *(--sp) = self.frame->rcx;
+        *(--sp) = self.frame->rdx;
+        *(--sp) = self.frame->rsi;
+        *(--sp) = self.frame->rdi;
+        *(--sp) = self.frame->rbp;
+        *(--sp) = self.frame->r8;
+        *(--sp) = self.frame->r9;
+        *(--sp) = self.frame->r10;
+        *(--sp) = self.frame->r11;
+        *(--sp) = self.frame->r12;
+        *(--sp) = self.frame->r13;
+        *(--sp) = self.frame->r14;
+        *(--sp) = self.frame->r15;
 
         self.krsp = reinterpret_cast<uptr>(sp);
 }
@@ -65,9 +76,15 @@ Process::Process(int id, void (*entry)(), mem::PML4T &pml4t)
         this->status = ProcessStatus::Alive;
         this->time = 0;
 
-        this->init_kernel_stack();
+        this->frame = &this->frame_storage;
+        memset(this->frame, 0, sizeof(*this->frame));
+        this->frame->cs = 0x1b;
+        this->frame->ss = 0x23;
+        this->frame->flags = 1 << 9;
         this->frame->rip = reinterpret_cast<u64>(entry);
         this->frame->rsp = cpu::USER_STACK_TOP;
+
+        this->init_kernel_stack();
 }
 // --------------------------------------------------
 
@@ -80,9 +97,11 @@ Process::Process(int id, const Process &parent, mem::PML4T &pml4t)
         this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
         this->time = 0;
 
-        this->init_kernel_stack();
-        memcpy(this->frame, parent.frame, sizeof(ProcessStackFrame));
+        this->frame = &this->frame_storage;
+        memcpy(this->frame, parent.frame, sizeof(*this->frame));
         this->frame->rax = 0;
+
+        this->init_kernel_stack();
 
         this->status = ProcessStatus::Alive;
 }
@@ -103,7 +122,7 @@ void Process::switch_pml4t(this Process &self, const mem::PML4T &pml4t)
         self.cr3 = reinterpret_cast<u64>(self.pml4t.raw()) - hhdm_offset;
 }
 
-void Process::save_context(this Process &self, cpu::IRQFrame *frame)
+void Process::save_context(this Process &self, cpu::SyscallFrame *frame)
 {
         self.frame->rax   = frame->rax;
         self.frame->rbx   = frame->rbx;
@@ -128,7 +147,7 @@ void Process::save_context(this Process &self, cpu::IRQFrame *frame)
         self.cr3   = frame->cr3;
 }
 
-void Process::load_context(this Process &self, cpu::IRQFrame *frame)
+void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
 {
         frame->rax      = self.frame->rax;
         frame->rbx      = self.frame->rbx;

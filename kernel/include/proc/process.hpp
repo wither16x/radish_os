@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cpu/syscall.hpp"
 #include <cpu/irq.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
@@ -16,8 +17,6 @@ enum class ProcessStatus : int {
 };
 
 struct [[gnu::packed]] ProcessStackFrame {
-        lib::u64 cr2;
-        lib::u64 cr3;
         lib::u64 r15;
         lib::u64 r14;
         lib::u64 r13;
@@ -54,8 +53,8 @@ public:
         void load(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
 
-        void save_context(this Process &self, cpu::IRQFrame *frame);
-        void load_context(this Process &self, cpu::IRQFrame *frame);
+        void save_context(this Process &self, cpu::SyscallFrame *frame);
+        void load_context(this Process &self, cpu::SyscallFrame *frame);
 
         void remap_stack(this Process &self);
         void reset_stack(this Process &self);
@@ -79,6 +78,8 @@ public:
         mem::PML4T pml4t;
 
         ProcessStackFrame *frame;
+        ProcessStackFrame frame_storage;
+
         lib::uptr kstack_frame;
         lib::uptr kstack_top;
         lib::uptr krsp;

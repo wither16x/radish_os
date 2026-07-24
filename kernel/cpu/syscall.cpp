@@ -31,6 +31,10 @@ enum SyscallType : u64 {
 /// NOTE: using a table instead of a switch loop may be more efficient... 
 extern "C" void syscall_handler(SyscallFrame *frame)
 {
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (curr_proc)
+                curr_proc->save_context(frame);
+
         switch (frame->rax) {
         // write:
         // RBX = path

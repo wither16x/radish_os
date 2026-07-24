@@ -17,8 +17,6 @@ int fork()
         parent->add_child(child);
         scheduler::add_process(child);
 
-        child->frame->rax = 0;
-
         return child->id;
 }
 
