@@ -88,8 +88,10 @@ bool expecting_break = false;
 
 Queue<u8, 50> ringbuf;
 
-void handle_irq()
+void handle_irq(cpu::IRQFrame *frame)
 {
+        (void)frame;
+
         u8 status = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_STATUS);
 
         u8 scancode = 0;
@@ -113,7 +115,7 @@ void init()
                 shift_kbd_layout[k.scancode] = k.shift;
         }
 
-        cpu::register_irq(drivers::pic::IRQType::IRQ_KEYBOARD, reinterpret_cast<void *>(handle_irq));
+        cpu::register_irq(drivers::pic::IRQType::IRQ_KEYBOARD, handle_irq);
         fs::devfs::register_device(fs::devfs::DeviceType::Input, "D:/input");
 
         logger.ok("initialized generic keyboard driver");

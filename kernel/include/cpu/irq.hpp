@@ -32,6 +32,6 @@ struct [[gnu::packed]] IRQFrame {
 	lib::u64 ss;
 };
 
-void register_irq(int n, void *handler);
+void register_irq(int n, void (*handler)(IRQFrame *));
 
 } /* namespace kernel::cpu */

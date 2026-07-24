@@ -19,14 +19,14 @@ namespace {
 
 constexpr int MAX_IRQ_HANDLERS = 16;
 
-void *handlers[MAX_IRQ_HANDLERS];
+void (*handlers[MAX_IRQ_HANDLERS])(IRQFrame *);
 
 } /* anonymous namespace */
 
 // --------------------------------------------------
-void register_irq(int n, void *handler)
+void register_irq(int n, void (*handler)(IRQFrame *))
 {
-        handlers[n] = reinterpret_cast<void *>(handler);
+        handlers[n] = handler;
         drivers::pic::irq_unmask(n);
 }
 // --------------------------------------------------
@@ -39,29 +39,13 @@ extern "C" void irq_handler(IRQFrame *f)
                 return;
         }
 
-        void *handler = handlers[f->irqno];
+        void (*handler)(IRQFrame *) = handlers[f->irqno];
         if (!handler) {
-                logger.err("handler for irq %u is null", f->irqno);
+                logger.err("no handler available for irq %u", f->irqno);
                 return;
         }
-
-        switch (f->irqno) {
-        case drivers::pic::IRQ_TIMER: {
-                void (*timer_handler)(IRQFrame *) = reinterpret_cast<void (*)(IRQFrame *)>(handler);
-                timer_handler(f);
-                break;
-        }
-
-        case drivers::pic::IRQ_KEYBOARD: {
-                void (*keyboard_handler)() = reinterpret_cast<void (*)()>(handler);
-                keyboard_handler();
-                break;
-        }
-
-        default:
-                logger.err("received unexpected irq: %u", f->irqno);
-                break;
-        }
+        
+        handler(f);
 }
 // --------------------------------------------------
 

@@ -51,7 +51,7 @@ void init()
         cpu::output_byte_port(Port::PORT_CHANNEL_0, divider & 0xff);
         cpu::output_byte_port(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
 
-        cpu::register_irq(drivers::pic::IRQType::IRQ_TIMER, reinterpret_cast<void *>(handle_irq));
+        cpu::register_irq(drivers::pic::IRQType::IRQ_TIMER, handle_irq);
 
         logger.ok("initialized pit driver");
 }
