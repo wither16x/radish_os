@@ -259,6 +259,31 @@ const mem::PML4T &Process::get_pml4t(this const Process &self)
         return self.pml4t;
 }
 
+const ProcessStackFrame *Process::get_stack_frame(this const Process &self)
+{
+        return self.frame;
+}
+
+uptr Process::kernel_stack_top(this const Process &self)
+{
+        return self.kstack_top;
+}
+
+uptr Process::kernel_stack_frame(this const Process &self)
+{
+        return self.kstack_frame;
+}
+
+uptr Process::kernel_stack_pointer(this const Process &self)
+{
+        return self.krsp;
+}
+
+const uptr *Process::kernel_stack_pointer_address(this const Process &self)
+{
+        return &self.krsp;
+}
+
 bool Process::is_dead(this const Process &self)
 {
         return self.status == ProcessStatus::Dead;

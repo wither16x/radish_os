@@ -61,8 +61,8 @@ int spawn(const String &path)
                 panic("failed to spawn process: null entry point");
 
         cpu::enter_userspace(
-                reinterpret_cast<void *>(p->frame->rip),
-                reinterpret_cast<void *>(p->frame->rsp)
+                reinterpret_cast<void *>(p->get_stack_frame()->rip),
+                reinterpret_cast<void *>(p->get_stack_frame()->rsp)
         );
 
         cpu::sti();

@@ -53,6 +53,13 @@ class Process {
         // each process has its own page tables
         mem::PML4T pml4t;
 
+        ProcessStackFrame *frame;
+        ProcessStackFrame frame_storage;
+
+        lib::uptr kstack_frame;
+        lib::uptr kstack_top;
+        lib::uptr krsp;
+
         void init_kernel_stack(this Process &self);
 
 public:
@@ -80,16 +87,14 @@ public:
         PID get_id(this const Process &self);
         const void *get_entry(this const Process &self);
         const mem::PML4T &get_pml4t(this const Process &self);
+        const ProcessStackFrame *get_stack_frame(this const Process &self);
+        lib::uptr kernel_stack_top(this const Process &self);
+        lib::uptr kernel_stack_frame(this const Process &self);
+        lib::uptr kernel_stack_pointer(this const Process &self);
+        const lib::uptr *kernel_stack_pointer_address(this const Process &self);
 
         bool is_dead(this const Process &self);
         void die(this Process &self);
-
-        ProcessStackFrame *frame;
-        ProcessStackFrame frame_storage;
-
-        lib::uptr kstack_frame;
-        lib::uptr kstack_top;
-        lib::uptr krsp;
 };
 
 extern "C" void proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);

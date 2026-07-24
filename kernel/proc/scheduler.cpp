@@ -37,7 +37,7 @@ void reap_pending_zombie()
         Process *zombie = ctx.pending_zombie;
         ctx.pending_zombie = nullptr;
 
-        mem::pmm::free_frame(zombie->kstack_frame);
+        mem::pmm::free_frame(zombie->kernel_stack_frame());
         remove_process(zombie->get_id());
         delete zombie;
 }
@@ -116,17 +116,17 @@ void tick()
         ctx.current_process_index = new_proc_idx;
 
         new_proc->load_pml4t();
-        get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
+        get_kernel_gdt().get_tss().reset_stack(new_proc->kernel_stack_top());
 
         if (old_proc->is_dead()) {
                 uptr discard = 0;
                 ctx.pending_zombie = old_proc;
-                proc_switch(&discard, new_proc->krsp);
+                proc_switch(&discard, new_proc->kernel_stack_pointer());
                 while (true)
                         cpu::hlt();
         }
 
-        proc_switch(&old_proc->krsp, new_proc->krsp);
+        proc_switch(const_cast<uptr *>(old_proc->kernel_stack_pointer_address()), new_proc->kernel_stack_pointer());
         reap_pending_zombie();
 }
 // --------------------------------------------------
@@ -208,10 +208,10 @@ void yield()
                 return;
 
         new_proc->load_pml4t();
-        get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
+        get_kernel_gdt().get_tss().reset_stack(new_proc->kernel_stack_top());
         ctx.current_process = new_proc;
 
-        proc_switch(&old_proc->krsp, new_proc->krsp);
+        proc_switch(const_cast<uptr *>(old_proc->kernel_stack_pointer_address()), new_proc->kernel_stack_pointer());
 }
 
 } /* namespace kernel::proc::scheduler */
