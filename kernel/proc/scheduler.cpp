@@ -17,18 +17,25 @@ namespace kernel::proc::scheduler {
 namespace {
 
 Vector<Process *> processes;
-Process *curr_proc = nullptr;
-Process *pending_zombie = nullptr;
-usize curr_proc_idx = 0;
-bool active = false;
+
+struct SchedulerContext {
+        bool is_active;
+
+        Process *current_process;
+        usize current_process_index;
+
+        Process *pending_zombie;
+};
+
+SchedulerContext ctx;
 
 void reap_pending_zombie()
 {
-        if (!pending_zombie)
+        if (!ctx.pending_zombie)
                 return;
 
-        Process *zombie = pending_zombie;
-        pending_zombie = nullptr;
+        Process *zombie = ctx.pending_zombie;
+        ctx.pending_zombie = nullptr;
 
         mem::pmm::free_frame(zombie->kstack_frame);
         remove_process(zombie->id);
@@ -40,9 +47,9 @@ void reap_pending_zombie()
 // --------------------------------------------------
 void init()
 {
-        curr_proc_idx = 0;
-        curr_proc = nullptr;
-        active = true;
+        ctx.current_process = 0;
+        ctx.current_process = nullptr;
+        ctx.is_active = true;
 
         logger.ok("initialized scheduler");
 }
@@ -54,8 +61,8 @@ void add_process(Process *p)
         // this function only adds the process to the vector:
         // it must have been initialized before
         processes.push_back(p);
-        if (!curr_proc)
-                curr_proc = p;
+        if (!ctx.current_process)
+                ctx.current_process = p;
 }
 // --------------------------------------------------
 
@@ -72,23 +79,23 @@ void remove_process(PID pid)
 // --------------------------------------------------
 void tick()
 {
-        if (!active || processes.size() == 0 || !curr_proc)
+        if (!ctx.is_active || processes.size() == 0 || !ctx.current_process)
                 return;
 
-        if (curr_proc->status != ProcessStatus::Dead) {
-                curr_proc->time++;
-                if (curr_proc->time < TIME_PER_PROCESS)
+        if (ctx.current_process->status != ProcessStatus::Dead) {
+                ctx.current_process->time++;
+                if (ctx.current_process->time < TIME_PER_PROCESS)
                         return;
-                curr_proc->time = 0;
+                ctx.current_process->time = 0;
         }
 
-        Process *old_proc = curr_proc;
+        Process *old_proc = ctx.current_process;
         Process *new_proc = nullptr;
 
-        usize new_proc_idx = curr_proc_idx;
+        usize new_proc_idx = ctx.current_process_index;
 
         for (usize i = 0; i < processes.size(); i++) {
-                usize idx = (curr_proc_idx + 1 + i) % processes.size();
+                usize idx = (ctx.current_process_index + 1 + i) % processes.size();
                 if (processes[idx]->status != ProcessStatus::Dead) {
                         new_proc = processes[idx];
                         new_proc_idx = idx;
@@ -97,7 +104,7 @@ void tick()
         }
 
         if (!new_proc) {
-                curr_proc = nullptr;
+                ctx.current_process = nullptr;
                 if (old_proc->status == ProcessStatus::Dead)
                         undertaker(old_proc->id);
                 return;
@@ -106,15 +113,15 @@ void tick()
         if (new_proc == old_proc)
                 return;
 
-        curr_proc = new_proc;
-        curr_proc_idx = new_proc_idx;
+        ctx.current_process = new_proc;
+        ctx.current_process_index = new_proc_idx;
 
         new_proc->load_pml4t();
         get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
 
         if (old_proc->status == ProcessStatus::Dead) {
                 uptr discard = 0;
-                pending_zombie = old_proc;
+                ctx.pending_zombie = old_proc;
                 proc_switch(&discard, new_proc->krsp);
                 while (true)
                         cpu::hlt();
@@ -128,14 +135,14 @@ void tick()
 // --------------------------------------------------
 bool is_active()
 {
-        return active;
+        return ctx.is_active;
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
 Process *get_current_process()
 {
-        return curr_proc;
+        return ctx.current_process;
 }
 // --------------------------------------------------
 
@@ -152,7 +159,7 @@ Process *get_process_by_id(PID pid)
 // --------------------------------------------------
 void set_current_process(Process *p)
 {
-        curr_proc = p;
+        ctx.current_process = p;
 }
 // --------------------------------------------------
 
@@ -180,20 +187,20 @@ void undertaker(PID pid)
 
 void yield()
 {
-        Process *old_proc = curr_proc;
+        Process *old_proc = ctx.current_process;
         if (!old_proc) {
                 logger.debug("old process is null");
                 return;
         }
 
         Process *new_proc = nullptr;
-        usize start_idx = curr_proc_idx;
+        usize start_idx = ctx.current_process_index;
 
         for (usize i = 0; i < processes.size(); i++) {
                 usize idx = (start_idx + 1 + i) % processes.size();
                 if (processes[idx]->status != ProcessStatus::Dead && processes[idx] != old_proc) {
                         new_proc = processes[idx];
-                        curr_proc_idx = idx;
+                        ctx.current_process_index = idx;
                         break;
                 }
         }
@@ -203,7 +210,7 @@ void yield()
 
         new_proc->load_pml4t();
         get_kernel_gdt().get_tss().reset_stack(new_proc->kstack_top);
-        curr_proc = new_proc;
+        ctx.current_process = new_proc;
 
         proc_switch(&old_proc->krsp, new_proc->krsp);
 }
