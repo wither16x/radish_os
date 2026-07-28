@@ -68,4 +68,9 @@ Status File::read(void *buf, usize size)
         return Status::NotImplemented;
 }
 
+Status File::close()
+{
+        return Status::NotImplemented;       
+}
+
 } /* namespace kernel::fs::vfs */

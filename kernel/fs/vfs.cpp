@@ -121,6 +121,7 @@ File *open_file(const lib::String &path)
                 return nullptr;
         }
         f->vnode = vnd;
+        ++f->ref_count;
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (curr_proc)
@@ -138,6 +139,15 @@ Status close_file(File *file)
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (curr_proc)
                 curr_proc->remove_file_descriptor(file);
+
+        if (file->ref_count == 0)
+                return Status::NoRefs;
+
+        --file->ref_count;
+        if (file->ref_count == 0) {
+                file->close();
+                delete file;
+        }
 
         return Status::Success;
 }

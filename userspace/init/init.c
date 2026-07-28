@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 int main()
@@ -10,6 +11,7 @@ int main()
         int fd = open("I:/README.txt");
         read(fd, buf, sizeof(buf));
         close(fd);
+        buf[strlen(buf) - 1] = '\0';
 
         printf("I:/README.txt: %s\n", buf);
 

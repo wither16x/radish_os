@@ -58,9 +58,11 @@ public:
 
         VNode *vnode;
         lib::usize size;
+        lib::usize ref_count = 0;
 
         virtual Status write(const void *buf, lib::usize size);
         virtual Status read(void *buf, lib::usize size);
+        virtual Status close();
 };
 
 class FileSystem {

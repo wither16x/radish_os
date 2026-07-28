@@ -28,6 +28,7 @@ public:
 
         vfs::Status read(void *buf, usize size) override;
         vfs::Status write(const void *buf, usize size) override;
+        vfs::Status close() override;
 };
 
 class Node : public vfs::VNode {
@@ -89,6 +90,14 @@ vfs::Status DevfsFile::write(const void *buf, usize n)
         default:
                 break;
         }
+
+        return vfs::Status::Success;
+}
+
+vfs::Status DevfsFile::close()
+{
+        if (this->owner)
+                this->owner->file_data = nullptr;
 
         return vfs::Status::Success;
 }

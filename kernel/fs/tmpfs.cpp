@@ -40,6 +40,7 @@ public:
 
         vfs::Status read(void *buf, usize size) override;
         vfs::Status write(const void *buf, usize size) override;
+        vfs::Status close() override;
 };
 
 // Depending on the node type, `file_data` or `dir_data` is set
@@ -123,6 +124,14 @@ vfs::Status TmpfsFile::write(const void *buf, usize n)
         return vfs::Status::Success;
 }
 // --------------------------------------------------
+
+vfs::Status TmpfsFile::close()
+{
+        if (this->owner)
+                this->owner->file_data = nullptr;
+
+        return vfs::Status::Success;
+}
 
 // --------------------------------------------------
 vfs::Status Node::mkfile(const String &name)

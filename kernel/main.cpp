@@ -187,9 +187,6 @@ void kernel_main()
 
         scheduler::init();
 
-        lib::File *stdin_fd = lib::open("D:/input");
-        lib::File *stdout_fd = lib::open("D:/console");
-
         init_console();
 
         logger.info("-------------------------------------");
@@ -206,8 +203,6 @@ void kernel_main()
 
         test::test_lib();
 
-        lib::close(stdin_fd);
-        lib::close(stdout_fd);
         spawn("I:/bin/init");
         
         unmount_initrd();
