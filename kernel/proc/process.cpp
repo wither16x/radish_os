@@ -7,6 +7,7 @@
 #include <lib/typing.hpp>
 #include <lib/memory.hpp>
 #include <lib/vector.hpp>
+#include <lib/filesystem.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <mem/page.hpp>
@@ -16,6 +17,7 @@
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::memset, kernel::lib::memcpy;
 using kernel::lib::Vector;
+using kernel::lib::File;
 
 namespace kernel::proc {
 
@@ -98,6 +100,7 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->pml4t = pml4t;
         this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
         this->time = 0;
+        this->file_descriptors = parent.file_descriptors;
 
         this->frame = &this->frame_storage;
         memcpy(this->frame, parent.frame, sizeof(*this->frame));
@@ -245,6 +248,27 @@ void Process::use_kernel_stack(this const Process &self)
         get_kernel_gdt().get_tss().reset_stack(self.krsp);
 }
 
+void Process::add_file_descriptor(this Process &self, File *file)
+{
+        for (usize i = 0; i < self.file_descriptors.size(); i++) {
+                if (!self.file_descriptors[i]) {
+                        self.file_descriptors[i] = file;
+                        return;
+                }
+        }
+        self.file_descriptors.push_back(file);
+}
+
+void Process::remove_file_descriptor(this Process &self, File *file)
+{
+        for (usize i = 0; i < self.file_descriptors.size(); i++) {
+                if (self.file_descriptors[i] == file) {
+                        self.file_descriptors[i] = nullptr;
+                        break;
+                }
+        }
+}
+
 u64 Process::get_time(this const Process &self)
 {
         return self.time;
@@ -300,6 +324,30 @@ const uptr *Process::kernel_stack_pointer_address(this const Process &self)
         return &self.krsp;
 }
 
+const Vector<File *> Process::get_file_descriptors(this const Process &self)
+{
+        return self.file_descriptors;
+}
+
+const File *Process::find_file(this const Process &self, usize id)
+{
+        if (id >= self.file_descriptors.size())
+                return nullptr;
+        return self.file_descriptors[id];
+}
+
+usize Process::find_fd(this const Process &self, File *file)
+{
+        for (usize i = 0; i < self.file_descriptors.size(); i++) {
+                if (self.file_descriptors[i] == file)
+                        return i;
+        }
+
+        // note: this value is going to be converted to the biggest value that usize
+        // can handle
+        return -1; // not found
+}
+
 bool Process::is_dead(this const Process &self)
 {
         return self.status == ProcessStatus::Dead;
@@ -307,6 +355,11 @@ bool Process::is_dead(this const Process &self)
 
 void Process::die(this Process &self)
 {
+        for (usize i = 0; i < self.file_descriptors.size(); i++) {
+                if (self.file_descriptors[i])
+                        lib::close(self.file_descriptors[i]);
+        }
+
         self.status = ProcessStatus::Dead;
 }
 

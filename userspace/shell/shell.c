@@ -11,7 +11,7 @@ int main()
 
         while (true) {
                 printf("$ ");
-                fgets(uinput, sizeof(uinput), "D:/input");
+                fgets(uinput, sizeof(uinput), stdin);
 
                 for (size_t i = 0; i < sizeof(uinput); i++) {
                         if (uinput[i] == '\n') {

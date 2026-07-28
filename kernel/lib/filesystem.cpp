@@ -3,64 +3,65 @@
 
 namespace kernel::lib {
 
-// --------------------------------------------------
-int touch(const String &path)
+File *open(const String &path)
 {
-        return fs::vfs::touch(path);
+        return fs::vfs::open_file(path);
 }
-// --------------------------------------------------
+
+fs::vfs::Status close(File *f)
+{
+        return fs::vfs::close_file(f);
+}
+
+fs::vfs::Status mkfile(const String &path)
+{
+        return fs::vfs::mkfile(path);
+}
 
 // --------------------------------------------------
-int mkdir(const String &path)
+fs::vfs::Status mkdir(const String &path)
 {
         return fs::vfs::mkdir(path);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int remove(const String &path)
+fs::vfs::Status remove(const String &path)
 {
         return fs::vfs::remove(path);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int write(const String &path, const void *buf, usize n)
+fs::vfs::Status write(File *f, const void *buf, usize n)
 {
-        return fs::vfs::write(path, buf, n);
+        return fs::vfs::write(f, buf, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int read(const String &path, void *buf, usize n)
+fs::vfs::Status read(File *f, void *buf, usize n)
 {
-        return fs::vfs::read(path, buf, n);
+        return fs::vfs::read(f, buf, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int getdirent(const String &path, fs::vfs::DirEntry *entry, usize n)
+fs::vfs::Status getdirent(const String &path, fs::vfs::DirEntry *entry, usize n)
 {
         return fs::vfs::readdir(path, entry, n);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-fs::vfs::VNode *lookup(const String &path)
-{
-        return fs::vfs::lookup(path);
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int getfilesz(const String &path, usize *buf)
+fs::vfs::Status getfilesz(const String &path, usize *buf)
 {
         return fs::vfs::getfilesz(path, buf);
 }
 // --------------------------------------------------
 
 // --------------------------------------------------
-int getdirentn(const String &path, usize *buf)
+fs::vfs::Status getdirentn(const String &path, usize *buf)
 {
         return fs::vfs::getdirentn(path, buf);
 }

@@ -9,7 +9,7 @@ int main()
 {
         char buf[NAME_LENGTH];
         printf("What is your name? ");
-        fgets(buf, sizeof(buf), "D:/input");
+        fgets(buf, sizeof(buf), stdin);
         for (size_t i = 0; i < sizeof(buf); i++) {
                 if (buf[i] == '\n') {
                         buf[i] = '\0';

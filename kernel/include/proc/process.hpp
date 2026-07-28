@@ -7,6 +7,7 @@
 #include <lib/vector.hpp>
 #include <mem/pml4t.hpp>
 #include <proc/pid.hpp>
+#include <lib/filesystem.hpp>
 
 namespace kernel::proc {
 
@@ -60,6 +61,8 @@ class Process {
         lib::uptr kstack_top;
         lib::uptr krsp;
 
+        lib::Vector<lib::File *> file_descriptors;
+
         void init_kernel_stack(this Process &self);
 
 public:
@@ -82,6 +85,8 @@ public:
         void consume_time(this Process &self, int ms);
         void switch_with(this Process &self, const Process *other);
         void use_kernel_stack(this const Process &self);
+        void add_file_descriptor(this Process &self, lib::File *file);
+        void remove_file_descriptor(this Process &self, lib::File *file);
 
         lib::u64 get_time(this const Process &self);
         const lib::Vector<Process *> &get_children(this const Process &self);
@@ -94,6 +99,9 @@ public:
         lib::uptr kernel_stack_frame(this const Process &self);
         lib::uptr kernel_stack_pointer(this const Process &self);
         const lib::uptr *kernel_stack_pointer_address(this const Process &self);
+        const lib::Vector<lib::File *> get_file_descriptors(this const Process &self);
+        const lib::File *find_file(this const Process &self, lib::usize id);
+        lib::usize find_fd(this const Process &self, lib::File *file);
 
         bool is_dead(this const Process &self);
         void die(this Process &self);

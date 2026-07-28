@@ -12,7 +12,7 @@ public:
         ~USTAR()        = default;
 
         vfs::VNode *get_root() override;
-        void unmount() override;
+        vfs::Status unmount() override;
 
 private:
         lib::u8 *archive;

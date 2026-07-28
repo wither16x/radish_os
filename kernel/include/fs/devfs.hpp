@@ -9,7 +9,7 @@ struct DEVFS : public vfs::FileSystem {
         ~DEVFS()        = default;
 
         vfs::VNode *get_root() override;
-        void unmount() override;
+        vfs::Status unmount() override;
 };
 
 /// Every device type is registered here to ensure that no unsupported device can be

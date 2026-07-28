@@ -29,8 +29,11 @@ int exec(const lib::String &path)
         proc_pml4t.init(kpml4t);
         uptr proc_addr = 0;
         int load_res = elf::load_elf(&proc_pml4t, path, &proc_addr);
-        if (load_res != 0)
+        if (load_res != 0) {
+                cpu::sti();
                 return -1;
+        }
+
         void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
 
         // Update the process

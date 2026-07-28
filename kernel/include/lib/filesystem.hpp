@@ -6,23 +6,25 @@
 
 namespace kernel::lib {
 
+using File = fs::vfs::File;
+
+File *open(const String &path);
+fs::vfs::Status close(File *f);
 /// Create a new file.
-int touch(const String &path);
-/// Create a new directory. 
-int mkdir(const String &path);
+fs::vfs::Status mkfile(const String &path);
+/// Create a new directory.
+fs::vfs::Status mkdir(const String &path);
 /// Remove a file or a directory.
-int remove(const String &path);
+fs::vfs::Status rm(const String &path);
 /// Write bytes to a file.
-int write(const String &path, const void *buf, usize n);
+fs::vfs::Status write(File *f, const void *buf, usize n);
 /// Read bytes from a file.
-int read(const String &path, void *buf, usize n);
+fs::vfs::Status read(File *f, void *buf, usize n);
 /// Get a single entry from a directory. 
-int getdirent(const String &path, fs::vfs::DirEntry *entry, usize n);
-/// Lookup a file.
-fs::vfs::VNode *lookup(const String &path);
+fs::vfs::Status getdirent(const String &path, fs::vfs::DirEntry *entry, usize n);
 /// Get the size of a file.
-int getfilesz(const String &path, usize *buf);
+fs::vfs::Status getfilesz(const String &path, usize *buf);
 /// Get the number of entries of a directory.
-int getdirentn(const String &path, usize *buf);
+fs::vfs::Status getdirentn(const String &path, usize *buf);
 
 } /* namespace kernel::lib */

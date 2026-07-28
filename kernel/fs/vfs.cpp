@@ -1,330 +1,269 @@
-#include <fs/path.hpp>
 #include <fs/vfs.hpp>
-#include <lib/string.hpp>
-#include <lib/typing.hpp>
-#include <lib/vector.hpp>
+#include <fs/path.hpp>
+#include <proc/process.hpp>
+#include <proc/scheduler.hpp>
 
 using kernel::lib::String;
-using kernel::lib::usize;
 using kernel::lib::Vector;
+using kernel::lib::usize;
 
 namespace kernel::fs::vfs {
 
 namespace {
 
-constexpr int MAX_DRIVES = 26;
+/// From A to Z
+constexpr unsigned int MAX_DRIVES = 26;
 
-Drive drives[MAX_DRIVES];
-char current_drive_id = 'A';            // default drive
+struct VFSContext {
+        Drive drives[MAX_DRIVES];
 
-/// Find a drive using its ID.
-Drive *get_drive_by_id(char id)
-{
-        for (int i = 0; i < MAX_DRIVES; i++) {
-                if (drives[i].id == id)
-                        return &drives[i];
+        Drive &get_drive_by_id(this VFSContext &self, drive_id id)
+        {
+                return self.drives[id - 'A'];
         }
+};
 
-        return nullptr;
-}
+VFSContext ctx;
 
-/// Check if a path is long enough to handle `D:/`.
-bool path_can_handle_drive(const String &path)
+constexpr bool can_path_handle_drive(const String &path)
 {
         return path.length() >= 3;
 }
 
 } /* anonymous namespace */
 
-// --------------------------------------------------------------------
-int VNode::touch(const String &name)
+Status mount(drive_id drive, FileSystem *fs)
 {
-        static_cast<void>(name);
-        return 0;
-}
-// --------------------------------------------------
+        Drive &drv = ctx.get_drive_by_id(drive);
+        if (drv.fs)
+                return Status::FsMounted;
 
-// --------------------------------------------------
-int VNode::mkdir(const String &name)
-{
-        static_cast<void>(name);
-        return 0;
-}
-// --------------------------------------------------
+        drv.id = drive;
+        drv.fs = fs;
+        drv.root = fs->get_root();
+        if (drv.root)
+                ++drv.root->ref_count;
 
-// --------------------------------------------------
-int VNode::remove()
-{
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int VNode::write(const void *buf, usize n)
-{
-        static_cast<void>(buf);
-        static_cast<void>(n);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int VNode::read(void *buf, usize n)
-{
-        static_cast<void>(buf);
-        static_cast<void>(n);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int VNode::readdir(DirEntry *entry, usize n)
-{
-        static_cast<void>(entry);
-        static_cast<void>(n);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-void *VNode::lookup(const String &name)
-{
-        static_cast<void>(name);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int VNode::getfilesz(usize *buf)
-{
-        static_cast<void>(buf);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int VNode::getdirentn(lib::usize *buf)
-{
-        static_cast<void>(buf);
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int mount(char id, FileSystem *fs)
-{
-        Drive *drv = &drives[id - 'A'];
-        if (drv->fs)
-                return -1;              // already mounted
-
-        drv->id = id;
-        drv->fs = fs;
-        drv->root = fs->get_root();
-
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int unmount(char id)
-{
-        Drive *drv = &drives[id - 'A'];
-        if (!drv->fs)
-                return -1;              // not mounted
-
-        drv->fs->unmount();
-        delete drv->fs;
-        drv->fs = nullptr;
-        drv->root = nullptr;
-
-        return 0;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int chdrive(char id)
-{
-        if (id >= 'A' && id <= 'Z') {
-                current_drive_id = id;
-                return 0;
-        }
-
-        return -1;
-}
-// --------------------------------------------------
-
-char getdrive()
-{
-        return current_drive_id;
+        return Status::Success;
 }
 
-// --------------------------------------------------
-VNode *lookup(const lib::String &path)
+Status unmount(drive_id drive)
 {
-        if (!path_can_handle_drive(path))
-                return nullptr;         // path too small for D:/
+        Drive &drv = ctx.get_drive_by_id(drive);
+        if (not drv.fs)
+                return Status::FsNotMounted;
 
-        char drive_id = path[0];
+        drv.fs->unmount();
+        delete drv.fs;
+        drv.fs = nullptr;
+        release_node(drv.root);
+        drv.root = nullptr;
+
+        return Status::Success;
+}
+
+VNode *lookup_node(const String &path)
+{
+        if (not can_path_handle_drive(path))
+                return nullptr;
+
+        drive_id drive = path[0];
         String rel = path.sub(2);
 
-        Drive *drv = get_drive_by_id(drive_id);
-        if (!drv || !drv->root)
-                return nullptr;         // drive not found or drive does not have a root directory
+        Drive &drv = ctx.get_drive_by_id(drive);
 
         Vector<String> parts = parse_path(rel);
 
-        VNode *curr_nd = drv->root;
+        VNode *curr_nd = drv.root;
+        ++curr_nd->ref_count;
+
         for (usize i = 0; i < parts.size(); i++) {
                 void *child = curr_nd->lookup(parts[i]);
-                if (!child)
+                if (not child) {
+                        release_node(curr_nd);
                         return nullptr;         // child not found
+                }
 
-                curr_nd = static_cast<VNode *>(child);
+                VNode *next = static_cast<VNode *>(child);
+                ++next->ref_count;
+
+                release_node(curr_nd);
+
+                curr_nd = next;
         }
 
         return curr_nd;
 }
-// --------------------------------------------------
 
-// --------------------------------------------------
-int touch(const lib::String &path)
+Status release_node(VNode *vnd)
 {
-        if (!path_can_handle_drive(path))
-                return -1;      // path is too small for D:/
+        if (!vnd)
+                return Status::NullNode;
+        if (vnd->ref_count == 0)
+                return Status::NoRefs;
 
-        char drive_id = path[0];
+        --vnd->ref_count;
+        if (vnd->ref_count == 0)
+                delete vnd;
+
+        return Status::Success;
+}
+
+File *open_file(const lib::String &path)
+{
+        VNode *vnd = lookup_node(path);
+        if (not vnd)
+                return nullptr; // node not found
+
+        File *f = vnd->open();
+        if (not f) {
+                release_node(vnd);
+                return nullptr;
+        }
+        f->vnode = vnd;
+
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (curr_proc)
+                curr_proc->add_file_descriptor(f);
+
+        return f;
+}
+
+Status close_file(File *file)
+{
+        if (not file)
+                return Status::NullFile; // file descriptor is null
+
+        release_node(file->vnode);
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (curr_proc)
+                curr_proc->remove_file_descriptor(file);
+
+        return Status::Success;
+}
+
+Status mkfile(const lib::String &path)
+{
+        if (not can_path_handle_drive(path))
+                return Status::PathTooShort;
+
+        drive_id drive = path[0];
         String rel = path.sub(2);
 
-        Drive *drv = get_drive_by_id(drive_id);
-        if (!drv || !drv->root)
-                return -2;      // drive not found or does not have a rootdir
+        Drive &drv = ctx.get_drive_by_id(drive);
+        if (not drv.root)
+                return Status::NullRoot;
 
         Vector<String> parts = parse_path(rel);
+        if (parts.empty())
+                return Status::EmptyPath;
 
-        VNode *curr_nd = drv->root;
+        VNode *curr_nd = drv.root;
 
         for (usize i = 0; i < parts.size() - 1; i++) {
-                void *child = curr_nd->lookup(parts[i]);
-                if (!child)
-                        return -3;      // child not found
+                VNode *child = curr_nd->lookup(parts[i]);
+                if (not child)
+                        return Status::ChildNotFound;
 
                 curr_nd = static_cast<VNode *>(child);
         }
 
-        return curr_nd->touch(parts[parts.size() - 1]);
+        Status ret = curr_nd->mkfile(parts[parts.size() - 1]);
+        if (curr_nd != drv.root)
+                release_node(curr_nd);
+        return ret;
 }
-// --------------------------------------------------
 
-// --------------------------------------------------
-int mkdir(const lib::String &path)
+Status mkdir(const lib::String &path)
 {
-        if (!path_can_handle_drive(path))
-                return -1;      // path is too small for D:/
+        if (not can_path_handle_drive(path))
+                return Status::PathTooShort;
 
-        char drive_id = path[0];
+        drive_id drive = path[0];
         String rel = path.sub(2);
 
-        Drive *drv = get_drive_by_id(drive_id);
-        if (!drv || !drv->root)
-                return -2;      // drive not found or does not have a rootdir
+        Drive &drv = ctx.get_drive_by_id(drive);
+        if (not drv.root)
+                return Status::NullRoot;
 
         Vector<String> parts = parse_path(rel);
+        if (parts.empty())
+                return Status::EmptyPath;
 
-        VNode *curr_nd = drv->root;
+        VNode *curr_nd = drv.root;
         for (usize i = 0; i < parts.size() - 1; i++) {
-                void *child = curr_nd->lookup(parts[i]);
+                VNode *child = curr_nd->lookup(parts[i]);
                 if (!child)
-                        return -3;      // child not found
+                        return Status::ChildNotFound;
 
                 curr_nd = static_cast<VNode *>(child);
         }
 
-        return curr_nd->mkdir(parts[parts.size() - 1]);
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int remove(const lib::String &path)
-{
-        VNode *vnd = lookup(path);
-        if (!vnd)
-                return -1;      // file/dir not found
-
-        return vnd->remove();
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int write(const String &path, const void *buf, usize n)
-{
-        VNode *vnd = lookup(path);
-        if (!vnd)
-                return -1;      // file not found
-
-        return vnd->write(buf, n);
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-int read(const String &path, void *buf, usize n)
-{
-        VNode *vnd = lookup(path);
-        if (!vnd)
-                return -1;      // file not found
-
-        int ret = vnd->read(buf, n);
-        if (vnd->owned)
-                delete vnd;
+        Status ret = curr_nd->mkdir(parts[parts.size() - 1]);
+        if (curr_nd != drv.root)
+                release_node(curr_nd);
         return ret;
 }
-// --------------------------------------------------
 
-// --------------------------------------------------
-int readdir(const String &path, DirEntry *entry, usize n)
+Status remove(const lib::String &path)
 {
-        VNode *vnd = lookup(path);
+        VNode *vnd = lookup_node(path);
         if (!vnd)
-                return -1;      // directory not found
+                return Status::NullNode;
 
-        int ret = vnd->readdir(entry, n);
-
-        if (vnd->owned)
-                delete vnd;
-
+        Status ret = vnd->rm();
+        release_node(vnd);
         return ret;
 }
-// --------------------------------------------------
 
-// --------------------------------------------------
-int getfilesz(const lib::String &path, usize *buf)
+Status write(File *file, const void *buf, usize size)
 {
-        VNode *vnd = lookup(path);
-        if (!vnd)
-                return 0;      // file not found
+        if (not file)
+                return Status::NullFile;
 
-        int ret = vnd->getfilesz(buf);
+        return file->write(buf, size);
+}
+
+Status read(File *file, void *buf, usize size)
+{
+        if (not file)
+                return Status::NullFile;
+
+        Status ret = file->read(buf, size);
+        return ret;
+}
+
+Status readdir(const String &path, DirEntry *entry, usize index)
+{
+        VNode *vnd = lookup_node(path);
+        if (not vnd)
+                return Status::NullNode;
+
+        Status ret = vnd->readdir(entry, index);
+        release_node(vnd);
+        return ret;
+}
+
+Status getfilesz(const lib::String &path, usize *buf)
+{
+        VNode *vnd = lookup_node(path);
+        if (not vnd)
+                return Status::NullNode;
+
+        Status ret = vnd->getfilesz(buf);
+        release_node(vnd);
+        return ret;
+}
+
+Status getdirentn(const lib::String &path, lib::usize *buf)
+{
+        VNode *vnd = lookup_node(path);
+        if (!vnd)
+                return Status::NullNode;
         
-        if (vnd->owned)
-                delete vnd;
-        
+        Status ret = vnd->getdirentn(buf);
+        release_node(vnd);
         return ret;
 }
-// --------------------------------------------------
-
-// --------------------------------------------------
-int getdirentn(const lib::String &path, lib::usize *buf)
-{
-        VNode *vnd = lookup(path);
-        if (!vnd)
-                return -1;       // directory not found
-        
-        int ret = vnd->getdirentn(buf);
-
-        if (vnd->owned)
-                delete vnd;
-
-        return ret;
-}
-// --------------------------------------------------
 
 } /* namespace kernel::fs::vfs */

@@ -111,19 +111,21 @@ void __test_ls(const kernel::lib::String &path)
                 kernel::lib::getdirent(path, &entry, i);
 
                 logger.info("* %s", entry.name.raw());;
-                if (entry.is_dir)
+                if (entry.type == fs::vfs::DirEntryType::Dir)
                         __test_ls(path + entry.name);
         }
 }
 
 /// Idle.
+[[noreturn]]
 void kernel_hang()
 {
         panic("nothing to do");
 }
 
 /// Kernel entry point.
-extern "C" void kernel_main()
+extern "C" [[noreturn]]
+void kernel_main()
 {
         if (!boot::limine::get_base_revision().is_supported())
                 panic("limine base revsion not supported"); // you wont see the message
@@ -183,6 +185,11 @@ extern "C" void kernel_main()
         );
         logger.ok("initialized framebuffer");
 
+        scheduler::init();
+
+        lib::File *stdin_fd = lib::open("D:/input");
+        lib::File *stdout_fd = lib::open("D:/console");
+
         init_console();
 
         logger.info("-------------------------------------");
@@ -199,7 +206,9 @@ extern "C" void kernel_main()
 
         test::test_lib();
 
-        spawn("I:/bin/shell");
+        lib::close(stdin_fd);
+        lib::close(stdout_fd);
+        spawn("I:/bin/init");
         
         unmount_initrd();
         vfs::unmount('D');

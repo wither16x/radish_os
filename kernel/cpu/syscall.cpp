@@ -1,3 +1,4 @@
+#include "fs/vfs.hpp"
 #include <cpu/syscall.hpp>
 #include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
@@ -8,7 +9,6 @@
 #include <proc/process.hpp>
 #include <proc/wait.hpp>
 
-using kernel::lib::write, kernel::lib::read;
 using kernel::lib::u64, kernel::lib::usize;
 
 namespace kernel::cpu {
@@ -24,28 +24,49 @@ enum SyscallType : u64 {
         SC_EXIT,
         SC_GETPID,
         SC_WAIT,
+        SC_OPEN,
+        SC_CLOSE,
 
         SC_LIMIT // number of syscalls, always at the end of the enumeration
 };
 
+/// RBX = file descriptor
+/// RCX = buffer
+/// RDX = bytes to write
 void syscall_write(SyscallFrame *frame)
 {
-        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        usize fd = frame->rbx;
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (!curr_proc) {
+                frame->rax = static_cast<u64>(-1);
+                return;
+        }
+        const lib::File *file = curr_proc->find_file(fd);
         const void *buf = reinterpret_cast<const void *>(frame->rcx);
         usize n = frame->rdx;
-        int res = write(path, buf, n);
-        frame->rax = res;
+        fs::vfs::Status res = lib::write(const_cast<lib::File *>(file), buf, n);
+        frame->rax = static_cast<u64>(res);
 }
 
+/// RBX = file descriptor
+/// RCX = buffer
+/// RDX = bytes to write
 void syscall_read(SyscallFrame *frame)
 {
-        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        usize fd = frame->rbx;
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (!curr_proc) {
+                frame->rax = static_cast<u64>(-1);
+                return;
+        }
+        const lib::File *file = curr_proc->find_file(fd);
         void *buf = reinterpret_cast<void *>(frame->rcx);
         usize n = frame->rdx;
-        int res = read(path, buf, n);
-        frame->rax = res;
+        fs::vfs::Status res = lib::read(const_cast<lib::File* >(file), buf, n);
+        frame->rax = static_cast<u64>(res);
 }
 
+/// RBX = path
 void syscall_exec(SyscallFrame *frame)
 {
         const char *path = reinterpret_cast<const char *>(frame->rbx);
@@ -81,6 +102,34 @@ void syscall_wait(SyscallFrame *frame)
         frame->rax = res;
 }
 
+/// RBX = path
+void syscall_open(SyscallFrame *frame)
+{
+        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        lib::File *f = lib::open(path);
+        if (!f) {
+                frame->rax = static_cast<u64>(-1);
+                return;
+        }
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        usize fd = curr_proc->find_fd(f);
+        frame->rax = fd;
+}
+
+/// RBX = pointer to file descriptor
+void syscall_close(SyscallFrame *frame)
+{
+        usize fd = frame->rbx;
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (!curr_proc) {
+                frame->rax = static_cast<u64>(-1);
+                return;
+        }
+        const lib::File *file = curr_proc->find_file(fd);
+        fs::vfs::Status res = lib::close(const_cast<lib::File *>(file));
+        frame->rax = static_cast<u64>(res);
+}
+
 void (*syscalls[])(SyscallFrame *) = {
         syscall_write,
         syscall_read,
@@ -88,7 +137,9 @@ void (*syscalls[])(SyscallFrame *) = {
         syscall_fork,
         syscall_exit,
         syscall_getpid,
-        syscall_wait
+        syscall_wait,
+        syscall_open,
+        syscall_close
 };
 
 } /* anonymous namespace */

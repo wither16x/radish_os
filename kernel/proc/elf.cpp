@@ -15,7 +15,7 @@ using kernel::lib::log::logger;
 using kernel::lib::String;
 using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr, kernel::lib::usize;
 using kernel::lib::Vector;
-using kernel::lib::getfilesz, kernel::lib::read;
+using kernel::lib::getfilesz;
 using kernel::lib::memcpy, kernel::lib::memset;
 using kernel::lib::min;
 
@@ -60,7 +60,10 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
         usize size = 0;
         getfilesz(path, &size);
         buf.resize(size);
-        read(path, buf.get_data(), size);
+
+        lib::File *elf_file = lib::open(path);
+        lib::read(elf_file, buf.get_data(), size);
+        lib::close(elf_file);
 
         // parse the file
         ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());

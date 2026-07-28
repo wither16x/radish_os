@@ -4,6 +4,7 @@
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>
+#include <lib/filesystem.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 
@@ -36,6 +37,9 @@ void reap_pending_zombie()
 
         Process *zombie = ctx.pending_zombie;
         ctx.pending_zombie = nullptr;
+
+        for (auto &fd : zombie  ->get_file_descriptors())
+                lib::close(fd);
 
         mem::pmm::free_frame(zombie->kernel_stack_frame());
         remove_process(zombie);
@@ -186,6 +190,9 @@ void undertaker(Process *p)
                 logger.err("undertaker: process does not exist");
                 return;
         }
+
+        for (auto &fd : p->get_file_descriptors())
+                lib::close(fd);
 
         mem::pmm::free_frame(p->kernel_stack_frame());
         remove_process(p);

@@ -8,7 +8,7 @@
 #include <lib/vector.hpp>
 
 using kernel::lib::String;
-using kernel::lib::read, kernel::lib::getfilesz;
+using kernel::lib::open, kernel::lib::getfilesz, kernel::lib::File;
 using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::usize;
 using kernel::lib::Vector;
 
@@ -75,7 +75,9 @@ void Console::init_font(this Console &self, const String &font)
         getfilesz(font, &filesz);
         self.font_data.resize(filesz);
 
-        read(font, reinterpret_cast<char *>(self.font_data.get_data()), filesz);
+        File *font_file = open(font);
+        lib::read(font_file, reinterpret_cast<char *>(self.font_data.get_data()), filesz);
+        lib::close(font_file);
 
         PSF2Header *hdr = reinterpret_cast<PSF2Header *>(self.font_data.get_data());
 
