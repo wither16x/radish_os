@@ -135,7 +135,6 @@ Status close_file(File *file)
         if (not file)
                 return Status::NullFile; // file descriptor is null
 
-        release_node(file->vnode);
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (curr_proc)
                 curr_proc->remove_file_descriptor(file);
@@ -146,6 +145,7 @@ Status close_file(File *file)
         --file->ref_count;
         if (file->ref_count == 0) {
                 file->close();
+                release_node(file->vnode);
                 delete file;
         }
 

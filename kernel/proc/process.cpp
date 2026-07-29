@@ -100,7 +100,13 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->pml4t = pml4t;
         this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
         this->time = 0;
+
         this->file_descriptors = parent.file_descriptors;
+        // ref_count must be incremented for each copied file
+        for (usize i = 0; i < this->file_descriptors.size(); i++) {
+                if (this->file_descriptors[i])
+                        ++this->file_descriptors[i]->ref_count;
+        }
 
         this->frame = &this->frame_storage;
         memcpy(this->frame, parent.frame, sizeof(*this->frame));
@@ -250,6 +256,12 @@ void Process::use_kernel_stack(this const Process &self)
 
 void Process::add_file_descriptor(this Process &self, File *file)
 {
+        for (usize i = 0; i < self.file_descriptors.size(); i++) {
+                if (!self.file_descriptors[i]) {
+                        self.file_descriptors[i] = file;
+                        return;
+                }
+        }
         self.file_descriptors.push_back(file);
 }
 

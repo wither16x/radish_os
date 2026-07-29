@@ -238,6 +238,8 @@ vfs::Status Node::getfilesz(usize *buf)
 {
         if (this->dir_data)
                 return vfs::Status::IsADirectory;
+        if (not this->storage)
+                return vfs::Status::NullData;
 
         memcpy(buf, &this->storage->size, sizeof(*buf));
         
