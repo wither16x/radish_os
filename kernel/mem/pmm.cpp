@@ -27,13 +27,13 @@ void init(boot::BootInfo::MemmapInfo &memmap)
 
         for (usize i = 0; i < memmap.entry_count; i++) {
                 if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
-                        boot::MemmapEntry& e = memmap.entries[i];
+                        boot::MemmapEntry &e = memmap.entries[i];
                         for (uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
                                 allocator_stage1.get_bitmap().clear(addr / FRAME_BYTES);
                 }
         }
 
-        logger.ok("initialized pmm stage 1");
+        logger.ok("initialized pmm");
 }
 // --------------------------------------------------
 

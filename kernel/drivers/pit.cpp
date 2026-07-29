@@ -65,7 +65,7 @@ void tick()
 	// reset tics every second so the tic counter never
 	// overflows
 	// I will maybe add minutes, hours, days, and so on
-        if (tics % 1000 == 0 && !sleeping) {
+        if (tics % 1000 == 0 and not sleeping) {
                 tics = 0;
                 seconds++;
         }

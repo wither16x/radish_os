@@ -31,7 +31,7 @@ const char *String::raw(this const String &self)
 usize String::length(this const String &self)
 {
         // avoid returning -1
-        if (self.data.size() == 0)
+        if (self.data.empty())
                 return 0;
 
         return self.data.size() - 1;

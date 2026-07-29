@@ -3,9 +3,6 @@
 #include <lib/vector.hpp>
 #include <lib/typing.hpp>
 
-// I have serious doubts on my bits/bytes operations not
-// gonna lie.
-
 namespace kernel::lib {
 
 /// This bitmap has a fixed size known at compile-time.

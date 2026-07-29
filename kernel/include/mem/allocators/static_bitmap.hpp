@@ -23,7 +23,7 @@ public:
                         lib::usize start = this->last_allocated;
 
                         do {
-                                if (!this->bitmap.test(this->last_allocated))
+                                if (not this->bitmap.test(this->last_allocated))
                                         break;
 
                                 this->last_allocated++;
@@ -41,9 +41,8 @@ public:
 
         void free(T n) override
         {
-                if (!this->bitmap.test(n))
+                if (not this->bitmap.test(n))
                         panic("double free");
-                        //return;
 
                 this->bitmap.clear(n);
         }

@@ -7,19 +7,19 @@ char* itoa(isize n, int base)
 {
         static char str[65];
 
-        if (base < 2 || base > 36) {
+        if (base < 2 or base > 36) {
                 str[0] = '\0';
                 return str;
         }
 
         usize u;
 
-        bool neg = (n < 0) && (base == 10);
+        bool neg = (n < 0) and (base == 10);
 
         if (n < 0)
-                u = (usize)(-(n + 1)) + 1;
+                u = static_cast<usize>(-(n + 1)) + 1;
         else
-                u = (usize)n;
+                u = static_cast<usize>(n);
 
         char* p = str;
 
@@ -51,7 +51,7 @@ char* utoa(usize n, int base)
 {
         static char str[65];
 
-        if (base < 2 || base > 36) {
+        if (base < 2 or base > 36) {
                 str[0] = '\0';
                 return str;
         }

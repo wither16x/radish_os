@@ -17,7 +17,6 @@ void __cxa_pure_virtual()
         panic("call to pure virtual method");
 }
 
-// not sure about this but at least it works
 int atexit()
 {
         return 0;

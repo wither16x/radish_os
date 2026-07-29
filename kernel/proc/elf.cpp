@@ -32,9 +32,9 @@ enum PHDRType : elf64_word {
 int elf_check(ELF64Ehdr *hdr)
 {
         if (hdr->e_ident[ELF64Magic::EI_I0] != ELF64Magic::EI_BYTE0
-        || hdr->e_ident[ELF64Magic::EI_I1] != ELF64Magic::EI_BYTE1
-        || hdr->e_ident[ELF64Magic::EI_I2] != ELF64Magic::EI_BYTE2
-        || hdr->e_ident[ELF64Magic::EI_I3] != ELF64Magic::EI_BYTE3
+        or hdr->e_ident[ELF64Magic::EI_I1] != ELF64Magic::EI_BYTE1
+        or hdr->e_ident[ELF64Magic::EI_I2] != ELF64Magic::EI_BYTE2
+        or hdr->e_ident[ELF64Magic::EI_I3] != ELF64Magic::EI_BYTE3
         ) {
                 return -1; // invalid magic
         }

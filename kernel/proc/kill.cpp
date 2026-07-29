@@ -7,7 +7,7 @@ namespace kernel::proc {
 int kill(PID pid)
 {
         Process *proc = scheduler::get_process_by_id(pid);
-        if (!proc)
+        if (not proc)
                 return -1; // process does not exit
 
         if (proc->get_id() == scheduler::get_current_process()->get_id())

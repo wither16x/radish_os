@@ -133,7 +133,7 @@ void parse_archive(u8 *archive)
 
                 Vector<String> parts = parse_path(path);
 
-                if (parts.size() == 0) {
+                if (parts.empty()) {
                         usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
                         archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
                         continue;
@@ -144,10 +144,10 @@ void parse_archive(u8 *archive)
                 Node *parent = root;
                 for (usize i = 0; i < parts.size() - 1; i++) {
                         Node *next = find_dir(parent, parts[i]);
-                        if (!next)
+                        if (not next)
                                 next = __create_dir(parent, parts[i]);
                         parent = next;
-                        if (!parent) // failed to create the directory
+                        if (not parent) // failed to create the directory
                                 break;
                 }
 
@@ -281,7 +281,7 @@ USTAR::USTAR(void *archive)
 // --------------------------------------------------
 vfs::VNode *USTAR::get_root()
 {
-        if (!root) {
+        if (not root) {
                 root            = new Node;
                 root->parent    = nullptr;
                 root->name      = "/";

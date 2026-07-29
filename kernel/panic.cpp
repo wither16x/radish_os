@@ -55,7 +55,7 @@ const char *lookup_symbol(uptr addr)
         uptr best_addr = 0;
 
         for (usize i = 0; i < kernel_symbol_count; i++) {
-                if (kernel_symbols[i].addr <= addr && kernel_symbols[i].addr >= best_addr) {
+                if (kernel_symbols[i].addr <= addr and kernel_symbols[i].addr >= best_addr) {
                         best_addr = kernel_symbols[i].addr;
                         best_match = kernel_symbols[i].name;
                 }
@@ -69,7 +69,7 @@ void dump_stack_trace(u8 depth)
 {
         for (u8 i = 0; i < depth; i++) {
                 void *addr = get_return_address(i);
-                if (!addr || reinterpret_cast<uptr>(addr) < 0x10000)
+                if (not addr or reinterpret_cast<uptr>(addr) < 0x10000)
                         break;
 
                 const char *name = lookup_symbol(reinterpret_cast<uptr>(addr));

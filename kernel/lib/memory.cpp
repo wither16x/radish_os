@@ -67,7 +67,7 @@ int memcmp(const void *s1, const void *s2, usize n)
 // --------------------------------------------------
 int strcmp(const char *s1, const char *s2)
 {
-        while (*s1 && *s2) {
+        while (*s1 and *s2) {
                 if (*s1 != *s2)
                         break;
 

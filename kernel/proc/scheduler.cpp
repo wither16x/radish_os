@@ -32,7 +32,7 @@ SchedulerContext ctx;
 
 void reap_pending_zombie()
 {
-        if (!ctx.pending_zombie)
+        if (not ctx.pending_zombie)
                 return;
 
         Process *zombie = ctx.pending_zombie;
@@ -52,7 +52,7 @@ Process *find_next_runnable_process(Process *old_proc, usize *new_proc_idx)
 
         for (usize i = 0; i < ctx.processes.size(); i++) {
                 usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
-                if (!ctx.processes[idx]->is_dead() && ctx.processes[idx] != old_proc) {
+                if (not ctx.processes[idx]->is_dead() and ctx.processes[idx] != old_proc) {
                         __new_proc_idx = idx;
                         memcpy(new_proc_idx, &__new_proc_idx, sizeof(*new_proc_idx));
                         return ctx.processes[idx];
@@ -81,7 +81,7 @@ void add_process(Process *p)
         // this function only adds the process to the vector;
         // it must have been initialized before
         ctx.processes.push_back(p);
-        if (!ctx.current_process)
+        if (not ctx.current_process)
                 ctx.current_process = p;
 }
 // --------------------------------------------------
@@ -100,7 +100,7 @@ void remove_process(Process *p)
 // --------------------------------------------------
 void tick()
 {
-        if (!ctx.is_active || ctx.processes.empty() || !ctx.current_process)
+        if (not ctx.is_active or ctx.processes.empty() or not ctx.current_process)
                 return;
 
         if (ctx.current_process->get_status() != ProcessStatus::Dead) {
@@ -114,7 +114,7 @@ void tick()
         usize new_proc_idx = 0;
         Process *new_proc = find_next_runnable_process(nullptr, &new_proc_idx);
 
-        if (!new_proc) {
+        if (not new_proc) {
                 ctx.current_process = nullptr;
                 if (old_proc->is_dead())
                         undertaker(old_proc);
@@ -202,7 +202,7 @@ void undertaker(Process *p)
 void yield()
 {
         Process *old_proc = ctx.current_process;
-        if (!old_proc) {
+        if (not old_proc) {
                 logger.debug("old process is null");
                 return;
         }
@@ -210,7 +210,7 @@ void yield()
         usize start_idx = 0;
         Process *new_proc = find_next_runnable_process(old_proc, &start_idx);
 
-        if (!new_proc)
+        if (not new_proc)
                 return;
 
         new_proc->load_pml4t();

@@ -293,7 +293,7 @@ vfs::File *Node::open()
 // --------------------------------------------------
 vfs::VNode *TMPFS::get_root()
 {
-        if (!root) {
+        if (not root) {
                 root            = new Node;
                 root->parent    = nullptr;
                 root->name      = "/";

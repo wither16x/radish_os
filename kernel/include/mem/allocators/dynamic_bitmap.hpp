@@ -24,7 +24,7 @@ public:
 
                         do {
                                 bool state = this->bitmap.test(this->last_allocated);
-                                if (!state)
+                                if (not state)
                                         break;
                                 
                                 this->last_allocated++;
@@ -42,7 +42,7 @@ public:
 
         void free(T n) override
         {
-                if (!this->bitmap.test(n))
+                if (not this->bitmap.test(n))
                         panic("double free");
                 this->bitmap.clear(n);
         }

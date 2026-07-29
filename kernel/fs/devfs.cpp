@@ -61,7 +61,7 @@ vfs::Status DevfsFile::read(void *buf, usize n)
         case DeviceType::Input: {
                 for (usize i = 0; i < n; i++) {
                         char ch = 0;
-                        while (!ch)
+                        while (not ch)
                                 ch = drivers::keyboard::read();
 
                         static_cast<char *>(buf)[i] = ch;
@@ -193,7 +193,7 @@ vfs::File *Node::open()
 
 vfs::VNode *DEVFS::get_root()
 {
-        if (!root) {
+        if (not root) {
                 root            = new Node;
                 root->name      = "/";
                 root->type      = NodeType::Root;

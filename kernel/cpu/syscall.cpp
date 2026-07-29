@@ -37,7 +37,7 @@ void syscall_write(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
         proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (!curr_proc) {
+        if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
@@ -55,7 +55,7 @@ void syscall_read(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
         proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (!curr_proc) {
+        if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
@@ -107,7 +107,7 @@ void syscall_open(SyscallFrame *frame)
 {
         const char *path = reinterpret_cast<const char *>(frame->rbx);
         lib::File *f = lib::open(path);
-        if (!f) {
+        if (not f) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
@@ -121,7 +121,7 @@ void syscall_close(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
         proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (!curr_proc) {
+        if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }

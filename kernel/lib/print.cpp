@@ -79,9 +79,9 @@ void putchar(int ch)
         color = process_ansi_sequence(ch);
         if (ch == '\033')
                 return;
-        if (ansi_seq_start && '0' <= ch && ch <= '7')
+        if (ansi_seq_start and '0' <= ch and ch <= '7')
                 return;
-        if (ansi_seq_start && (ch == 'm' || ch == '['))
+        if (ansi_seq_start and (ch == 'm' or ch == '['))
                 return;
 
         drivers::console::Console &console = drivers::console::get_console();

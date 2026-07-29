@@ -32,7 +32,7 @@ void PML4T::init(this PML4T &self, const PML4T &parent)
 
         for (usize i = 0; i < PAGE_TABLE_ENTRIES / 2; i++) {
                 u64 entry = parent.raw()->entries[i];
-                if (!(entry & PageFlag::Present))
+                if (not (entry & PageFlag::Present))
                         continue;
 
                 u64 flags = entry & ~PHYS_ADDR_MASK;
@@ -49,7 +49,7 @@ void PML4T::destroy(this PML4T &self)
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
         for (usize pml4t_idx = 0; pml4t_idx < PAGE_TABLE_ENTRIES / 2; pml4t_idx++) {
-                if (!(self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
+                if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                         continue;
 
                 if (pml4t_idx == mem::heap::HEAP_PML4T_IDX / 2)
@@ -57,17 +57,17 @@ void PML4T::destroy(this PML4T &self)
 
                 PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 for (u64 pdpt_idx = 0; pdpt_idx < PAGE_TABLE_ENTRIES; pdpt_idx++) {
-                        if (!(pdpt->entries[pdpt_idx] & PageFlag::Present))
+                        if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                                 continue;
 
                         PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                         for (u16 pdt_idx = 0; pdt_idx < PAGE_TABLE_ENTRIES; pdt_idx++) {
-                                if (!(pdt->entries[pdt_idx] & PageFlag::Present))
+                                if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                                         continue;
 
                                 PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                                 for (u64 pt_idx = 0; pt_idx < PAGE_TABLE_ENTRIES; pt_idx++) {
-                                        if (!(pt->entries[pt_idx] & PageFlag::Present))
+                                        if (not (pt->entries[pt_idx] & PageFlag::Present))
                                                 continue;
 
                                         pmm::free_frame(pt->entries[pt_idx] & PHYS_ADDR_MASK);
@@ -106,7 +106,7 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags)
         usize pt_idx    = (vaddr >> 12) & 0x1ff;
 
         // now map the page to the given frame
-        if (!(self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present)) {
+        if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present)) {
                 self.raw_pml4t->entries[pml4t_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset),
@@ -116,7 +116,7 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags)
         }
 
         PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdpt->entries[pdpt_idx] & PageFlag::Present)) {
+        if (not (pdpt->entries[pdpt_idx] & PageFlag::Present)) {
                 pdpt->entries[pdpt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset),
@@ -126,7 +126,7 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags)
         }
 
         PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdt->entries[pdt_idx] & PageFlag::Present)) {
+        if (not (pdt->entries[pdt_idx] & PageFlag::Present)) {
                 pdt->entries[pdt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
                 memset(
                         reinterpret_cast<u64 *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset),
@@ -136,7 +136,7 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags)
         }
 
         PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pt->entries[pt_idx] & PageFlag::Present))
+        if (not (pt->entries[pt_idx] & PageFlag::Present))
                 pt->entries[pt_idx] = paddr | flags;
 }
 
@@ -149,19 +149,19 @@ void PML4T::unmap_page(this PML4T &self, uptr vaddr)
         u64 pdt_idx     = (vaddr >> 21) & 0x1ff;
         u64 pt_idx      = (vaddr >> 12) & 0x1ff;
 
-        if (!(self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
+        if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                 return;
 
         PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdpt->entries[pdpt_idx] & PageFlag::Present))
+        if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                 return;
 
         PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdt->entries[pdt_idx] & PageFlag::Present))
+        if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                 return;
 
         PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pt->entries[pt_idx] & PageFlag::Present))
+        if (not (pt->entries[pt_idx] & PageFlag::Present))
                 return;
 
         pt->entries[pt_idx] = 0;
@@ -200,15 +200,15 @@ bool PML4T::is_mapped(this const PML4T &self, uptr vaddr)
         u64 pdt_idx     = (vaddr >> 21) & 0x1ff;
         u64 pt_idx      = (vaddr >> 12) & 0x1ff;
 
-        if (!(self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
+        if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                 return false;
 
         PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdpt->entries[pdpt_idx] & PageFlag::Present))
+        if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                 return false;
 
         PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (!(pdt->entries[pdt_idx] & PageFlag::Present))
+        if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                 return false;
 
         PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);

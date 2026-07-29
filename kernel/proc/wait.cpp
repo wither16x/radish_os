@@ -11,14 +11,14 @@ namespace kernel::proc {
 int wait()
 {
         Process *proc = scheduler::get_current_process();
-        if (!proc)
+        if (not proc)
                 return -1; // there is no current process
 
         if (proc->get_children().size() == 0)
                 return -2; // process has no child
 
         Process *dead_child = nullptr;
-        while (!dead_child) {
+        while (not dead_child) {
                 for (auto &child : proc->get_children()) {
                         if (child->get_status() == ProcessStatus::Dead) {
                                 dead_child = child;
@@ -27,7 +27,7 @@ int wait()
                         }
                 }
 
-                if (!dead_child)
+                if (not dead_child)
                         scheduler::yield();
         }
 

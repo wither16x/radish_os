@@ -127,7 +127,7 @@ void kernel_hang()
 extern "C" [[noreturn]]
 void kernel_main()
 {
-        if (!boot::limine::get_base_revision().is_supported())
+        if (not boot::limine::get_base_revision().is_supported())
                 panic("limine base revsion not supported"); // you wont see the message
 
         if (serial::init_port(serial::Port::SERIAL_COM1) != Status::Ok)

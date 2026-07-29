@@ -268,7 +268,7 @@ Status getfilesz(const lib::String &path, usize *buf)
 Status getdirentn(const lib::String &path, lib::usize *buf)
 {
         VNode *vnd = lookup_node(path);
-        if (!vnd)
+        if (not vnd)
                 return Status::NullNode;
         
         Status ret = vnd->getdirentn(buf);

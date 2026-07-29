@@ -24,7 +24,7 @@ Vector<String> parse_path(const String &path)
                         i++;
                         String part_buf;
 
-                        while (i < path.length() && path[i] != '/') {
+                        while (i < path.length() and path[i] != '/') {
                                 part_buf += path[i];
                                 i++;
                         }

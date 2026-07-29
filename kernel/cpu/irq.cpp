@@ -40,7 +40,7 @@ extern "C" void irq_handler(IRQFrame *f)
         }
 
         void (*handler)(IRQFrame *) = handlers[f->irqno];
-        if (!handler) {
+        if (not handler) {
                 logger.err("no handler available for irq %u", f->irqno);
                 return;
         }

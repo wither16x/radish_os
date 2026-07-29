@@ -63,14 +63,14 @@ private:
                 BlockHeader *curr = self.block_list.first();
                 while (curr) {
                         lib::uptr curr_addr = reinterpret_cast<lib::uptr>(curr);
-                        if (!curr->free && curr_addr >= last_page)
+                        if (not curr->free && curr_addr >= last_page)
                                 return false;
                         curr = static_cast<BlockHeader *>(curr->next);
                 }
 
                 BlockHeader *last_block = self.block_list.last();
 
-                if (!last_block->free)
+                if (not last_block->free)
                         return false;
 
                 lib::uptr last_addr  = reinterpret_cast<lib::uptr>(last_block);
@@ -106,7 +106,7 @@ private:
                                 self.curr_block->next->prev = new_block;
 
                         self.curr_block->next = new_block;
-                        if (!self.curr_block->next || (lib::uptr)self.curr_block->next == 0xffffffffffffffff)
+                        if (not self.curr_block->next)
                                 panic("new block is null");
                         self.curr_block->bytes = base_size;
                 }
@@ -118,7 +118,7 @@ private:
                 BlockHeader *current_block = self.block_list.first();
 
                 while (current_block) {
-                        if (current_block->free && current_block->bytes >= min_size)
+                        if (current_block->free and current_block->bytes >= min_size)
                                 return current_block;
 
                         current_block = static_cast<BlockHeader *>(current_block->next);
@@ -167,7 +167,7 @@ public:
 
                 BlockHeader *block = this->find_free_block(n);
 
-                if (!block) {
+                if (not block) {
                         lib::usize required_pages = lib::align_up(n + sizeof(BlockHeader), PAGE_SIZE) / PAGE_SIZE;
                         for (lib::usize i = 0; i < required_pages; i++)
                                 this->extend();
@@ -193,14 +193,14 @@ public:
 
                 hdr->free = true;
 
-                if (hdr->next && static_cast<BlockHeader *>(hdr->next)->free) {
+                if (hdr->next and static_cast<BlockHeader *>(hdr->next)->free) {
                         hdr->bytes += sizeof(BlockHeader) + static_cast<BlockHeader *>(hdr->next)->bytes;
                         hdr->next = hdr->next->next;
                         if (hdr->next)
                                 hdr->next->prev = hdr;
                 }
 
-                if (hdr->prev && static_cast<BlockHeader *>(hdr->prev)->free) {
+                if (hdr->prev and static_cast<BlockHeader *>(hdr->prev)->free) {
                         static_cast<BlockHeader *>(hdr->prev)->bytes += sizeof(BlockHeader) + hdr->bytes;
                         hdr->prev->next = hdr->next;
                         if (hdr->next)
@@ -211,10 +211,10 @@ public:
                 while (this->pages > 1) {
                         BlockHeader *last_block = this->block_list.last();
 
-                        if (!last_block->free)
+                        if (not last_block->free)
                                 break;
 
-                        if (!this->shorten())
+                        if (not this->shorten())
                                 break;
                 }
         }
