@@ -18,7 +18,6 @@
 #include <lib/filesystem.hpp>
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
-#include <lib/status.hpp>
 #include <lib/typing.hpp>
 #include <mem/heap.hpp>
 #include <mem/pmm.hpp>
@@ -33,7 +32,6 @@ using namespace kernel::mem;
 using namespace kernel::proc;
 
 using kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::Status;
 using kernel::lib::log::logger;
 using kernel::boot::BootInfo;
 using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::sti;
@@ -130,7 +128,7 @@ void kernel_main()
         if (not boot::limine::get_base_revision().is_supported())
                 panic("limine base revsion not supported"); // you wont see the message
 
-        if (serial::init_port(serial::Port::SERIAL_COM1) != Status::Ok)
+        if (not serial::init_port(serial::Port::SERIAL_COM1))
                 panic("no display device"); // so the message cannot be printed lol
 
         logger.set_context("kernel");

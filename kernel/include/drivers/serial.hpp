@@ -1,6 +1,5 @@
 #pragma once
 
-#include <lib/status.hpp>
 #include <lib/typing.hpp>
 
 namespace kernel::drivers::serial {
@@ -15,7 +14,7 @@ enum Port : lib::u16 {
 };
 
 /// Initialize a serial port.
-lib::Status init_port(lib::u16 port);
+bool init_port(lib::u16 port);
 /// Send a byte to a serial port.
 void send_byte(lib::u16 port, lib::u8 byte);
 

@@ -1,10 +1,9 @@
-#include "cpu/io.hpp"
+#include <cpu/io.hpp>
 #include <cpu/assembly.hpp>
 #include <drivers/serial.hpp>
 #include <lib/typing.hpp>
 
 using kernel::lib::u8, kernel::lib::u16;
-using kernel::lib::Status;
 
 namespace kernel::drivers::serial {
 
@@ -19,7 +18,7 @@ void wait_port_busy(u16 port)
 } /* anonymous namespace */
 
 // --------------------------------------------------
-Status init_port(u16 port)
+bool init_port(u16 port)
 {
         cpu::output_byte_port(port + 1, 0);
 	cpu::output_byte_port(port + 3, 0x80);
@@ -32,10 +31,10 @@ Status init_port(u16 port)
 
 	cpu::output_byte_port(port, 0xae);
         if (cpu::input_byte_port(port) != 0xae)
-                return Status::Err;
+                return false;
 
         cpu::output_byte_port(port + 4, 0xf);
-        return Status::Ok;
+        return true;
 }
 // --------------------------------------------------
 
