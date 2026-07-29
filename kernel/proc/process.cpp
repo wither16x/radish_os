@@ -27,6 +27,65 @@ extern "C" void __proc_trampoline();
 
 } /* anonymous namespace */
 
+ProcessHeap::ProcessHeap(uptr start, uptr limit, mem::PML4T &pml4t)
+        : start(start), limit(limit), pml4t(pml4t)
+{
+        this->last_page = this->start;
+        this->pml4t.map_page(this->start,
+                mem::pmm::allocate_frame(),
+                mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
+        );
+        this->last_page = this->start + mem::PAGE_SIZE;
+}
+
+bool ProcessHeap::extend(this ProcessHeap &self, int pages)
+{
+        if (self.last_page + pages * mem::PAGE_SIZE > self.limit)
+                return false;
+
+        uptr vaddr = self.last_page;
+        for (int i = 0; i < pages; i++) {
+                self.pml4t.map_page(vaddr,
+                        mem::pmm::allocate_frame(),
+                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
+                );
+                vaddr += mem::PAGE_SIZE;
+        }
+
+        self.last_page += pages * mem::PAGE_SIZE;
+        return true;
+}
+
+bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
+{
+        if (self.last_page - pages * mem::PAGE_SIZE < self.start)
+                return false;
+
+        uptr vaddr = self.last_page - mem::PAGE_SIZE;
+        for (int i = 0; i > pages; i++) {
+                self.pml4t.unmap_page(vaddr);
+                vaddr -= mem::PAGE_SIZE;
+        }
+
+        self.last_page -= pages * mem::PAGE_SIZE;
+        return true;
+}
+
+uptr ProcessHeap::get_start(this const ProcessHeap &self)
+{
+        return self.start;
+}
+
+uptr ProcessHeap::get_last_page(this const ProcessHeap &self)
+{
+        return self.last_page;
+}
+
+uptr ProcessHeap::get_limit(this const ProcessHeap &self)
+{
+        return self.limit;
+}
+
 void Process::init_kernel_stack(this Process &self)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
@@ -64,10 +123,11 @@ void Process::init_kernel_stack(this Process &self)
 }
 
 // --------------------------------------------------
-Process::Process(PID id, void (*entry)(), mem::PML4T &pml4t)
+Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
+        : heap(mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, pml4t)
 {
         this->id = id;
-        this->entry = entry;
+        this->entry = info->entry;
 
         for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
                 pml4t.map_page(addr,
@@ -93,6 +153,7 @@ Process::Process(PID id, void (*entry)(), mem::PML4T &pml4t)
 // --------------------------------------------------
 
 Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
+        : heap(parent.heap.get_start(), parent.heap.get_limit(), pml4t)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
@@ -352,6 +413,11 @@ usize Process::find_fd(this const Process &self, File *file)
         // note: this value is going to be converted to the biggest value that usize
         // can handle
         return -1; // not found
+}
+
+ProcessHeap &Process::get_heap(this Process &self)
+{
+        return self.heap;
 }
 
 bool Process::is_dead(this const Process &self)

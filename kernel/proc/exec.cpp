@@ -27,14 +27,14 @@ int exec(const lib::String &path)
         mem::PML4T &kpml4t = get_kernel_pml4t();
         mem::PML4T proc_pml4t;
         proc_pml4t.init(kpml4t);
-        uptr proc_addr = 0;
-        int load_res = elf::load_elf(&proc_pml4t, path, &proc_addr);
+        elf::ElfInfo elf_info;
+        int load_res = elf::load_elf(&proc_pml4t, path, &elf_info);
         if (load_res != 0) {
                 cpu::sti();
                 return -1;
         }
 
-        void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
+        void (*proc_entry)() = reinterpret_cast<void (*)()>(elf_info.address);
 
         // Update the process
         proc->switch_pml4t(proc_pml4t);

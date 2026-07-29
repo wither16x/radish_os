@@ -1,6 +1,7 @@
 # objects and binaries
 /bin/
 /build/
+/.cache/
 
 # limine header file, ignored as it is copied here by scripts/get-deps.sh
 /include/limine.h
@@ -10,3 +11,5 @@
 
 # donwloaded header
 /test/Tarwi/Tarwi.hpp
+
+/compile_commands.json

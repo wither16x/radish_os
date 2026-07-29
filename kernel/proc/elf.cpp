@@ -24,22 +24,22 @@ namespace kernel::proc::elf {
 namespace {
 
 /// Supported program header types.
-enum PHDRType : elf64_word {
-        PHDRTypeLoad            = 1
+enum PhdrType : elf64_word {
+        PhdrTypeLoad            = 1
 };
 
 /// Check if an ELF is valid or not.
-int elf_check(ELF64Ehdr *hdr)
+int elf_check(Elf64Ehdr *hdr)
 {
-        if (hdr->e_ident[ELF64Magic::EI_I0] != ELF64Magic::EI_BYTE0
-        or hdr->e_ident[ELF64Magic::EI_I1] != ELF64Magic::EI_BYTE1
-        or hdr->e_ident[ELF64Magic::EI_I2] != ELF64Magic::EI_BYTE2
-        or hdr->e_ident[ELF64Magic::EI_I3] != ELF64Magic::EI_BYTE3
+        if (hdr->e_ident[Elf64Magic::EI_I0] != Elf64Magic::EI_BYTE0
+        or hdr->e_ident[Elf64Magic::EI_I1] != Elf64Magic::EI_BYTE1
+        or hdr->e_ident[Elf64Magic::EI_I2] != Elf64Magic::EI_BYTE2
+        or hdr->e_ident[Elf64Magic::EI_I3] != Elf64Magic::EI_BYTE3
         ) {
                 return -1; // invalid magic
         }
 
-        if (hdr->e_type != ELF64Type::ET_EXEC)
+        if (hdr->e_type != Elf64Type::ET_EXEC)
                 return -2; // invalid ELF type
 
         if (hdr->e_version != 1)
@@ -51,7 +51,7 @@ int elf_check(ELF64Ehdr *hdr)
 } /* anonymous namespace */
 
 // --------------------------------------------------
-int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
+int load_elf(mem::PML4T *pml4t, const String &path, ElfInfo *info)
 {
         uptr hhdm = get_kernel_hhdm_offset();
 
@@ -66,7 +66,7 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
         lib::close(elf_file);
 
         // parse the file
-        ELF64Ehdr *hdr = reinterpret_cast<ELF64Ehdr *>(buf.get_data());
+        Elf64Ehdr *hdr = reinterpret_cast<Elf64Ehdr *>(buf.get_data());
         int is_file_valid = elf_check(hdr);
         if (is_file_valid != 0) {
                 logger.err("elf is not valid");
@@ -74,11 +74,16 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
         }
 
         uptr phdr_offset = reinterpret_cast<uptr>(hdr) + hdr->e_phoff;
+        uptr highest_vaddr = 0;
 
         for (elf64_half i = 0; i < hdr->e_phnum; i++) {
-                ELF64Phdr *phdr = reinterpret_cast<ELF64Phdr *>(phdr_offset + i * hdr->e_phentsize);        
-                if (phdr->p_type != PHDRType::PHDRTypeLoad)
+                Elf64Phdr *phdr = reinterpret_cast<Elf64Phdr *>(phdr_offset + i * hdr->e_phentsize);        
+                if (phdr->p_type != PhdrType::PhdrTypeLoad)
                         continue;
+
+                uptr segment_end = phdr->p_vaddr + phdr->p_memsz;
+                if (segment_end > highest_vaddr)
+                        highest_vaddr = segment_end;
 
                 usize pages = ((phdr->p_vaddr & (mem::PAGE_SIZE - 1)) + phdr->p_memsz + mem::PAGE_SIZE - 1) / mem::PAGE_SIZE;
                 for (usize j = 0; j < pages; j++) {
@@ -122,7 +127,8 @@ int load_elf(mem::PML4T *pml4t, const String &path, uptr *addr)
         }
 
         // copy the entry address
-        memcpy(addr, &hdr->e_entry, sizeof(*addr));
+        memcpy(&info->address, &hdr->e_entry, sizeof(info->address));
+        info->highest_vaddr = highest_vaddr;
 
         return 0;
 }

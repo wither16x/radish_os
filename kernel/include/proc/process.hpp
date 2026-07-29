@@ -5,9 +5,10 @@
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
+#include <lib/filesystem.hpp>
 #include <mem/pml4t.hpp>
 #include <proc/pid.hpp>
-#include <lib/filesystem.hpp>
+#include <proc/elf.hpp>
 
 namespace kernel::proc {
 
@@ -41,6 +42,26 @@ struct [[gnu::packed]] ProcessStackFrame {
         lib::u64 ss;
 };
 
+/// Process heap pages are linear from `start` to `limit`.
+/// `last_page` represents the last mapped page. It changes when
+/// the heap gets smaller or bigger.
+class ProcessHeap {
+        lib::uptr start;
+        lib::uptr last_page;
+        lib::uptr limit;
+        mem::PML4T &pml4t;
+
+public:
+        ProcessHeap(lib::uptr start, lib::uptr limit, mem::PML4T &pml4t);
+
+        bool extend(this ProcessHeap &self, int pages);
+        bool shorten(this ProcessHeap &self, int pages);
+
+        lib::uptr get_start(this const ProcessHeap &self);
+        lib::uptr get_last_page(this const ProcessHeap &self);
+        lib::uptr get_limit(this const ProcessHeap &self);
+};
+
 /// Representation of a process.
 /// It is recommended to use `allocate_pid()` instead
 /// of assigning a PID manually when creating a new process.
@@ -57,6 +78,8 @@ class Process {
         ProcessStackFrame *frame;
         ProcessStackFrame frame_storage;
 
+        ProcessHeap heap;
+
         lib::uptr kstack_frame;
         lib::uptr kstack_top;
         lib::uptr krsp;
@@ -67,7 +90,7 @@ class Process {
 
 public:
         /// Create a brand new process. 
-        Process(PID id, void (*entry)(), mem::PML4T &pml4t);
+        Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
         /// Create a process from another.
         Process(PID id, const Process &parent, mem::PML4T &pml4t);
 
@@ -102,6 +125,7 @@ public:
         const lib::Vector<lib::File *> get_file_descriptors(this const Process &self);
         const lib::File *find_file(this const Process &self, lib::usize id);
         lib::usize find_fd(this const Process &self, lib::File *file);
+        ProcessHeap &get_heap(this Process &self);
 
         bool is_dead(this const Process &self);
         void die(this Process &self);

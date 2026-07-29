@@ -25,14 +25,15 @@ Process *load_program_as_process(const String &path)
         proc_pml4t.init(kpml4t);
 
         // load the file (assume ELF64)
-        uptr proc_addr = 0;
-        int load_res = elf::load_elf(&proc_pml4t, path, &proc_addr);
+        elf::ElfInfo elf_info;
+        int load_res = elf::load_elf(&proc_pml4t, path, &elf_info);
         if (load_res != 0)
                 return nullptr; // could not load executable
 
+        elf_info.entry = reinterpret_cast<void (*)()>(elf_info.address);
+
         // create the process
-        void (*proc_entry)() = reinterpret_cast<void (*)()>(proc_addr);
-        Process *proc = new Process(allocate_pid(), proc_entry, proc_pml4t);
+        Process *proc = new Process(allocate_pid(), &elf_info, proc_pml4t);
 
         return proc;
 }

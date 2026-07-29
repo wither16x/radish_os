@@ -9,7 +9,7 @@ namespace kernel::proc::elf {
 constexpr int EI_NIDENT = 16;
 
 /// Magic bytes of an ELF file and their indexes.
-enum ELF64Magic : unsigned char {
+enum Elf64Magic : unsigned char {
         EI_I0              = 0,
         EI_I1,
         EI_I2,
@@ -33,12 +33,12 @@ using elf64_section             = lib::u16;
 using elf64_versym              = elf64_half;
 
 /// Enumeration of supported ELF types.
-enum ELF64Type : elf64_half {
+enum Elf64Type : elf64_half {
         ET_EXEC           = 2
 };
 
 /// Handled symbol states.
-enum SHN : int {
+enum Shn : int {
         SHN_UNDEF
 };
 
@@ -47,7 +47,7 @@ enum SHN : int {
 // sh = section header
 
 /// Header of an ELF.
-struct ELF64Ehdr {
+struct Elf64Ehdr {
         unsigned char   e_ident[EI_NIDENT];
         elf64_half      e_type;
         elf64_half      e_machine;
@@ -65,7 +65,7 @@ struct ELF64Ehdr {
 };
 
 /// Header of a section.
-struct ELF64Shdr {
+struct Elf64Shdr {
         elf64_word      sh_name;
         elf64_word      sh_type;
         elf64_xword     sh_flags;
@@ -79,7 +79,7 @@ struct ELF64Shdr {
 };
 
 /// Header of a program.
-struct ELF64Phdr {
+struct Elf64Phdr {
         elf64_word      p_type;
         elf64_word      p_flags;
         elf64_off       p_offset;
@@ -91,7 +91,7 @@ struct ELF64Phdr {
 };
 
 /// Representation of a symbol.
-struct ELF64Sym {
+struct Elf64Sym {
         elf64_word      st_name;
         unsigned char   st_info;
         unsigned char   st_other;
@@ -100,8 +100,17 @@ struct ELF64Sym {
         elf64_xword     st_size;
 };
 
+/// Structure filled when loading an ELF to give informations to
+/// the process which need them.
+struct ElfInfo {
+        void (*entry)();
+        lib::uptr address;
+        // end of last PT_LOAD
+        lib::uptr highest_vaddr;
+};
+
 /// Load an ELF and map it in higher-half in a process'
 /// PML4 table.
-int load_elf(mem::PML4T *pml4t, const lib::String &path, lib::uptr *addr);
+int load_elf(mem::PML4T *pml4t, const lib::String &path, ElfInfo *info);
 
 } /* namespace kernel::proc::elf */

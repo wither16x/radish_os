@@ -26,6 +26,7 @@ enum SyscallType : u64 {
         SC_WAIT,
         SC_OPEN,
         SC_CLOSE,
+        SC_LASTPG,
 
         SC_LIMIT // number of syscalls, always at the end of the enumeration
 };
@@ -37,13 +38,16 @@ void syscall_write(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
         proc::Process *curr_proc = proc::scheduler::get_current_process();
+
         if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
+
         const lib::File *file = curr_proc->find_file(fd);
         const void *buf = reinterpret_cast<const void *>(frame->rcx);
         usize n = frame->rdx;
+
         fs::vfs::Status res = lib::write(const_cast<lib::File *>(file), buf, n);
         frame->rax = static_cast<u64>(res);
 }
@@ -54,14 +58,17 @@ void syscall_write(SyscallFrame *frame)
 void syscall_read(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
+
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
+
         const lib::File *file = curr_proc->find_file(fd);
         void *buf = reinterpret_cast<void *>(frame->rcx);
         usize n = frame->rdx;
+
         fs::vfs::Status res = lib::read(const_cast<lib::File* >(file), buf, n);
         frame->rax = static_cast<u64>(res);
 }
@@ -106,12 +113,15 @@ void syscall_wait(SyscallFrame *frame)
 void syscall_open(SyscallFrame *frame)
 {
         const char *path = reinterpret_cast<const char *>(frame->rbx);
+
         lib::File *f = lib::open(path);
         if (not f) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
+
         proc::Process *curr_proc = proc::scheduler::get_current_process();
+
         usize fd = curr_proc->find_fd(f);
         frame->rax = fd;
 }
@@ -120,14 +130,38 @@ void syscall_open(SyscallFrame *frame)
 void syscall_close(SyscallFrame *frame)
 {
         usize fd = frame->rbx;
+
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
                 frame->rax = static_cast<u64>(-1);
                 return;
         }
+
         const lib::File *file = curr_proc->find_file(fd);
         fs::vfs::Status res = lib::close(const_cast<lib::File *>(file));
         frame->rax = static_cast<u64>(res);
+}
+
+/// RBX = amount of pages
+///     RBX > 0 : extend process heap
+///     RBX = 0 : get last mapped page from process heap
+///     RBX < 0 : shorten process heap
+void syscall_lastpg(SyscallFrame *frame)
+{
+        int pages = frame->rbx;
+
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (not curr_proc) {
+                frame->rax = 2; // no current process
+                return;
+        }
+
+        if (pages > 0)
+                frame->rax = curr_proc->get_heap().extend(pages);
+        else if (pages == 0)
+                frame->rax = curr_proc->get_heap().get_last_page();
+        else if (pages < 0)
+                frame->rax = curr_proc->get_heap().shorten(pages);
 }
 
 void (*syscalls[])(SyscallFrame *) = {
@@ -139,7 +173,8 @@ void (*syscalls[])(SyscallFrame *) = {
         syscall_getpid,
         syscall_wait,
         syscall_open,
-        syscall_close
+        syscall_close,
+        syscall_lastpg
 };
 
 } /* anonymous namespace */
