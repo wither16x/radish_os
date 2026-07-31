@@ -35,34 +35,21 @@ bool ProcessHeap::extend(this ProcessHeap &self, int pages)
 {
         cpu::cli();
 
-        logger.debug("mapping %d more pages...", pages);
-        logger.debug("informations: self.start = 0x%x", self.start);
-        logger.debug("\tself.last_page = 0x%x", self.last_page);
-        logger.debug("\tself.limit = 0x%x", self.limit);
-
-        logger.debug("new last page should be 0x%x", self.last_page + pages * mem::PAGE_SIZE);
-
         if (self.last_page + pages * mem::PAGE_SIZE > self.limit) {
-                logger.debug("process heap limit reached");
                 cpu::sti();
                 return false;
         }
 
         uptr vaddr = self.last_page;
-        logger.debug("starting from 0x%x", vaddr);
         for (int i = 0; i < pages; i++) {
-                logger.debug("mapping page %d", i);
                 self.pml4t.map_page(vaddr,
                         mem::pmm::allocate_frame(),
-                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser,
-                        true
+                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
                 );
                 vaddr += mem::PAGE_SIZE;
-                logger.debug("mapped 1 page, now at 0x%x", vaddr);
         }
 
         self.last_page += pages * mem::PAGE_SIZE;
-        logger.debug("now at 0x%x", self.last_page);
         cpu::sti();
         return true;
 }

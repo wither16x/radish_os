@@ -91,12 +91,9 @@ void PML4T::load(this const PML4T &self)
         __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<u64>(self.raw_pml4t) - hhdm_offset));
 }
 
-void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags, bool debug)
+void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags)
 {
-        if (debug) logger.debug("mapping page 0x%x to 0x%x...", vaddr, paddr);
-
         uptr hhdm_offset = get_kernel_hhdm_offset();
-        if (debug) logger.debug("hhdm offset is 0x%x", hhdm_offset);
 
         // create intermediate page tables containing informations
         // that tell the CPU where the corresponding frame is
@@ -109,35 +106,25 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags, bool d
         usize pt_idx    = (vaddr >> 12) & 0x1ff;
 
         // now map the page to the given frame
-        if (debug) logger.debug("checking pml4t...");
         if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present)) {
-                if (debug) logger.debug("entry not present in pml4t");
                 self.raw_pml4t->entries[pml4t_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
-                if (debug) logger.debug("setting entry to 0...");
                 memset(
                         reinterpret_cast<u64 *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset),
                         0,
                         PAGE_SIZE
                 );
-                if (debug) logger.debug("set entry to 0");
         }
 
-        if (debug) logger.debug("checking pdpt...");
         PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
-        if (debug) logger.debug("pdpt = 0x%x", (uptr)pdpt);
         if (not (pdpt->entries[pdpt_idx] & PageFlag::Present)) {
-                if (debug) logger.debug("entry not present in pdpt");
                 pdpt->entries[pdpt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
-                if (debug) logger.debug("setting entry to 0...");
                 memset(
                         reinterpret_cast<u64 *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset),
                         0,
                         PAGE_SIZE
                 );
-                if (debug) logger.debug("entry set to 0");
         }
 
-        if (debug) logger.debug("checking pdt...");
         PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
         if (not (pdt->entries[pdt_idx] & PageFlag::Present)) {
                 pdt->entries[pdt_idx] = pmm::allocate_frame() | PageFlag::ReadWriteUser;
@@ -148,12 +135,9 @@ void PML4T::map_page(this PML4T &self, uptr vaddr, uptr paddr, u64 flags, bool d
                 );
         }
 
-        if (debug) logger.debug("checking pt...");
         PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
         if (not (pt->entries[pt_idx] & PageFlag::Present))
                 pt->entries[pt_idx] = paddr | flags;
-
-        if (debug) logger.debug("mapped page");
 }
 
 void PML4T::unmap_page(this PML4T &self, uptr vaddr)
