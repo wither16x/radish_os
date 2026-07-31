@@ -127,19 +127,18 @@ void Process::init_kernel_stack(this Process &self)
 
 // --------------------------------------------------
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
-        : heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, pml4t)
+        : pml4t(pml4t), heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t)
 {
         this->id = id;
         this->entry = info->entry;
 
         for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
-                pml4t.map_page(addr,
+                this->pml4t.map_page(addr,
                         mem::pmm::allocate_frame(),
                         mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
                 );
         }
 
-        this->pml4t = pml4t;
         this->status = ProcessStatus::Alive;
         this->time = 0;
 
@@ -161,7 +160,7 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
         this->id = id;
-        this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
+        this->cr3 = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
         this->time = 0;
 
         this->file_descriptors = parent.file_descriptors;

@@ -8,13 +8,18 @@ int main()
 
         printf("Hello from init!\n");
 
-        int fd = open("I:/README.txt");
-        read(fd, buf, sizeof(buf));
-        close(fd);
-        buf[strlen(buf) - 1] = '\0';
+        FILE *f = fopen("I:/README.txt");
+        if (!f) {
+                printf("Failed to create file object\n");
+                goto exec_shell;
+        }
+        read(f->fd, buf, sizeof(buf));
+        fclose(f);
 
+        buf[strlen(buf) - 1] = '\0';
         printf("I:/README.txt: %s\n", buf);
 
+exec_shell:
         printf("Executing shell...\n");
         pid_t pid = fork();
         if (pid == 0)
