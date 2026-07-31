@@ -30,6 +30,20 @@ constexpr bool can_path_handle_drive(const String &path)
         return path.length() >= 3;
 }
 
+VNode *get_nodes_from_drive_root(const Drive &drv, const Vector<String> &parts)
+{
+        VNode *curr_nd = drv.root;
+        for (usize i = 0; i < parts.size() - 1; i++) {
+                VNode *child = curr_nd->lookup(parts[i]);
+                if (not child)
+                        return nullptr;
+
+                curr_nd = static_cast<VNode *>(child);
+        }
+
+        return curr_nd;
+}
+
 } /* anonymous namespace */
 
 Status mount(drive_id drive, FileSystem *fs)
@@ -159,28 +173,19 @@ Status mkfile(const lib::String &path)
 
         drive_id drive = path[0];
         String rel = path.sub(2);
-
         Drive &drv = ctx.get_drive_by_id(drive);
         if (not drv.root)
                 return Status::NullRoot;
-
         Vector<String> parts = parse_path(rel);
         if (parts.empty())
                 return Status::EmptyPath;
 
-        VNode *curr_nd = drv.root;
+        VNode *vnd = get_nodes_from_drive_root(drv, parts);
 
-        for (usize i = 0; i < parts.size() - 1; i++) {
-                VNode *child = curr_nd->lookup(parts[i]);
-                if (not child)
-                        return Status::ChildNotFound;
+        Status ret = vnd->mkfile(parts[parts.size() - 1]);
+        if (vnd != drv.root)
+                release_node(vnd);
 
-                curr_nd = static_cast<VNode *>(child);
-        }
-
-        Status ret = curr_nd->mkfile(parts[parts.size() - 1]);
-        if (curr_nd != drv.root)
-                release_node(curr_nd);
         return ret;
 }
 
@@ -191,27 +196,21 @@ Status mkdir(const lib::String &path)
 
         drive_id drive = path[0];
         String rel = path.sub(2);
-
         Drive &drv = ctx.get_drive_by_id(drive);
         if (not drv.root)
                 return Status::NullRoot;
-
         Vector<String> parts = parse_path(rel);
         if (parts.empty())
                 return Status::EmptyPath;
 
-        VNode *curr_nd = drv.root;
-        for (usize i = 0; i < parts.size() - 1; i++) {
-                VNode *child = curr_nd->lookup(parts[i]);
-                if (!child)
-                        return Status::ChildNotFound;
+        VNode *vnd = get_nodes_from_drive_root(drv, parts);
+        if (not vnd)
+                return Status::NullNode;
 
-                curr_nd = static_cast<VNode *>(child);
-        }
-
-        Status ret = curr_nd->mkdir(parts[parts.size() - 1]);
-        if (curr_nd != drv.root)
-                release_node(curr_nd);
+        Status ret = vnd->mkdir(parts[parts.size() - 1]);
+        if (vnd != drv.root)
+                release_node(vnd);
+        
         return ret;
 }
 
