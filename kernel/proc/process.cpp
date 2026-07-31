@@ -48,7 +48,7 @@ bool ProcessHeap::extend(this ProcessHeap &self, int pages)
                 return false;
         }
 
-        uptr vaddr = self.last_page - mem::PAGE_SIZE;
+        uptr vaddr = self.last_page;
         logger.debug("starting from 0x%x", vaddr);
         for (int i = 0; i < pages; i++) {
                 logger.debug("mapping page %d", i);
