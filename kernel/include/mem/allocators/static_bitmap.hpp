@@ -21,16 +21,22 @@ public:
         {
                 for (lib::usize i = 0; i < n; i++) {
                         lib::usize start = this->last_allocated;
+                        bool found = false;
 
                         do {
-                                if (not this->bitmap.test(this->last_allocated))
+                                if (not this->bitmap.test(this->last_allocated)) {
+                                        found = true;
                                         break;
+                                }
 
-                                this->last_allocated++;
+                                ++this->last_allocated;
 
                                 if (this->last_allocated >= SIZE)
-                                        panic("out of memory");
+                                        this->last_allocated = 0;
                         } while (this->last_allocated != start);
+
+                        if (not found)
+                                panic("out of memory");
 
                         this->bitmap.set(this->last_allocated);
                 }

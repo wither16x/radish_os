@@ -27,47 +27,63 @@ extern "C" void __proc_trampoline();
 
 } /* anonymous namespace */
 
-ProcessHeap::ProcessHeap(uptr start, uptr limit, mem::PML4T &pml4t)
-        : start(start), limit(limit), pml4t(pml4t)
-{
-        this->last_page = this->start;
-        this->pml4t.map_page(this->start,
-                mem::pmm::allocate_frame(),
-                mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
-        );
-        this->last_page = this->start + mem::PAGE_SIZE;
-}
+ProcessHeap::ProcessHeap(uptr start, uptr last_page, uptr limit, mem::PML4T &pml4t)
+        : start(start), last_page(last_page), limit(limit), pml4t(pml4t)
+{}
 
 bool ProcessHeap::extend(this ProcessHeap &self, int pages)
 {
-        if (self.last_page + pages * mem::PAGE_SIZE > self.limit)
-                return false;
+        cpu::cli();
 
-        uptr vaddr = self.last_page;
+        logger.debug("mapping %d more pages...", pages);
+        logger.debug("informations: self.start = 0x%x", self.start);
+        logger.debug("\tself.last_page = 0x%x", self.last_page);
+        logger.debug("\tself.limit = 0x%x", self.limit);
+
+        logger.debug("new last page should be 0x%x", self.last_page + pages * mem::PAGE_SIZE);
+
+        if (self.last_page + pages * mem::PAGE_SIZE > self.limit) {
+                logger.debug("process heap limit reached");
+                cpu::sti();
+                return false;
+        }
+
+        uptr vaddr = self.last_page - mem::PAGE_SIZE;
+        logger.debug("starting from 0x%x", vaddr);
         for (int i = 0; i < pages; i++) {
+                logger.debug("mapping page %d", i);
                 self.pml4t.map_page(vaddr,
                         mem::pmm::allocate_frame(),
-                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
+                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser,
+                        true
                 );
                 vaddr += mem::PAGE_SIZE;
+                logger.debug("mapped 1 page, now at 0x%x", vaddr);
         }
 
         self.last_page += pages * mem::PAGE_SIZE;
+        logger.debug("now at 0x%x", self.last_page);
+        cpu::sti();
         return true;
 }
 
 bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
 {
-        if (self.last_page - pages * mem::PAGE_SIZE < self.start)
+        cpu::cli();
+
+        if (self.last_page - pages * mem::PAGE_SIZE < self.start) {
+                cpu::sti();
                 return false;
+        }
 
         uptr vaddr = self.last_page - mem::PAGE_SIZE;
-        for (int i = 0; i > pages; i++) {
+        for (int i = 0; i < pages; i++) {
                 self.pml4t.unmap_page(vaddr);
                 vaddr -= mem::PAGE_SIZE;
         }
 
         self.last_page -= pages * mem::PAGE_SIZE;
+        cpu::sti();
         return true;
 }
 
@@ -124,7 +140,7 @@ void Process::init_kernel_stack(this Process &self)
 
 // --------------------------------------------------
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
-        : heap(mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, pml4t)
+        : heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, pml4t)
 {
         this->id = id;
         this->entry = info->entry;
@@ -153,12 +169,11 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
 // --------------------------------------------------
 
 Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
-        : heap(parent.heap.get_start(), parent.heap.get_limit(), pml4t)
+        : pml4t(pml4t), heap(parent.heap.get_start(), parent.heap.get_last_page(), parent.heap.get_limit(), this->pml4t)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
         this->id = id;
-        this->pml4t = pml4t;
         this->cr3 = reinterpret_cast<u64>(pml4t.raw()) - hhdm_offset;
         this->time = 0;
 

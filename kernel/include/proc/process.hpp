@@ -52,7 +52,7 @@ class ProcessHeap {
         mem::PML4T &pml4t;
 
 public:
-        ProcessHeap(lib::uptr start, lib::uptr limit, mem::PML4T &pml4t);
+        ProcessHeap(lib::uptr start, lib::uptr last_page, lib::uptr limit, mem::PML4T &pml4t);
 
         bool extend(this ProcessHeap &self, int pages);
         bool shorten(this ProcessHeap &self, int pages);

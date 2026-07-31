@@ -1,4 +1,4 @@
-#include "fs/vfs.hpp"
+#include "mem/page.hpp"
 #include <cpu/syscall.hpp>
 #include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
@@ -9,7 +9,7 @@
 #include <proc/process.hpp>
 #include <proc/wait.hpp>
 
-using kernel::lib::u64, kernel::lib::usize;
+using kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 
 namespace kernel::cpu {
 
@@ -148,7 +148,9 @@ void syscall_close(SyscallFrame *frame)
 ///     RBX < 0 : shorten process heap
 void syscall_lastpg(SyscallFrame *frame)
 {
+        logger.debug("syscall lastpg...");
         int pages = frame->rbx;
+        logger.debug("%u page(s) requested", pages);
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
@@ -156,12 +158,34 @@ void syscall_lastpg(SyscallFrame *frame)
                 return;
         }
 
-        if (pages > 0)
-                frame->rax = curr_proc->get_heap().extend(pages);
-        else if (pages == 0)
-                frame->rax = curr_proc->get_heap().get_last_page();
-        else if (pages < 0)
-                frame->rax = curr_proc->get_heap().shorten(pages);
+        logger.debug("process heap start = 0x%x", curr_proc->get_heap().get_start());
+        logger.debug("process heap limit = 0x%x", curr_proc->get_heap().get_limit());
+        logger.debug("process heap last page base = 0x%x", curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE);
+
+        if (pages > 0) {
+                logger.debug("pages > 0, extending process heap...");
+                bool result = curr_proc->get_heap().extend(pages);
+                logger.debug("extended process heap");
+                if (not result) {
+                        logger.debug("failed to extend process heap");
+                        frame->rax = 0;
+                        return;
+                }
+
+                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
+                logger.debug("extended: last page is at 0x%x", frame->rax);
+        } else if (pages == 0) {
+                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;;
+        } else if (pages < 0) {
+                bool result = curr_proc->get_heap().shorten(-pages);
+                if (not result) {
+                        frame->rax = 0;
+                        return;
+                }
+
+                logger.debug("shortened: last page is at 0x%x", frame->rax);
+                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
+        }
 }
 
 void (*syscalls[])(SyscallFrame *) = {

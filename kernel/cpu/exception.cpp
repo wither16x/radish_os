@@ -1,8 +1,12 @@
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
+#include <lib/print.hpp>
+#include <proc/scheduler.hpp>
+#include <proc/process.hpp>
 #include <panic.hpp>
 
 using kernel::lib::u64;
+using kernel::lib::println;
 
 namespace kernel::cpu {
 
@@ -41,28 +45,57 @@ struct [[gnu::packed]] CPUFrame {
 
 /// Handle exceptions. Basically panic and display every
 /// available information.
-extern "C" [[gnu::noreturn]] void exception_handler(CPUFrame *f)
+extern "C" void exception_handler(CPUFrame *f)
 {
-        panic(
-                "CPU exception #%u with error code %u\r\n"
-                "RAX=0x%x RBX=0x%x RCX=0x%x RDX=0x%x\r\n"
-                "RDI=0x%x RSI=0x%x\r\n"
-                "RBP=0x%x RSP=0x%x\r\n"
-                "R8=0x%x R9=0x%x R10=0x%x R11=0x%x R12=0x%x R13=0x%x R14=0x%x R15=0x%x\r\n"
-                "CR2=0x%x CR3=0x%x\r\n"
-                "CS=0x%x SS=0x%x\r\n"
-                "RIP=0x%x\r\n"
-                "FLAGS=0x%x\r\n",
-                f->err_type, f->err_code,
-                f->rax, f->rbx, f->rcx, f->rdx,
-                f->rdi, f->rsi,
-                f->rbp, f->rsp,
-                f->r8, f->r9, f->r10, f->r11, f->r12, f->r13, f->r14, f->r15,
-                f->cr2, f->cr3,
-                f->cs, f->ss,
-                f->rip,
-                f->flags
-        );
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+
+        if (not curr_proc) {
+                panic(
+                        "CPU exception #%u with error code %u\r\n"
+                        "RAX=0x%x RBX=0x%x RCX=0x%x RDX=0x%x\r\n"
+                        "RDI=0x%x RSI=0x%x\r\n"
+                        "RBP=0x%x RSP=0x%x\r\n"
+                        "R8=0x%x R9=0x%x R10=0x%x R11=0x%x R12=0x%x R13=0x%x R14=0x%x R15=0x%x\r\n"
+                        "CR2=0x%x CR3=0x%x\r\n"
+                        "CS=0x%x SS=0x%x\r\n"
+                        "RIP=0x%x\r\n"
+                        "FLAGS=0x%x\r\n",
+                        f->err_type, f->err_code,
+                        f->rax, f->rbx, f->rcx, f->rdx,
+                        f->rdi, f->rsi,
+                        f->rbp, f->rsp,
+                        f->r8, f->r9, f->r10, f->r11, f->r12, f->r13, f->r14, f->r15,
+                        f->cr2, f->cr3,
+                        f->cs, f->ss,
+                        f->rip,
+                        f->flags
+                );
+        } else {
+                println(
+                        "CPU exception #%u with error code %u\r\n"
+                        "RAX=0x%x RBX=0x%x RCX=0x%x RDX=0x%x\r\n"
+                        "RDI=0x%x RSI=0x%x\r\n"
+                        "RBP=0x%x RSP=0x%x\r\n"
+                        "R8=0x%x R9=0x%x R10=0x%x R11=0x%x R12=0x%x R13=0x%x R14=0x%x R15=0x%x\r\n"
+                        "CR2=0x%x CR3=0x%x\r\n"
+                        "CS=0x%x SS=0x%x\r\n"
+                        "RIP=0x%x\r\n"
+                        "FLAGS=0x%x",
+                        f->err_type, f->err_code,
+                        f->rax, f->rbx, f->rcx, f->rdx,
+                        f->rdi, f->rsi,
+                        f->rbp, f->rsp,
+                        f->r8, f->r9, f->r10, f->r11, f->r12, f->r13, f->r14, f->r15,
+                        f->cr2, f->cr3,
+                        f->cs, f->ss,
+                        f->rip,
+                        f->flags
+                );
+
+                curr_proc->die();
+
+                println("Process (ID %u) aborted", curr_proc->get_id());
+        }
 }
 
 } /* namespace kernel::cpu */

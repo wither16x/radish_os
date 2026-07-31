@@ -14,7 +14,7 @@ public:
         
         void destroy(this PML4T &self);
         void load(this const PML4T &self);
-        void map_page(this PML4T &self, lib::uptr vaddr, lib::uptr paddr, lib::u64 flags);
+        void map_page(this PML4T &self, lib::uptr vaddr, lib::uptr paddr, lib::u64 flags, bool debug = false);
         void unmap_page(this PML4T &self, lib::uptr vaddr);
 
         bool is_mapped(this const PML4T &self, lib::uptr vaddr);
