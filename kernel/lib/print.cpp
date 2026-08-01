@@ -103,6 +103,8 @@ void print_string(const char *s)
 // --------------------------------------------------
 void vprintf(const char *fmt, va_list args)
 {
+        char buf[65];
+
         while (*fmt) {
                 if (*fmt != '%') {
                         putchar(*fmt);
@@ -120,35 +122,42 @@ void vprintf(const char *fmt, va_list args)
 
                 case 'b': {
                         usize n = va_arg(args, usize);
-                        char *s = utoa(n, 2);
+                        char *s = utoa(n, buf, 2);
                         print_string(s);
                         break;
                 }
 
                 case 'o': {
                         usize n = va_arg(args, usize);
-                        char *s = utoa(n, 8);
+                        char *s = utoa(n, buf, 8);
                         print_string(s);
                         break;
                 }
 
                 case 'd': {
                         isize n = va_arg(args, isize);
-                        char *s = itoa(n, 10);
+                        char *s = itoa(n, buf, 10);
                         print_string(s);
                         break;
                 }
 
                 case 'u': {
                         usize n = va_arg(args, usize);
-                        char *s = utoa(n, 10);
+                        char *s = utoa(n, buf, 10);
                         print_string(s);
                         break;
                 }
 
                 case 'x': {
                         usize n = va_arg(args, usize);
-                        char *s = utoa(n, 16);
+                        char *s = utoa(n, buf, 16);
+                        print_string(s);
+                        break;
+                }
+
+                case 'f': {
+                        double n = va_arg(args, double);
+                        char *s = ftoa(n, buf);
                         print_string(s);
                         break;
                 }

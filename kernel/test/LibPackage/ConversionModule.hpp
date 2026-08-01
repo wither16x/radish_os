@@ -17,8 +17,9 @@ TARWI_MODULE(ConversionModule)
 
         TARWI_UNIT(unitTestItoa)
         {
+                char buf[10];
                 int i = 1234;
-                char *s = itoa(i, 10);
+                char *s = itoa(i, buf, 10);
                 TARWI_EXPECT(strcmp(s, "1234") == 0);
         }
 

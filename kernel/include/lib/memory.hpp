@@ -69,5 +69,6 @@ usize strlen(const char *s);
 void strcpy(const char *src, char *dest);
 /// Check if a string starts with another string.
 bool strstartswith(const char *s1, const char *s2);
+char *strcat(char *dest, const char *src);
 
 } /* namespace kernel::lib */

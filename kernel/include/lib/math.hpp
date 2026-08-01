@@ -28,4 +28,23 @@ inline T clamp(T x, T a, T b)
         return max<T>(a, min<T>(x, b));
 }
 
+template<typename T>
+T pow(T base, T exp)
+{
+        T result = 1;
+
+        while (true) {
+                if (exp & 1)
+                        result *= base;
+
+                exp >>= 1;
+                if (not exp)
+                        break;
+
+                base *= base;
+        }
+
+        return result;
+}
+
 } /* namespace kernel::lib */
