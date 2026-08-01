@@ -20,10 +20,10 @@ TARWI_MODULE(VectorModule) {
                         vec.push_back(i * 5);
 
                 TARWI_EXPECT(
-                        vec[0] == 0 &&
-                        vec[1] == 5 &&
-                        vec[2] == 10 &&
-                        vec[3] == 15 &&
+                        vec[0] == 0 and
+                        vec[1] == 5 and
+                        vec[2] == 10 and
+                        vec[3] == 15 and
                         vec[4] == 20
                 );
         }

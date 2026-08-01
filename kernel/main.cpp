@@ -5,6 +5,7 @@
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/idt.hpp>
+#include <cpu/sse2.hpp>
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
 #include <drivers/keyboard.hpp>
@@ -97,23 +98,6 @@ void init_console()
         logger.info("framebuffer should now be used for display");
 }
 
-/// Test function to display files and directories in the
-/// initrd.
-void __test_ls(const kernel::lib::String &path)
-{
-        kernel::lib::usize count = 0;
-        kernel::lib::getdirentn(path, &count);
-
-        for (kernel::lib::usize i = 0; i < count; i++) {
-                vfs::DirEntry entry;
-                kernel::lib::getdirent(path, &entry, i);
-
-                logger.info("* %s", entry.name.raw());;
-                if (entry.type == fs::vfs::DirEntryType::Dir)
-                        __test_ls(path + entry.name);
-        }
-}
-
 /// Idle.
 [[noreturn]]
 void kernel_hang()
@@ -184,22 +168,15 @@ void kernel_main()
         logger.ok("initialized framebuffer");
 
         scheduler::init();
+        cpu::enable_sse2();
+        logger.ok("enabled sse2");
 
         init_console();
-
-        logger.info("-------------------------------------");
-        logger.info("list initrd content");
-        logger.info("-------------------------------------");
-        __test_ls("I:/");
-        logger.info("-------------------------------------");
-        logger.info("list of devices");
-        logger.info("-------------------------------------");
-        __test_ls("D:/");
-        logger.info("-------------------------------------");
 
         scheduler::init();
 
         test::test_lib();
+        test::test_float();
 
         spawn("I:/bin/init");
         
