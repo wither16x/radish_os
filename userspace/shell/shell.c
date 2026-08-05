@@ -22,7 +22,9 @@ int main()
 
                 pid_t pid = fork();
                 if (pid == 0) {
-                        exec(uinput);
+                        char *argv[] = {"apple"};
+                        printf("executing with argv[0] = %s\n", argv[0]);
+                        exec(uinput, 1, argv, NULL);
                         return 1; // failed to launch program
                 } else {
                         int wait_res = wait();

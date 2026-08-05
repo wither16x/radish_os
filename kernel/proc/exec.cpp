@@ -2,6 +2,7 @@
 #include <kernel.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <lib/memory.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <mem/pml4t.hpp>
@@ -13,10 +14,11 @@
 
 using kernel::lib::String;
 using kernel::lib::u64, kernel::lib::uptr;
+using kernel::lib::strcpy;
 
 namespace kernel::proc {
 
-int exec(const lib::String &path)
+int exec(const String &path, int argc, char **argv, char **envp)
 {
         cpu::cli();
 
@@ -33,8 +35,19 @@ int exec(const lib::String &path)
                 cpu::sti();
                 return -1;
         }
+        proc->argc = argc;
+        if (argv) {
+                proc->argv = new char *[sizeof(argv) / sizeof(*argv[0])];
+                for (int i = 0; i < argc; i++)
+                        strcpy(argv[i], proc->argv[i]);
+        }
+        if (envp) {
+                proc->envp = new char *[sizeof(envp) / sizeof(*envp[0])];
+                for (int i = 0; envp[i] != NULL; i++)
+                        strcpy(envp[i], proc->envp[i]);
+        }
 
-        void (*proc_entry)() = reinterpret_cast<void (*)()>(elf_info.address);
+        elf::elf_entry_t proc_entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
 
         // Update the process
         proc->switch_pml4t(proc_pml4t);

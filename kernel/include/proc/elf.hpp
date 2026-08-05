@@ -8,6 +8,8 @@ namespace kernel::proc::elf {
 
 constexpr int EI_NIDENT = 16;
 
+using elf_entry_t = int (*)(int, char **, char **);
+
 /// Magic bytes of an ELF file and their indexes.
 enum Elf64Magic : unsigned char {
         EI_I0              = 0,
@@ -100,10 +102,15 @@ struct Elf64Sym {
         elf64_xword     st_size;
 };
 
+struct AuxvPair {
+        long type;
+        long value;
+};
+
 /// Structure filled when loading an ELF to give informations to
 /// the process which need them.
 struct ElfInfo {
-        void (*entry)();
+        elf_entry_t entry;
         lib::uptr address;
         // end of last PT_LOAD
         lib::uptr highest_vaddr;

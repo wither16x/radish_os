@@ -26,6 +26,7 @@ enum SyscallType : u64 {
         SC_OPEN,
         SC_CLOSE,
         SC_LASTPG,
+        SC_GETCPUTIME,
 
         SC_LIMIT // number of syscalls, always at the end of the enumeration
 };
@@ -73,10 +74,16 @@ void syscall_read(SyscallFrame *frame)
 }
 
 /// RBX = path
+/// RCX = argc
+/// RDX = argv
+/// RDI = envp
 void syscall_exec(SyscallFrame *frame)
 {
         const char *path = reinterpret_cast<const char *>(frame->rbx);
-        int res = proc::exec(path);
+        int argc = frame->rcx;
+        char **argv = reinterpret_cast<char **>(frame->rdx);
+        char **envp = reinterpret_cast<char **>(frame->rdi);
+        int res = proc::exec(path, argc, argv, envp);
         frame->rax = res;
         proc::Process *current_proc = proc::scheduler::get_current_process();
         current_proc->load_context(frame);
@@ -176,6 +183,17 @@ void syscall_lastpg(SyscallFrame *frame)
         }
 }
 
+void syscall_getcputime(SyscallFrame *frame)
+{
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (not curr_proc) {
+                frame->rax = -1;
+                return;
+        }
+
+        frame->rax = proc::scheduler::TIME_PER_PROCESS - curr_proc->get_time();
+}
+
 void (*syscalls[])(SyscallFrame *) = {
         syscall_write,
         syscall_read,
@@ -186,7 +204,8 @@ void (*syscalls[])(SyscallFrame *) = {
         syscall_wait,
         syscall_open,
         syscall_close,
-        syscall_lastpg
+        syscall_lastpg,
+        syscall_getcputime
 };
 
 } /* anonymous namespace */

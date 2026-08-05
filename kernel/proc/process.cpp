@@ -1,3 +1,4 @@
+#include "proc/elf.hpp"
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
@@ -103,9 +104,10 @@ void Process::init_kernel_stack(this Process &self)
         *(--sp) = self.frame->flags;
         *(--sp) = self.frame->cs;
         *(--sp) = self.frame->rip;
-
+        *(--sp) = reinterpret_cast<u64>(self.envp);
+        *(--sp) = reinterpret_cast<u64>(self.argv);
+        *(--sp) = self.argc;
         *(--sp) = reinterpret_cast<u64>(&__proc_trampoline);
-
         *(--sp) = self.frame->rax;
         *(--sp) = self.frame->rbx;
         *(--sp) = self.frame->rcx;
@@ -266,7 +268,7 @@ void Process::reset_stack(this Process &self)
         self.frame->rsp = cpu::USER_STACK_TOP;
 }
 
-void Process::switch_entry(this Process &self, void (*entry)())
+void Process::switch_entry(this Process &self, elf::elf_entry_t entry)
 {
         self.entry = entry;
         self.frame->rip = reinterpret_cast<u64>(entry);

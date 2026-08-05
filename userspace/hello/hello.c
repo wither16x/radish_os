@@ -5,8 +5,11 @@
 
 #define NAME_LENGTH             50
 
-int main()
+int main(int argc, char **argv)
 {
+        printf("argc = %d\n", argc);
+        printf("argv[0] = %s\n", argv[0]);
+
         char buf[NAME_LENGTH];
         printf("What is your name? ");
         fgets(buf, sizeof(buf), stdin);

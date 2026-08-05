@@ -23,7 +23,7 @@ exec_shell:
         printf("Executing shell...\n");
         pid_t pid = fork();
         if (pid == 0)
-                exec("I:/bin/shell");
+                exec("I:/bin/shell", 0, NULL, NULL);
         else
                 wait();
 

@@ -30,7 +30,7 @@ Process *load_program_as_process(const String &path)
         if (load_res != 0)
                 return nullptr; // could not load executable
 
-        elf_info.entry = reinterpret_cast<void (*)()>(elf_info.address);
+        elf_info.entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
 
         // create the process
         Process *proc = new Process(allocate_pid(), &elf_info, proc_pml4t);
@@ -46,7 +46,7 @@ int spawn(const String &path)
         cpu::cli();
 
         Process *proc = load_program_as_process(path);
-        if (!proc) {
+        if (not proc) {
                 logger.err("failed to spawn process: failed to load %s", path.raw());
                 return -1;
         }
@@ -58,7 +58,7 @@ int spawn(const String &path)
         Process *p = scheduler::get_current_process();
         p->load_pml4t();
 
-        if (!p->get_entry())
+        if (not p->get_entry())
                 panic("failed to spawn process: null entry point");
 
         cpu::enter_userspace(

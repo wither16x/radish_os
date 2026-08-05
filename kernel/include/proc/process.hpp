@@ -69,7 +69,7 @@ class Process {
         lib::u64 time;  // elapsed time in ms
         lib::Vector<Process *> children;
         ProcessStatus status;
-        void (*entry)();
+        elf::elf_entry_t entry;
         PID id;
         lib::u64 cr3;
         // each process has its own page tables
@@ -89,9 +89,13 @@ class Process {
         void init_kernel_stack(this Process &self);
 
 public:
+        int argc;
+        char **argv;
+        char **envp;
+
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
-        /// Create a process from another.
+        /// Create a process from another. Use when forking processes.
         Process(PID id, const Process &parent, mem::PML4T &pml4t);
 
         void load_pml4t(this Process &self);
@@ -101,7 +105,7 @@ public:
         void load_context(this Process &self, cpu::SyscallFrame *frame);
         void remap_stack(this Process &self);
         void reset_stack(this Process &self);
-        void switch_entry(this Process &self, void (*entry)());
+        void switch_entry(this Process &self, elf::elf_entry_t entry);
         int add_child(this Process &self, Process *child);
         int remove_child(this Process &self, PID id);
         void reset_time(this Process &self);
