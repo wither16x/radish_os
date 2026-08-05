@@ -102,11 +102,6 @@ struct Elf64Sym {
         elf64_xword     st_size;
 };
 
-struct AuxvPair {
-        long type;
-        long value;
-};
-
 /// Structure filled when loading an ELF to give informations to
 /// the process which need them.
 struct ElfInfo {

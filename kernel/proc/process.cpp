@@ -99,14 +99,12 @@ void Process::init_kernel_stack(this Process &self)
 
         uptr *sp = reinterpret_cast<uptr *>(self.kstack_top);
 
+        // TODO: add argc, argv, envp
         *(--sp) = self.frame->ss;
         *(--sp) = self.frame->rsp;
         *(--sp) = self.frame->flags;
         *(--sp) = self.frame->cs;
         *(--sp) = self.frame->rip;
-        *(--sp) = reinterpret_cast<u64>(self.envp);
-        *(--sp) = reinterpret_cast<u64>(self.argv);
-        *(--sp) = self.argc;
         *(--sp) = reinterpret_cast<u64>(&__proc_trampoline);
         *(--sp) = self.frame->rax;
         *(--sp) = self.frame->rbx;

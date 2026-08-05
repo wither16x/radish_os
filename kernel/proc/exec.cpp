@@ -14,7 +14,7 @@
 
 using kernel::lib::String;
 using kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::strcpy;
+using kernel::lib::strcpy, kernel::lib::strlen;
 
 namespace kernel::proc {
 
@@ -37,14 +37,26 @@ int exec(const String &path, int argc, char **argv, char **envp)
         }
         proc->argc = argc;
         if (argv) {
-                proc->argv = new char *[sizeof(argv) / sizeof(*argv[0])];
-                for (int i = 0; i < argc; i++)
+                proc->argv = new char *[argc + 1];
+                if (not proc->argv)
+                        logger.err("failed to allocate argv");
+                for (int i = 0; i < argc; i++) {
+                        logger.debug("exec: argv[%d] = %s", i, argv[i]);
+                        proc->argv[i] = new char[strlen(argv[i]) + 1];
                         strcpy(argv[i], proc->argv[i]);
+                }
         }
         if (envp) {
-                proc->envp = new char *[sizeof(envp) / sizeof(*envp[0])];
-                for (int i = 0; envp[i] != NULL; i++)
+                int envc = 0;
+                while (envp[envc] != NULL)
+                        ++envc;
+                proc->envp = new char *[envc + 1];
+                if (not proc->envp)
+                        logger.err("failed to allocate envp");
+                for (int i = 0; i < envc; i++) {
+                        proc->envp[i] = new char[strlen(envp[i]) + 1];
                         strcpy(envp[i], proc->envp[i]);
+                }
         }
 
         elf::elf_entry_t proc_entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
