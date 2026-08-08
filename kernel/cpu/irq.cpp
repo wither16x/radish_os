@@ -10,7 +10,7 @@
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 
-using kernel::lib::u8, kernel::lib::u64;
+using kernel::lib::u8, kernel::lib::u64, kernel::lib::callable;
 using kernel::lib::log::logger;
 
 namespace kernel::cpu {
@@ -19,12 +19,12 @@ namespace {
 
 constexpr int MAX_IRQ_HANDLERS = 16;
 
-void (*handlers[MAX_IRQ_HANDLERS])(IRQFrame &);
+callable<void, IRQFrame &> handlers[MAX_IRQ_HANDLERS];
 
 } /* anonymous namespace */
 
 // --------------------------------------------------
-void register_irq(int n, void (*handler)(IRQFrame &))
+void register_irq(int n, callable<void, IRQFrame &> handler)
 {
         handlers[n] = handler;
         drivers::pic::irq_unmask(n);

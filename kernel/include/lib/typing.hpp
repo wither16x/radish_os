@@ -21,4 +21,7 @@ using u64               = uint64_t;
 using usize             = u64;
 using uptr              = u64;
 
+template<typename RET, typename... ARGS>
+using callable = RET (*)(ARGS...);
+
 } /* namespace kernel::lib */
