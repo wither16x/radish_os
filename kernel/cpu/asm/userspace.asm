@@ -1,3 +1,6 @@
+%define USER_CS                 0x1b
+%define USER_SS                 0x23
+
 [bits 64]
 
 section .text
@@ -10,7 +13,7 @@ enter_userspace:
 
         xor rax, rax
 
-        mov ax, 0x23
+        mov ax, USER_SS
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -22,7 +25,7 @@ enter_userspace:
         pop rax
         or rax, 0x200
         push rax
-        push 0x1b
+        push USER_CS
         push rdi
 
         mov rbp, rsi

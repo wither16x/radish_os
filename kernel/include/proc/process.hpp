@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpu/gdt.hpp>
 #include <cpu/irq.hpp>
 #include <cpu/syscall.hpp>
 #include <lib/time.hpp>
@@ -37,36 +38,31 @@ struct [[gnu::packed]] ProcessStackFrame {
         lib::u64 rcx;
         lib::u64 rax;
         lib::u64 rip;
-        lib::u64 cs;
+        cpu::Segment cs;
         lib::u64 flags;
         lib::u64 rsp;
-        lib::u64 ss;
+        cpu::Segment ss;
 };
 
 /// Representation of a process.
 /// It is recommended to use `allocate_pid()` instead
 /// of assigning a PID manually when creating a new process.
 class Process {
-        lib::u64 time;  // elapsed time in ms
-        lib::Vector<Process *> children;
-        ProcessStatus status;
-        elf::elf_entry_t entry;
-        PID id;
-        lib::u64 cr3;
-        // each process has its own page tables
-        mem::PML4T pml4t;
-
-        ProcessStackFrame *frame;
-        ProcessStackFrame frame_storage;
-
-        ProcessHeap heap;
-
-        lib::uptr kstack_frame;
-        lib::uptr kstack_top;
-        lib::uptr krsp;
-        lib::uptr *ksp;
-
-        lib::Vector<lib::u64> ustack_frames;
+        lib::u64                time;  // elapsed time in ms
+        lib::Vector<Process *>  children;
+        ProcessStatus           status;
+        elf::elf_entry_t        entry;
+        PID                     id;
+        lib::u64                cr3;
+        mem::PML4T              pml4t; // each process has its own page tables
+        ProcessStackFrame       *frame;
+        ProcessStackFrame       frame_storage;
+        ProcessHeap             heap;
+        lib::uptr               kstack_frame;
+        lib::uptr               kstack_top;
+        lib::uptr               krsp;
+        lib::uptr               *ksp;
+        lib::Vector<lib::u64>   ustack_frames;
         lib::Vector<lib::File *> file_descriptors;
 
         void init_kernel_stack(this Process &self);
@@ -86,6 +82,7 @@ public:
 
         void push_kernel(this Process &self, lib::u64 value);
         void push_kernel(this Process &self, void (*value)());
+        void push_kernel(this Process &self, cpu::Segment value);
 
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);

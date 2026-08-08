@@ -1,3 +1,4 @@
+#include <cpu/gdt.hpp>
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
@@ -168,10 +169,8 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
 {
         this->id = id;
         this->entry = info->entry;
-
         this->status = ProcessStatus::Alive;
         this->time = 0;
-
         this->argc = 0;
         this->envc = 0;
         this->argv = nullptr;
@@ -179,8 +178,8 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
 
         this->frame = &this->frame_storage;
         memset(this->frame, 0, sizeof(*this->frame));
-        this->frame->cs = 0x1b;
-        this->frame->ss = 0x23;
+        this->frame->cs = cpu::Segment::UserCS;
+        this->frame->ss = cpu::Segment::UserSS;
         this->frame->flags = 1 << 9;
         this->frame->rip = reinterpret_cast<u64>(entry);
         this->frame->rsp = cpu::USER_STACK_TOP;
@@ -230,6 +229,11 @@ void Process::push_kernel(this Process &self, void (*value)())
         self.push_kernel(reinterpret_cast<u64>(value));
 }
 
+void Process::push_kernel(this Process &self, cpu::Segment value)
+{
+        self.push_kernel(static_cast<u64>(value));
+}
+
 // --------------------------------------------------
 void Process::load_pml4t(this Process &self)
 {
@@ -269,10 +273,10 @@ void Process::save_context(this Process &self, cpu::SyscallFrame *frame)
         self.frame->r14   = frame->r14;
         self.frame->r15   = frame->r15;
         self.frame->rip   = frame->rip;
-        self.frame->cs    = frame->cs;
+        self.frame->cs    = static_cast<cpu::Segment>(frame->cs);
         self.frame->flags = frame->flags | (1 << 9);
         self.frame->rsp   = frame->rsp;
-        self.frame->ss    = frame->ss;
+        self.frame->ss    = static_cast<cpu::Segment>(frame->ss);
         self.cr3          = frame->cr3;
 }
 
@@ -294,10 +298,10 @@ void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
         frame->r14      = self.frame->r14;
         frame->r15      = self.frame->r15;
         frame->rip      = self.frame->rip;
-        frame->cs       = self.frame->cs;
+        frame->cs       = static_cast<u64>(self.frame->cs);
         frame->flags    = self.frame->flags | (1 << 9);
         frame->rsp      = self.frame->rsp;
-        frame->ss       = self.frame->ss;
+        frame->ss       = static_cast<u64>(self.frame->ss);
         frame->cr3      = self.cr3;
 }
 

@@ -5,6 +5,13 @@
 
 namespace kernel::cpu {
 
+enum class Segment : unsigned int {
+        KernelCS                = 0x08,
+        KernelDS                = 0x10,
+        UserCS                  = 0x1b,
+        UserSS                  = 0x23
+};
+
 /// Easy-to-use representation of a single GDT descriptor.
 struct [[gnu::packed]] GDTDescriptor {
         lib::u16 limit_low;
