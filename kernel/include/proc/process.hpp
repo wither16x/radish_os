@@ -84,6 +84,9 @@ public:
         void push_kernel(this Process &self, void (*value)());
         void push_kernel(this Process &self, cpu::Segment value);
 
+        /// Replace the file descriptors by the file descriptos from another process.
+        void set_file_descriptors(this Process &self, const Process &other);
+
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
         void destroy_pml4t(this Process &self);

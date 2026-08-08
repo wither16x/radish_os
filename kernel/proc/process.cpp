@@ -167,21 +167,21 @@ void Process::init_user_stack(this Process &self)
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         : pml4t(pml4t), heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t)
 {
-        this->id = id;
-        this->entry = info->entry;
-        this->status = ProcessStatus::Alive;
-        this->time = 0;
-        this->argc = 0;
-        this->envc = 0;
-        this->argv = nullptr;
-        this->envp = nullptr;
-        this->frame = &this->frame_storage;
+        this->id                = id;
+        this->entry             = info->entry;
+        this->status            = ProcessStatus::Alive;
+        this->time              = 0;
+        this->argc              = 0;
+        this->envc              = 0;
+        this->argv              = nullptr;
+        this->envp              = nullptr;
+        this->frame             = &this->frame_storage;
         memset(this->frame, 0, sizeof(*this->frame));
-        this->frame->cs = cpu::Segment::UserCS;
-        this->frame->ss = cpu::Segment::UserSS;
-        this->frame->flags = 1 << 9;
-        this->frame->rip = reinterpret_cast<u64>(entry);
-        this->frame->rsp = cpu::USER_STACK_TOP;
+        this->frame->cs         = cpu::Segment::UserCS;
+        this->frame->ss         = cpu::Segment::UserSS;
+        this->frame->flags      = 1 << 9;
+        this->frame->rip        = reinterpret_cast<u64>(entry);
+        this->frame->rsp        = cpu::USER_STACK_TOP;
 
         this->remap_stack();
         this->init_user_stack();
@@ -194,20 +194,15 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
-        this->id = id;
-        this->cr3 = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
-        this->time = 0;
-        this->file_descriptors = parent.file_descriptors;
-        // ref_count must be incremented for each copied file
-        for (usize i = 0; i < this->file_descriptors.size(); i++) {
-                if (this->file_descriptors[i])
-                        ++this->file_descriptors[i]->ref_count;
-        }
-        this->frame = &this->frame_storage;
+        this->id                = id;
+        this->cr3               = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
+        this->time              = 0;
+        this->frame             = &this->frame_storage;
         memcpy(this->frame, parent.frame, sizeof(*this->frame));
-        this->frame->rax = 0;
-        this->status = ProcessStatus::Alive;
+        this->frame->rax        = 0;
+        this->status            = ProcessStatus::Alive;
 
+        this->set_file_descriptors(parent);
         this->init_kernel_stack();
 }
 
@@ -228,6 +223,16 @@ void Process::push_kernel(this Process &self, void (*value)())
 void Process::push_kernel(this Process &self, cpu::Segment value)
 {
         self.push_kernel(static_cast<u64>(value));
+}
+
+void Process::set_file_descriptors(this Process &self, const Process &other)
+{
+        self.file_descriptors = other.file_descriptors;
+
+        for (auto &fd : self.file_descriptors) {
+                if (fd)
+                        ++fd->ref_count;
+        }
 }
 
 // --------------------------------------------------
