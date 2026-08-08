@@ -35,29 +35,38 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 cpu::sti();
                 return -1;
         }
-        proc->argc = argc;
+
+        // TODO: cleanup from here...
         if (argv) {
                 proc->argv = new char *[argc + 1];
-                if (not proc->argv)
+                if (not proc->argv) {
                         logger.err("failed to allocate argv");
+                        return -2;
+                }
                 for (int i = 0; i < argc; i++) {
-                        logger.debug("exec: argv[%d] = %s", i, argv[i]);
                         proc->argv[i] = new char[strlen(argv[i]) + 1];
                         strcpy(argv[i], proc->argv[i]);
                 }
+                proc->argv[argc] = nullptr;
+                proc->argc = argc;
         }
         if (envp) {
                 int envc = 0;
-                while (envp[envc] != NULL)
+                while (envp[envc] != nullptr)
                         ++envc;
                 proc->envp = new char *[envc + 1];
-                if (not proc->envp)
+                if (not proc->envp) {
                         logger.err("failed to allocate envp");
+                        return -3;
+                }
                 for (int i = 0; i < envc; i++) {
                         proc->envp[i] = new char[strlen(envp[i]) + 1];
                         strcpy(envp[i], proc->envp[i]);
                 }
+                proc->envp[envc] = nullptr;
+                proc->envc = envc;
         }
+        // ...to here
 
         elf::elf_entry_t proc_entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
 
@@ -65,6 +74,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
         proc->switch_pml4t(proc_pml4t);
         proc->reset_stack();
         proc->remap_stack();
+        proc->init_user_stack();
         proc->switch_entry(proc_entry);
         proc->load_pml4t();
 

@@ -1,4 +1,3 @@
-#include "proc/elf.hpp"
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
@@ -14,6 +13,8 @@
 #include <mem/page.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
+
+// TODO: BIG CLEANUP
 
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::memset, kernel::lib::memcpy;
@@ -99,7 +100,6 @@ void Process::init_kernel_stack(this Process &self)
 
         uptr *sp = reinterpret_cast<uptr *>(self.kstack_top);
 
-        // TODO: add argc, argv, envp
         *(--sp) = self.frame->ss;
         *(--sp) = self.frame->rsp;
         *(--sp) = self.frame->flags;
@@ -125,6 +125,107 @@ void Process::init_kernel_stack(this Process &self)
         self.krsp = reinterpret_cast<uptr>(sp);
 }
 
+void Process::init_user_stack(this Process &self)
+{
+        uptr hhdm_offset = get_kernel_hhdm_offset();
+        uptr usp = cpu::USER_STACK_TOP;
+
+        uptr *argv_uaddrs = new uptr[self.argc];
+        uptr *envp_uaddrs = new uptr[self.envc];
+
+        for (int i = self.envc - 1; i >= 0; i--) {
+                usize len = lib::strlen(self.envp[i]) + 1;
+                usp -= len;
+
+                for (usize j = 0; j < len; j++) {
+                        uptr uaddr = usp + j;
+                        uptr idx = (uaddr - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                        uptr off = uaddr % mem::PAGE_SIZE;
+                        uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                        *reinterpret_cast<char *>(kaddr) = self.envp[i][j];
+                }
+
+                envp_uaddrs[i] = usp;
+        }
+
+        for (int i = self.argc - 1; i >= 0; i--) {
+                usize len = lib::strlen(self.argv[i]) + 1;
+                usp -= len;
+
+                for (usize j = 0; j < len; j++) {
+                        uptr uaddr = usp + j;
+                        uptr idx = (uaddr - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                        uptr off = uaddr % mem::PAGE_SIZE;
+                        uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                        *reinterpret_cast<char *>(kaddr) = self.argv[i][j];
+                }
+
+                argv_uaddrs[i] = usp;
+        }
+
+        usp &= ~static_cast<uptr>(0xf);
+
+        int total_words = self.envc + self.argc + 5;
+        if (total_words % 2 != 0) {
+                usp -= sizeof(u64);
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = 0;
+        }
+
+        for (int i = 0; i < 2; i++) {
+                usp -= sizeof(u64);
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = 0;
+        }
+
+        usp -= sizeof(u64);
+        {
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = 0;
+        }
+        for (int i = self.envc - 1; i >= 0; i--) {
+                usp -= sizeof(u64);
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = envp_uaddrs[i];
+        }
+
+        usp -= sizeof(u64);
+        {
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = 0;
+        }
+        for (int i = self.argc - 1; i >= 0; i--) {
+                usp -= sizeof(u64);
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = argv_uaddrs[i];
+        }
+
+        usp -= sizeof(u64);
+        {
+                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
+                uptr off = usp % mem::PAGE_SIZE;
+                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                *reinterpret_cast<u64 *>(kaddr) = static_cast<u64>(self.argc);
+        }
+
+        delete[] argv_uaddrs;
+        delete[] envp_uaddrs;
+
+        self.frame->rsp = usp;
+}
+
 // --------------------------------------------------
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         : pml4t(pml4t), heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t)
@@ -132,15 +233,13 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         this->id = id;
         this->entry = info->entry;
 
-        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
-                this->pml4t.map_page(addr,
-                        mem::pmm::allocate_frame(),
-                        mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
-                );
-        }
-
         this->status = ProcessStatus::Alive;
         this->time = 0;
+
+        this->argc = 0;
+        this->envc = 0;
+        this->argv = nullptr;
+        this->envp = nullptr;
 
         this->frame = &this->frame_storage;
         memset(this->frame, 0, sizeof(*this->frame));
@@ -150,6 +249,8 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         this->frame->rip = reinterpret_cast<u64>(entry);
         this->frame->rsp = cpu::USER_STACK_TOP;
 
+        this->remap_stack();
+        this->init_user_stack();
         this->init_kernel_stack();
 }
 // --------------------------------------------------
@@ -254,10 +355,12 @@ void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
 void Process::remap_stack(this Process &self)
 {
         for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
+                uptr frame = mem::pmm::allocate_frame();
                 self.pml4t.map_page(addr,
-                        mem::pmm::allocate_frame(),
+                        frame,
                         mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
                 );
+                self.ustack_frames.push_back(frame);
         }
 }
 

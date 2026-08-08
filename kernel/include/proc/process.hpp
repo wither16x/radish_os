@@ -10,6 +10,8 @@
 #include <proc/pid.hpp>
 #include <proc/elf.hpp>
 
+// TODO: BIG CLEANUP
+
 namespace kernel::proc {
 
 /// Alive: the process can still use the CPU
@@ -84,14 +86,18 @@ class Process {
         lib::uptr kstack_top;
         lib::uptr krsp;
 
+        lib::Vector<lib::u64> ustack_frames;
         lib::Vector<lib::File *> file_descriptors;
 
         void init_kernel_stack(this Process &self);
 
 public:
         int argc;
+        int envc;
         char **argv;
         char **envp;
+
+        void init_user_stack(this Process &self);
 
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);

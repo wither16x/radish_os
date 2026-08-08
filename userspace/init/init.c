@@ -5,6 +5,7 @@
 int main()
 {
         char buf[50];
+        const char *shell_file = "I:/bin/shell";
 
         printf("Hello from init!\n");
 
@@ -23,8 +24,8 @@ exec_shell:
         printf("Executing shell...\n");
         pid_t pid = fork();
         if (pid == 0) {
-                char *argv[] = {"I:/bin/shell"};
-                exec("I:/bin/shell", 1, argv, NULL);
+                char *argv[] = {shell_file};
+                exec(shell_file, 1, argv, NULL);
         } else {
                 wait();
         }
