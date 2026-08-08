@@ -41,7 +41,7 @@ void Process::init_kernel_stack(this Process &self)
         self.push_kernel(self.frame->flags);
         self.push_kernel(self.frame->cs);
         self.push_kernel(self.frame->rip);
-        self.push_kernel(reinterpret_cast<u64>(&__proc_trampoline));
+        self.push_kernel(&__proc_trampoline);
         self.push_kernel(self.frame->rax);
         self.push_kernel(self.frame->rbx);
         self.push_kernel(self.frame->rcx);
@@ -223,6 +223,11 @@ void Process::push_kernel(this Process &self, u64 value)
 
         // the stack grows downwards
         *(--self.ksp) = value;
+}
+
+void Process::push_kernel(this Process &self, void (*value)())
+{
+        self.push_kernel(reinterpret_cast<u64>(value));
 }
 
 // --------------------------------------------------

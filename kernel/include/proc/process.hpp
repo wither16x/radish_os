@@ -85,6 +85,8 @@ public:
         Process(PID id, const Process &parent, mem::PML4T &pml4t);
 
         void push_kernel(this Process &self, lib::u64 value);
+        void push_kernel(this Process &self, void (*value)());
+
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
         void destroy_pml4t(this Process &self);
