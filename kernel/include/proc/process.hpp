@@ -87,8 +87,8 @@ public:
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
         void destroy_pml4t(this Process &self);
-        void save_context(this Process &self, cpu::SyscallFrame *frame);
-        void load_context(this Process &self, cpu::SyscallFrame *frame);
+        void save_context(this Process &self, cpu::SyscallFrame &frame);
+        void load_context(this Process &self, cpu::SyscallFrame &frame);
         void remap_stack(this Process &self);
         void reset_stack(this Process &self);
         void switch_entry(this Process &self, elf::elf_entry_t entry);

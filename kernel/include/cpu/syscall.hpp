@@ -33,6 +33,6 @@ struct [[gnu::packed]] SyscallFrame {
 };
 
 /// Execute the syscall corresponding to RAX.
-extern "C" void syscall_handler(SyscallFrame *frame);
+extern "C" void syscall_handler(SyscallFrame &frame);
 
 } /* namespace kernel::cpu */

@@ -175,7 +175,6 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         this->envc = 0;
         this->argv = nullptr;
         this->envp = nullptr;
-
         this->frame = &this->frame_storage;
         memset(this->frame, 0, sizeof(*this->frame));
         this->frame->cs = cpu::Segment::UserCS;
@@ -198,21 +197,18 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->id = id;
         this->cr3 = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
         this->time = 0;
-
         this->file_descriptors = parent.file_descriptors;
         // ref_count must be incremented for each copied file
         for (usize i = 0; i < this->file_descriptors.size(); i++) {
                 if (this->file_descriptors[i])
                         ++this->file_descriptors[i]->ref_count;
         }
-
         this->frame = &this->frame_storage;
         memcpy(this->frame, parent.frame, sizeof(*this->frame));
         this->frame->rax = 0;
+        this->status = ProcessStatus::Alive;
 
         this->init_kernel_stack();
-
-        this->status = ProcessStatus::Alive;
 }
 
 void Process::push_kernel(this Process &self, u64 value)
@@ -255,54 +251,54 @@ void Process::destroy_pml4t(this Process &self)
         self.pml4t.destroy();
 }
 
-void Process::save_context(this Process &self, cpu::SyscallFrame *frame)
+void Process::save_context(this Process &self, cpu::SyscallFrame &frame)
 {
-        self.frame->rax   = frame->rax;
-        self.frame->rbx   = frame->rbx;
-        self.frame->rcx   = frame->rcx;
-        self.frame->rdx   = frame->rdx;
-        self.frame->rsi   = frame->rsi;
-        self.frame->rdi   = frame->rdi;
-        self.frame->rbp   = frame->rbp;
-        self.frame->r8    = frame->r8;
-        self.frame->r9    = frame->r9;
-        self.frame->r10   = frame->r10;
-        self.frame->r11   = frame->r11;
-        self.frame->r12   = frame->r12;
-        self.frame->r13   = frame->r13;
-        self.frame->r14   = frame->r14;
-        self.frame->r15   = frame->r15;
-        self.frame->rip   = frame->rip;
-        self.frame->cs    = static_cast<cpu::Segment>(frame->cs);
-        self.frame->flags = frame->flags | (1 << 9);
-        self.frame->rsp   = frame->rsp;
-        self.frame->ss    = static_cast<cpu::Segment>(frame->ss);
-        self.cr3          = frame->cr3;
+        self.frame->rax   = frame.rax;
+        self.frame->rbx   = frame.rbx;
+        self.frame->rcx   = frame.rcx;
+        self.frame->rdx   = frame.rdx;
+        self.frame->rsi   = frame.rsi;
+        self.frame->rdi   = frame.rdi;
+        self.frame->rbp   = frame.rbp;
+        self.frame->r8    = frame.r8;
+        self.frame->r9    = frame.r9;
+        self.frame->r10   = frame.r10;
+        self.frame->r11   = frame.r11;
+        self.frame->r12   = frame.r12;
+        self.frame->r13   = frame.r13;
+        self.frame->r14   = frame.r14;
+        self.frame->r15   = frame.r15;
+        self.frame->rip   = frame.rip;
+        self.frame->cs    = static_cast<cpu::Segment>(frame.cs);
+        self.frame->flags = frame.flags | (1 << 9);
+        self.frame->rsp   = frame.rsp;
+        self.frame->ss    = static_cast<cpu::Segment>(frame.ss);
+        self.cr3          = frame.cr3;
 }
 
-void Process::load_context(this Process &self, cpu::SyscallFrame *frame)
+void Process::load_context(this Process &self, cpu::SyscallFrame &frame)
 {
-        frame->rax      = self.frame->rax;
-        frame->rbx      = self.frame->rbx;
-        frame->rcx      = self.frame->rcx;
-        frame->rdx      = self.frame->rdx;
-        frame->rsi      = self.frame->rsi;
-        frame->rdi      = self.frame->rdi;
-        frame->rbp      = self.frame->rbp;
-        frame->r8       = self.frame->r8;
-        frame->r9       = self.frame->r9;
-        frame->r10      = self.frame->r10;
-        frame->r11      = self.frame->r11;
-        frame->r12      = self.frame->r12;
-        frame->r13      = self.frame->r13;
-        frame->r14      = self.frame->r14;
-        frame->r15      = self.frame->r15;
-        frame->rip      = self.frame->rip;
-        frame->cs       = static_cast<u64>(self.frame->cs);
-        frame->flags    = self.frame->flags | (1 << 9);
-        frame->rsp      = self.frame->rsp;
-        frame->ss       = static_cast<u64>(self.frame->ss);
-        frame->cr3      = self.cr3;
+        frame.rax      = self.frame->rax;
+        frame.rbx      = self.frame->rbx;
+        frame.rcx      = self.frame->rcx;
+        frame.rdx      = self.frame->rdx;
+        frame.rsi      = self.frame->rsi;
+        frame.rdi      = self.frame->rdi;
+        frame.rbp      = self.frame->rbp;
+        frame.r8       = self.frame->r8;
+        frame.r9       = self.frame->r9;
+        frame.r10      = self.frame->r10;
+        frame.r11      = self.frame->r11;
+        frame.r12      = self.frame->r12;
+        frame.r13      = self.frame->r13;
+        frame.r14      = self.frame->r14;
+        frame.r15      = self.frame->r15;
+        frame.rip      = self.frame->rip;
+        frame.cs       = static_cast<u64>(self.frame->cs);
+        frame.flags    = self.frame->flags | (1 << 9);
+        frame.rsp      = self.frame->rsp;
+        frame.ss       = static_cast<u64>(self.frame->ss);
+        frame.cr3      = self.cr3;
 }
 
 /// Note that the stack wont be mapped if it is already mapped.

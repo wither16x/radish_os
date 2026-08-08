@@ -34,167 +34,167 @@ enum SyscallType : u64 {
 /// RBX = file descriptor
 /// RCX = buffer
 /// RDX = bytes to write
-void syscall_write(SyscallFrame *frame)
+void syscall_write(SyscallFrame &frame)
 {
-        usize fd = frame->rbx;
+        usize fd = frame.rbx;
         proc::Process *curr_proc = proc::scheduler::get_current_process();
 
         if (not curr_proc) {
-                frame->rax = static_cast<u64>(-1);
+                frame.rax = static_cast<u64>(-1);
                 return;
         }
 
         const lib::File *file = curr_proc->find_file(fd);
-        const void *buf = reinterpret_cast<const void *>(frame->rcx);
-        usize n = frame->rdx;
+        const void *buf = reinterpret_cast<const void *>(frame.rcx);
+        usize n = frame.rdx;
 
         fs::vfs::Status res = lib::write(const_cast<lib::File *>(file), buf, n);
-        frame->rax = static_cast<u64>(res);
+        frame.rax = static_cast<u64>(res);
 }
 
 /// RBX = file descriptor
 /// RCX = buffer
 /// RDX = bytes to write
-void syscall_read(SyscallFrame *frame)
+void syscall_read(SyscallFrame &frame)
 {
-        usize fd = frame->rbx;
+        usize fd = frame.rbx;
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
-                frame->rax = static_cast<u64>(-1);
+                frame.rax = static_cast<u64>(-1);
                 return;
         }
 
         const lib::File *file = curr_proc->find_file(fd);
-        void *buf = reinterpret_cast<void *>(frame->rcx);
-        usize n = frame->rdx;
+        void *buf = reinterpret_cast<void *>(frame.rcx);
+        usize n = frame.rdx;
 
         fs::vfs::Status res = lib::read(const_cast<lib::File* >(file), buf, n);
-        frame->rax = static_cast<u64>(res);
+        frame.rax = static_cast<u64>(res);
 }
 
 /// RBX = path
 /// RCX = argc
 /// RDX = argv
 /// RDI = envp
-void syscall_exec(SyscallFrame *frame)
+void syscall_exec(SyscallFrame &frame)
 {
-        const char *path = reinterpret_cast<const char *>(frame->rbx);
-        int argc = frame->rcx;
-        char **argv = reinterpret_cast<char **>(frame->rdx);
-        char **envp = reinterpret_cast<char **>(frame->rdi);
+        const char *path = reinterpret_cast<const char *>(frame.rbx);
+        int argc = frame.rcx;
+        char **argv = reinterpret_cast<char **>(frame.rdx);
+        char **envp = reinterpret_cast<char **>(frame.rdi);
         int res = proc::exec(path, argc, argv, envp);
-        frame->rax = res;
+        frame.rax = res;
         proc::Process *current_proc = proc::scheduler::get_current_process();
         current_proc->load_context(frame);
 }
 
-void syscall_fork(SyscallFrame *frame)
+void syscall_fork(SyscallFrame &frame)
 {
         int pid = proc::fork();
-        frame->rax = pid;
+        frame.rax = pid;
 }
 
-void syscall_exit(SyscallFrame *frame)
+void syscall_exit(SyscallFrame &frame)
 {
         proc::Process *proc = proc::scheduler::get_current_process();
         proc->die();
-        frame->rax = 0;
+        frame.rax = 0;
         proc::scheduler::yield();
 }
 
-void syscall_getpid(SyscallFrame *frame)
+void syscall_getpid(SyscallFrame &frame)
 {
         int pid = proc::scheduler::get_current_process()->get_id();
-        frame->rax = pid;
+        frame.rax = pid;
 }
 
-void syscall_wait(SyscallFrame *frame)
+void syscall_wait(SyscallFrame &frame)
 {
         int res = proc::wait();
-        frame->rax = res;
+        frame.rax = res;
 }
 
 /// RBX = path
-void syscall_open(SyscallFrame *frame)
+void syscall_open(SyscallFrame &frame)
 {
-        const char *path = reinterpret_cast<const char *>(frame->rbx);
+        const char *path = reinterpret_cast<const char *>(frame.rbx);
 
         lib::File *f = lib::open(path);
         if (not f) {
-                frame->rax = static_cast<u64>(-1);
+                frame.rax = static_cast<u64>(-1);
                 return;
         }
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
 
         usize fd = curr_proc->find_fd(f);
-        frame->rax = fd;
+        frame.rax = fd;
 }
 
 /// RBX = pointer to file descriptor
-void syscall_close(SyscallFrame *frame)
+void syscall_close(SyscallFrame &frame)
 {
-        usize fd = frame->rbx;
+        usize fd = frame.rbx;
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
-                frame->rax = static_cast<u64>(-1);
+                frame.rax = static_cast<u64>(-1);
                 return;
         }
 
         const lib::File *file = curr_proc->find_file(fd);
         fs::vfs::Status res = lib::close(const_cast<lib::File *>(file));
-        frame->rax = static_cast<u64>(res);
+        frame.rax = static_cast<u64>(res);
 }
 
 /// RBX = amount of pages
 ///     RBX > 0 : extend process heap
 ///     RBX = 0 : get last mapped page from process heap
 ///     RBX < 0 : shorten process heap
-void syscall_lastpg(SyscallFrame *frame)
+void syscall_lastpg(SyscallFrame &frame)
 {
-        int pages = frame->rbx;
+        int pages = frame.rbx;
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
-                frame->rax = 2; // no current process
+                frame.rax = 2; // no current process
                 return;
         }
 
         if (pages > 0) {
                 bool result = curr_proc->get_heap().extend(pages);
                 if (not result) {
-                        frame->rax = 0;
+                        frame.rax = 0;
                         return;
                 }
 
-                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
+                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
         } else if (pages == 0) {
-                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;;
+                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;;
         } else if (pages < 0) {
                 bool result = curr_proc->get_heap().shorten(-pages);
                 if (not result) {
-                        frame->rax = 0;
+                        frame.rax = 0;
                         return;
                 }
 
-                frame->rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
+                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
         }
 }
 
-void syscall_getcputime(SyscallFrame *frame)
+void syscall_getcputime(SyscallFrame &frame)
 {
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
-                frame->rax = -1;
+                frame.rax = -1;
                 return;
         }
 
-        frame->rax = proc::scheduler::TIME_PER_PROCESS - curr_proc->get_time();
+        frame.rax = proc::scheduler::TIME_PER_PROCESS - curr_proc->get_time();
 }
 
-void (*syscalls[])(SyscallFrame *) = {
+void (*syscalls[])(SyscallFrame &) = {
         syscall_write,
         syscall_read,
         syscall_exec,
@@ -210,17 +210,16 @@ void (*syscalls[])(SyscallFrame *) = {
 
 } /* anonymous namespace */
 
-/// NOTE: using a table instead of a switch loop may be more efficient... 
-extern "C" void syscall_handler(SyscallFrame *frame)
+extern "C" void syscall_handler(SyscallFrame &frame)
 {
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (curr_proc)
                 curr_proc->save_context(frame);
 
-        if (frame->rax >= SC_LIMIT)
+        if (frame.rax >= SC_LIMIT)
                 return;
 
-        void (*handler)(SyscallFrame *) = syscalls[frame->rax];
+        void (*handler)(SyscallFrame &) = syscalls[frame.rax];
         handler(frame);
 }
 
