@@ -218,6 +218,9 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
 
 void Process::push_kernel(this Process &self, u64 value)
 {
+        if (not self.ksp)
+                return;
+
         // the stack grows downwards
         *(--self.ksp) = value;
 }
