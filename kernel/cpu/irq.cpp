@@ -19,12 +19,12 @@ namespace {
 
 constexpr int MAX_IRQ_HANDLERS = 16;
 
-void (*handlers[MAX_IRQ_HANDLERS])(IRQFrame *);
+void (*handlers[MAX_IRQ_HANDLERS])(IRQFrame &);
 
 } /* anonymous namespace */
 
 // --------------------------------------------------
-void register_irq(int n, void (*handler)(IRQFrame *))
+void register_irq(int n, void (*handler)(IRQFrame &))
 {
         handlers[n] = handler;
         drivers::pic::irq_unmask(n);
@@ -32,16 +32,16 @@ void register_irq(int n, void (*handler)(IRQFrame *))
 // --------------------------------------------------
 
 // --------------------------------------------------
-extern "C" void irq_handler(IRQFrame *f)
+extern "C" void irq_handler(IRQFrame &f)
 {
-        if (f->irqno >= MAX_IRQ_HANDLERS) {
-                logger.err("received unexpected irq: %u", f->irqno);
+        if (f.irqno >= MAX_IRQ_HANDLERS) {
+                logger.err("received unexpected irq: %u", f.irqno);
                 return;
         }
 
-        void (*handler)(IRQFrame *) = handlers[f->irqno];
+        void (*handler)(IRQFrame &) = handlers[f.irqno];
         if (not handler) {
-                logger.err("no handler available for irq %u", f->irqno);
+                logger.err("no handler available for irq %u", f.irqno);
                 return;
         }
         

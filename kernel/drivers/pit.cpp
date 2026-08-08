@@ -24,7 +24,7 @@ u64 seconds = 0;
 
 bool sleeping = false;
 
-void handle_irq(cpu::IRQFrame *frame)
+void handle_irq(cpu::IRQFrame &frame)
 {
         (void)frame;
 

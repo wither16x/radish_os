@@ -88,7 +88,7 @@ bool expecting_break = false;
 
 Queue<u8, 50> ringbuf;
 
-void handle_irq(cpu::IRQFrame *frame)
+void handle_irq(cpu::IRQFrame &frame)
 {
         (void)frame;
 
