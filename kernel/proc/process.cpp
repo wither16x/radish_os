@@ -34,31 +34,31 @@ void Process::init_kernel_stack(this Process &self)
         self.kstack_frame = mem::pmm::allocate_frame();
         self.kstack_top = self.kstack_frame + hhdm_offset + mem::PAGE_SIZE;
 
-        uptr *sp = reinterpret_cast<uptr *>(self.kstack_top);
+        self.ksp = reinterpret_cast<uptr *>(self.kstack_top);
 
-        *(--sp) = self.frame->ss;
-        *(--sp) = self.frame->rsp;
-        *(--sp) = self.frame->flags;
-        *(--sp) = self.frame->cs;
-        *(--sp) = self.frame->rip;
-        *(--sp) = reinterpret_cast<u64>(&__proc_trampoline);
-        *(--sp) = self.frame->rax;
-        *(--sp) = self.frame->rbx;
-        *(--sp) = self.frame->rcx;
-        *(--sp) = self.frame->rdx;
-        *(--sp) = self.frame->rsi;
-        *(--sp) = self.frame->rdi;
-        *(--sp) = self.frame->rbp;
-        *(--sp) = self.frame->r8;
-        *(--sp) = self.frame->r9;
-        *(--sp) = self.frame->r10;
-        *(--sp) = self.frame->r11;
-        *(--sp) = self.frame->r12;
-        *(--sp) = self.frame->r13;
-        *(--sp) = self.frame->r14;
-        *(--sp) = self.frame->r15;
+        self.push_kernel(self.frame->ss);
+        self.push_kernel(self.frame->rsp);
+        self.push_kernel(self.frame->flags);
+        self.push_kernel(self.frame->cs);
+        self.push_kernel(self.frame->rip);
+        self.push_kernel(reinterpret_cast<u64>(&__proc_trampoline));
+        self.push_kernel(self.frame->rax);
+        self.push_kernel(self.frame->rbx);
+        self.push_kernel(self.frame->rcx);
+        self.push_kernel(self.frame->rdx);
+        self.push_kernel(self.frame->rsi);
+        self.push_kernel(self.frame->rdi);
+        self.push_kernel(self.frame->rbp);
+        self.push_kernel(self.frame->r8);
+        self.push_kernel(self.frame->r9);
+        self.push_kernel(self.frame->r10);
+        self.push_kernel(self.frame->r11);
+        self.push_kernel(self.frame->r12);
+        self.push_kernel(self.frame->r13);
+        self.push_kernel(self.frame->r14);
+        self.push_kernel(self.frame->r15);
 
-        self.krsp = reinterpret_cast<uptr>(sp);
+        self.krsp = reinterpret_cast<uptr>(self.ksp);
 }
 
 void Process::init_user_stack(this Process &self)
@@ -214,6 +214,12 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->init_kernel_stack();
 
         this->status = ProcessStatus::Alive;
+}
+
+void Process::push_kernel(this Process &self, u64 value)
+{
+        // the stack grows downwards
+        *(--self.ksp) = value;
 }
 
 // --------------------------------------------------
