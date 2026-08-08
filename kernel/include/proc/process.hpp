@@ -9,8 +9,7 @@
 #include <mem/pml4t.hpp>
 #include <proc/pid.hpp>
 #include <proc/elf.hpp>
-
-// TODO: BIG CLEANUP
+#include <proc/procheap.hpp>
 
 namespace kernel::proc {
 
@@ -42,26 +41,6 @@ struct [[gnu::packed]] ProcessStackFrame {
         lib::u64 flags;
         lib::u64 rsp;
         lib::u64 ss;
-};
-
-/// Process heap pages are linear from `start` to `limit`.
-/// `last_page` represents the last mapped page. It changes when
-/// the heap gets smaller or bigger.
-class ProcessHeap {
-        lib::uptr start;
-        lib::uptr last_page;
-        lib::uptr limit;
-        mem::PML4T &pml4t;
-
-public:
-        ProcessHeap(lib::uptr start, lib::uptr last_page, lib::uptr limit, mem::PML4T &pml4t);
-
-        bool extend(this ProcessHeap &self, int pages);
-        bool shorten(this ProcessHeap &self, int pages);
-
-        lib::uptr get_start(this const ProcessHeap &self);
-        lib::uptr get_last_page(this const ProcessHeap &self);
-        lib::uptr get_limit(this const ProcessHeap &self);
 };
 
 /// Representation of a process.
