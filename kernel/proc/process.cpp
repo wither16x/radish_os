@@ -30,36 +30,27 @@ extern "C" void __proc_trampoline();
 
 void Process::init_kernel_stack(this Process &self)
 {
-        uptr hhdm_offset = get_kernel_hhdm_offset();
-
-        self.kstack_frame = mem::pmm::allocate_frame();
-        self.kstack_top = self.kstack_frame + hhdm_offset + mem::PAGE_SIZE;
-
-        self.ksp = reinterpret_cast<uptr *>(self.kstack_top);
-
-        self.push_kernel(self.frame->ss);
-        self.push_kernel(self.frame->rsp);
-        self.push_kernel(self.frame->flags);
-        self.push_kernel(self.frame->cs);
-        self.push_kernel(self.frame->rip);
-        self.push_kernel(&__proc_trampoline);
-        self.push_kernel(self.frame->rax);
-        self.push_kernel(self.frame->rbx);
-        self.push_kernel(self.frame->rcx);
-        self.push_kernel(self.frame->rdx);
-        self.push_kernel(self.frame->rsi);
-        self.push_kernel(self.frame->rdi);
-        self.push_kernel(self.frame->rbp);
-        self.push_kernel(self.frame->r8);
-        self.push_kernel(self.frame->r9);
-        self.push_kernel(self.frame->r10);
-        self.push_kernel(self.frame->r11);
-        self.push_kernel(self.frame->r12);
-        self.push_kernel(self.frame->r13);
-        self.push_kernel(self.frame->r14);
-        self.push_kernel(self.frame->r15);
-
-        self.krsp = reinterpret_cast<uptr>(self.ksp);
+        self.kernel_stack.push(static_cast<uptr>(self.frame->ss));
+        self.kernel_stack.push(self.frame->rsp);
+        self.kernel_stack.push(self.frame->flags);
+        self.kernel_stack.push(static_cast<uptr>(self.frame->cs));
+        self.kernel_stack.push(self.frame->rip);
+        self.kernel_stack.push(reinterpret_cast<uptr>(&__proc_trampoline));
+        self.kernel_stack.push(self.frame->rax);
+        self.kernel_stack.push(self.frame->rbx);
+        self.kernel_stack.push(self.frame->rcx);
+        self.kernel_stack.push(self.frame->rdx);
+        self.kernel_stack.push(self.frame->rsi);
+        self.kernel_stack.push(self.frame->rdi);
+        self.kernel_stack.push(self.frame->rbp);
+        self.kernel_stack.push(self.frame->r8);
+        self.kernel_stack.push(self.frame->r9);
+        self.kernel_stack.push(self.frame->r10);
+        self.kernel_stack.push(self.frame->r11);
+        self.kernel_stack.push(self.frame->r12);
+        self.kernel_stack.push(self.frame->r13);
+        self.kernel_stack.push(self.frame->r14);
+        self.kernel_stack.push(self.frame->r15);
 }
 
 void Process::init_user_stack(this Process &self)
@@ -201,25 +192,6 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->init_kernel_stack();
 }
 
-void Process::push_kernel(this Process &self, u64 value)
-{
-        if (not self.ksp)
-                return;
-
-        // the stack grows downwards
-        *(--self.ksp) = value;
-}
-
-void Process::push_kernel(this Process &self, void (*value)())
-{
-        self.push_kernel(reinterpret_cast<u64>(value));
-}
-
-void Process::push_kernel(this Process &self, cpu::Segment value)
-{
-        self.push_kernel(static_cast<u64>(value));
-}
-
 void Process::set_file_descriptors(this Process &self, const Process &other)
 {
         self.file_descriptors = other.file_descriptors;
@@ -349,12 +321,12 @@ void Process::consume_time(this Process &self, int ms)
 
 void Process::switch_with(this Process &self, const Process *other)
 {
-        __proc_switch(&self.krsp, other->krsp);
+        __proc_switch(self.kernel_stack.address(), other->kernel_stack.get());
 }
 
 void Process::use_kernel_stack(this const Process &self)
 {
-        get_kernel_gdt().get_tss().reset_stack(self.krsp);
+        get_kernel_gdt().get_tss().reset_stack(self.kernel_stack.get());
 }
 
 void Process::add_file_descriptor(this Process &self, File *file)
@@ -415,22 +387,22 @@ const ProcessStackFrame *Process::get_stack_frame(this const Process &self)
 
 uptr Process::kernel_stack_top(this const Process &self)
 {
-        return self.kstack_top;
+        return self.kernel_stack.get_top();
 }
 
 uptr Process::kernel_stack_frame(this const Process &self)
 {
-        return self.kstack_frame;
+        return self.kernel_stack.get_frame();
 }
 
 uptr Process::kernel_stack_pointer(this const Process &self)
 {
-        return self.krsp;
+        return self.kernel_stack.get();
 }
 
 const uptr *Process::kernel_stack_pointer_address(this const Process &self)
 {
-        return &self.krsp;
+        return self.kernel_stack.address();
 }
 
 const Vector<File *> Process::get_file_descriptors(this const Process &self)

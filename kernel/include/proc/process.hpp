@@ -12,6 +12,7 @@
 #include <proc/pid.hpp>
 #include <proc/elf.hpp>
 #include <proc/procheap.hpp>
+#include <proc/procstack.hpp>
 
 namespace kernel::proc {
 
@@ -20,29 +21,6 @@ namespace kernel::proc {
 enum class ProcessStatus : int {
         Alive,
         Dead
-};
-
-struct [[gnu::packed]] ProcessStackFrame {
-        lib::u64 r15;
-        lib::u64 r14;
-        lib::u64 r13;
-        lib::u64 r12;
-        lib::u64 r11;
-        lib::u64 r10;
-        lib::u64 r9;
-        lib::u64 r8;
-        lib::u64 rdi;
-        lib::u64 rsi;
-        lib::u64 rbp;
-        lib::u64 rbx;
-        lib::u64 rdx;
-        lib::u64 rcx;
-        lib::u64 rax;
-        lib::u64 rip;
-        cpu::Segment cs;
-        lib::u64 flags;
-        lib::u64 rsp;
-        cpu::Segment ss;
 };
 
 /// Representation of a process.
@@ -59,11 +37,8 @@ class Process {
         ProcessStackFrame       *frame;
         ProcessStackFrame       frame_storage;
         ProcessHeap             heap;
-        lib::uptr               kstack_frame;
-        lib::uptr               kstack_top;
-        lib::uptr               krsp;
-        lib::uptr               *ksp;
-        lib::Stack<lib::u8>    user_stack;
+        ProcessKernelStack      kernel_stack;
+        lib::Stack<lib::u8>     user_stack;
         lib::Vector<lib::File *> file_descriptors;
 
         void init_kernel_stack(this Process &self);
@@ -80,10 +55,6 @@ public:
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
         /// Create a process from another. Use when forking processes.
         Process(PID id, const Process &parent, mem::PML4T &pml4t);
-
-        void push_kernel(this Process &self, lib::u64 value);
-        void push_kernel(this Process &self, void (*value)());
-        void push_kernel(this Process &self, cpu::Segment value);
 
         /// Replace the file descriptors by the file descriptos from another process.
         void set_file_descriptors(this Process &self, const Process &other);
