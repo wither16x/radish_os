@@ -65,107 +65,101 @@ void Process::init_kernel_stack(this Process &self)
 void Process::init_user_stack(this Process &self)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
-        uptr usp = cpu::USER_STACK_TOP;
 
-        uptr *argv_uaddrs = new uptr[self.argc];
-        uptr *envp_uaddrs = new uptr[self.envc];
+        uptr *argv_uaddrs = self.argc > 0 ? new uptr[self.argc] : nullptr;
+        uptr *envp_uaddrs = self.envc > 0 ? new uptr[self.envc] : nullptr;
 
-        for (int i = self.envc - 1; i >= 0; i--) {
-                usize len = lib::strlen(self.envp[i]) + 1;
-                usp -= len;
+        if (self.envp) {
+                for (int i = self.envc - 1; i >= 0; i--) {
+                        usize len = lib::strlen(self.envp[i]) + 1;
+                        self.user_stack.grow(len);
 
-                for (usize j = 0; j < len; j++) {
-                        uptr uaddr = usp + j;
-                        uptr idx = (uaddr - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                        uptr off = uaddr % mem::PAGE_SIZE;
-                        uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
-                        *reinterpret_cast<char *>(kaddr) = self.envp[i][j];
+                        for (usize j = 0; j < len; j++) {
+                                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get()) + j;
+                                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
+                                *reinterpret_cast<char *>(kaddr) = self.envp[i][j];
+                        }
+
+                        envp_uaddrs[i] = reinterpret_cast<uptr>(self.user_stack.get());
                 }
-
-                envp_uaddrs[i] = usp;
         }
 
-        for (int i = self.argc - 1; i >= 0; i--) {
-                usize len = lib::strlen(self.argv[i]) + 1;
-                usp -= len;
+        if (self.argv) {
+                for (int i = self.argc - 1; i >= 0; i--) {
+                        usize len = lib::strlen(self.argv[i]) + 1;
+                        self.user_stack.grow(len);
 
-                for (usize j = 0; j < len; j++) {
-                        uptr uaddr = usp + j;
-                        uptr idx = (uaddr - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                        uptr off = uaddr % mem::PAGE_SIZE;
-                        uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
-                        *reinterpret_cast<char *>(kaddr) = self.argv[i][j];
+                        for (usize j = 0; j < len; j++) {
+                                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get()) + j;
+                                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
+                                *reinterpret_cast<char *>(kaddr) = self.argv[i][j];
+                        }
+
+                        argv_uaddrs[i] = reinterpret_cast<uptr>(self.user_stack.get());
                 }
-
-                argv_uaddrs[i] = usp;
         }
 
-        usp &= ~static_cast<uptr>(0xf);
+        self.user_stack.align(16);
 
         int total_words = self.envc + self.argc + 5;
         if (total_words % 2 != 0) {
-                usp -= sizeof(u64);
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                self.user_stack.grow(sizeof(u64));
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = 0;
         }
 
         for (int i = 0; i < 2; i++) {
-                usp -= sizeof(u64);
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                self.user_stack.grow(sizeof(u64));
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = 0;
         }
 
-        usp -= sizeof(u64);
+        self.user_stack.grow(sizeof(u64));
         {
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = 0;
         }
         for (int i = self.envc - 1; i >= 0; i--) {
-                usp -= sizeof(u64);
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                self.user_stack.grow(sizeof(u64));
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = envp_uaddrs[i];
         }
 
-        usp -= sizeof(u64);
+        self.user_stack.grow(sizeof(u64));
         {
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = 0;
         }
         for (int i = self.argc - 1; i >= 0; i--) {
-                usp -= sizeof(u64);
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                self.user_stack.grow(sizeof(u64));
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = argv_uaddrs[i];
         }
 
-        usp -= sizeof(u64);
+        self.user_stack.grow(sizeof(u64));
         {
-                uptr idx = (usp - cpu::USER_STACK_BOTTOM) / mem::PAGE_SIZE;
-                uptr off = usp % mem::PAGE_SIZE;
-                uptr kaddr = self.ustack_frames[idx] + hhdm_offset + off;
+                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
+                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
                 *reinterpret_cast<u64 *>(kaddr) = static_cast<u64>(self.argc);
         }
 
         delete[] argv_uaddrs;
         delete[] envp_uaddrs;
 
-        self.frame->rsp = usp;
+        self.frame->rsp = reinterpret_cast<u64>(self.user_stack.get());
 }
 
 // --------------------------------------------------
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
-        : pml4t(pml4t), heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t)
+        : pml4t(pml4t),
+        heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t),
+        user_stack(this->pml4t, cpu::USER_STACK_BOTTOM, cpu::USER_STACK_TOP)
 {
         this->id                = id;
         this->entry             = info->entry;
@@ -183,17 +177,18 @@ Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         this->frame->rip        = reinterpret_cast<u64>(entry);
         this->frame->rsp        = cpu::USER_STACK_TOP;
 
-        this->remap_stack();
         this->init_user_stack();
         this->init_kernel_stack();
 }
 // --------------------------------------------------
 
 Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
-        : pml4t(pml4t), heap(parent.heap.get_start(), parent.heap.get_last_page(), parent.heap.get_limit(), this->pml4t)
+        : pml4t(pml4t),
+        heap(parent.heap.get_start(), parent.heap.get_last_page(), parent.heap.get_limit(), this->pml4t),
+        user_stack(parent.user_stack, this->pml4t)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
-
+        
         this->id                = id;
         this->cr3               = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
         this->time              = 0;
@@ -306,21 +301,9 @@ void Process::load_context(this Process &self, cpu::SyscallFrame &frame)
         frame.cr3      = self.cr3;
 }
 
-/// Note that the stack wont be mapped if it is already mapped.
-void Process::remap_stack(this Process &self)
-{
-        for (uptr addr = cpu::USER_STACK_BOTTOM; addr < cpu::USER_STACK_TOP; addr += mem::PAGE_SIZE) {
-                uptr frame = mem::pmm::allocate_frame();
-                self.pml4t.map_page(addr,
-                        frame,
-                        mem::PageFlag::ReadWriteUser | mem::PageFlag::NoExec
-                );
-                self.ustack_frames.push_back(frame);
-        }
-}
-
 void Process::reset_stack(this Process &self)
 {
+        self.user_stack.reset(self.pml4t, cpu::USER_STACK_BOTTOM, cpu::USER_STACK_TOP);
         self.frame->rsp = cpu::USER_STACK_TOP;
 }
 

@@ -191,6 +191,30 @@ void PML4T::unmap_page(this PML4T &self, uptr vaddr)
         self.raw_pml4t->entries[pml4t_idx] = 0;
 }
 
+uptr PML4T::virt_to_phys(this const PML4T &self, uptr vaddr)
+{
+        uptr hhdm_offset = get_kernel_hhdm_offset();
+
+        u64 pml4t_idx   = (vaddr >> 39) & 0x1ff;
+        u64 pdpt_idx    = (vaddr >> 30) & 0x1ff;
+        u64 pdt_idx     = (vaddr >> 21) & 0x1ff;
+        u64 pt_idx      = (vaddr >> 12) & 0x1ff;
+
+        if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
+                return 0;
+
+        PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+        if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
+                return 0;
+
+        PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+        if (not (pdt->entries[pdt_idx] & PageFlag::Present))
+                return 0;
+
+        PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+        return (pt->entries[pt_idx] & PHYS_ADDR_MASK) + (vaddr & 0xfff);
+}
+
 bool PML4T::is_mapped(this const PML4T &self, uptr vaddr)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();

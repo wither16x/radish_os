@@ -7,6 +7,7 @@
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 #include <lib/filesystem.hpp>
+#include <lib/stack.hpp>
 #include <mem/pml4t.hpp>
 #include <proc/pid.hpp>
 #include <proc/elf.hpp>
@@ -62,7 +63,7 @@ class Process {
         lib::uptr               kstack_top;
         lib::uptr               krsp;
         lib::uptr               *ksp;
-        lib::Vector<lib::u64>   ustack_frames;
+        lib::Stack<lib::u8>    user_stack;
         lib::Vector<lib::File *> file_descriptors;
 
         void init_kernel_stack(this Process &self);
@@ -92,7 +93,6 @@ public:
         void destroy_pml4t(this Process &self);
         void save_context(this Process &self, cpu::SyscallFrame &frame);
         void load_context(this Process &self, cpu::SyscallFrame &frame);
-        void remap_stack(this Process &self);
         void reset_stack(this Process &self);
         void switch_entry(this Process &self, elf::elf_entry_t entry);
         int add_child(this Process &self, Process *child);

@@ -41,6 +41,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 proc->argv = new char *[argc + 1];
                 if (not proc->argv) {
                         logger.err("failed to allocate argv");
+                        cpu::sti();
                         return -2;
                 }
                 for (int i = 0; i < argc; i++) {
@@ -49,7 +50,11 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 }
                 proc->argv[argc] = nullptr;
                 proc->argc = argc;
+        } else {
+                proc->argc = 0;
+                proc->argv = nullptr;
         }
+
         if (envp) {
                 int envc = 0;
                 while (envp[envc] != nullptr)
@@ -57,6 +62,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 proc->envp = new char *[envc + 1];
                 if (not proc->envp) {
                         logger.err("failed to allocate envp");
+                        cpu::sti();
                         return -3;
                 }
                 for (int i = 0; i < envc; i++) {
@@ -65,6 +71,9 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 }
                 proc->envp[envc] = nullptr;
                 proc->envc = envc;
+        } else {
+                proc->envc = 0;
+                proc->envp = nullptr;
         }
         // ...to here
 
@@ -73,7 +82,6 @@ int exec(const String &path, int argc, char **argv, char **envp)
         // Update the process
         proc->switch_pml4t(proc_pml4t);
         proc->reset_stack();
-        proc->remap_stack();
         proc->init_user_stack();
         proc->switch_entry(proc_entry);
         proc->load_pml4t();
