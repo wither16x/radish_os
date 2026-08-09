@@ -84,6 +84,7 @@ void dump_stack_trace(u8 depth)
 void panic(const char *fmt, ...)
 {
         cpu::disable_interrupts();
+        proc::scheduler::lock();
 
         logger.set_context("panic handler");
 
@@ -100,12 +101,17 @@ void panic(const char *fmt, ...)
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (not curr_proc) {
                 logger.info("idling");
-                while (true)
+                while (true) {
+                        cpu::disable_interrupts();
                         cpu::idle();
+                }
         }
 
         curr_proc->die();
         logger.ok("process with ID %u aborted", curr_proc->get_id());
+
+        proc::scheduler::unlock();
+        cpu::enable_interrupts();
 }
 // --------------------------------------------------
 

@@ -50,7 +50,7 @@ bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
         }
 
         self.last_page -= pages * mem::PAGE_SIZE;
-        cpu::disable_interrupts();
+        cpu::enable_interrupts();
         return true;
 }
 

@@ -18,13 +18,10 @@ namespace kernel::proc::scheduler {
 namespace {
 
 struct SchedulerContext {
-        bool is_active;
-
+        Status status;
         Vector<Process *> processes;
-
         Process *current_process;
         usize current_process_index;
-
         Process *pending_zombie;
 };
 
@@ -69,7 +66,7 @@ void init()
 {
         ctx.current_process = 0;
         ctx.current_process = nullptr;
-        ctx.is_active = true;
+        ctx.status = Status::Unlocked;
 
         logger.ok("initialized scheduler");
 }
@@ -100,7 +97,7 @@ void remove_process(Process *p)
 // --------------------------------------------------
 void tick()
 {
-        if (not ctx.is_active or ctx.processes.empty() or not ctx.current_process)
+        if (ctx.status == Status::Locked or ctx.processes.empty() or not ctx.current_process)
                 return;
 
         if (ctx.current_process->get_status() != ProcessStatus::Dead) {
@@ -146,7 +143,7 @@ void tick()
 // --------------------------------------------------
 bool is_active()
 {
-        return ctx.is_active;
+        return ctx.status != Status::Locked;
 }
 // --------------------------------------------------
 
@@ -186,7 +183,7 @@ const Vector<Process *> &get_processes()
 /// Step 3: destroy the process itself
 void undertaker(Process *p)
 {
-        if (!p) {
+        if (not p) {
                 logger.err("undertaker: process does not exist");
                 return;
         }
@@ -218,6 +215,16 @@ void yield()
         ctx.current_process = new_proc;
 
         old_proc->switch_with(new_proc);
+}
+
+void lock()
+{
+        ctx.status = Status::Locked;
+}
+
+void unlock()
+{
+        ctx.status = Status::Unlocked;
 }
 
 } /* namespace kernel::proc::scheduler */

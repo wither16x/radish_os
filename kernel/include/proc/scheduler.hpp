@@ -9,6 +9,11 @@ namespace kernel::proc::scheduler {
 
 constexpr lib::u64 TIME_PER_PROCESS = 35; // in ms
 
+enum class Status : unsigned int {
+        Locked,
+        Unlocked
+};
+
 /// Initialize the scheduler.
 void init();
 /// Add a process to the scheduler's process vector.
@@ -31,5 +36,7 @@ const lib::Vector<Process *> &get_processes();
 void undertaker(Process *p);
 /// Let other processes use the CPU. Use this to avoid locking the CPU.
 void yield();
+void lock();
+void unlock();
 
 } /* namespace kernel::proc::scheduler */
