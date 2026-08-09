@@ -1,6 +1,6 @@
+#include <cpu/cpu.hpp>
 #include <proc/procheap.hpp>
 #include <lib/typing.hpp>
-#include <cpu/assembly.hpp>
 #include <mem/pmm.hpp>
 
 using kernel::lib::uptr;
@@ -13,10 +13,10 @@ ProcessHeap::ProcessHeap(uptr start, uptr last_page, uptr limit, mem::PML4T &pml
 
 bool ProcessHeap::extend(this ProcessHeap &self, int pages)
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         if (self.last_page + pages * mem::PAGE_SIZE > self.limit) {
-                cpu::sti();
+                cpu::enable_interrupts();
                 return false;
         }
 
@@ -30,16 +30,16 @@ bool ProcessHeap::extend(this ProcessHeap &self, int pages)
         }
 
         self.last_page += pages * mem::PAGE_SIZE;
-        cpu::sti();
+        cpu::enable_interrupts();
         return true;
 }
 
 bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         if (self.last_page - pages * mem::PAGE_SIZE < self.start) {
-                cpu::sti();
+                cpu::enable_interrupts();
                 return false;
         }
 
@@ -50,7 +50,7 @@ bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
         }
 
         self.last_page -= pages * mem::PAGE_SIZE;
-        cpu::sti();
+        cpu::disable_interrupts();
         return true;
 }
 

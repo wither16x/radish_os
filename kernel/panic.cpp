@@ -1,4 +1,4 @@
-#include <cpu/assembly.hpp>
+#include <cpu/cpu.hpp>
 #include <lib/args.hpp>
 #include <lib/logging.hpp>
 #include <lib/print.hpp>
@@ -83,7 +83,7 @@ void dump_stack_trace(u8 depth)
 // --------------------------------------------------
 void panic(const char *fmt, ...)
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         logger.set_context("panic handler");
 
@@ -101,7 +101,7 @@ void panic(const char *fmt, ...)
         if (not curr_proc) {
                 logger.info("idling");
                 while (true)
-                        cpu::hlt();
+                        cpu::idle();
         }
 
         curr_proc->die();

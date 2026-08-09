@@ -6,7 +6,7 @@
 #include <kernel.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
-#include <cpu/assembly.hpp>
+#include <cpu/cpu.hpp>
 #include <cpu/userspace.hpp>
 #include <panic.hpp>
 
@@ -43,7 +43,7 @@ Process *load_program_as_process(const String &path)
 // --------------------------------------------------
 int spawn(const String &path)
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         Process *proc = load_program_as_process(path);
         if (not proc) {
@@ -66,7 +66,7 @@ int spawn(const String &path)
                 reinterpret_cast<void *>(p->get_stack_frame()->rsp)
         );
 
-        cpu::sti();
+        cpu::enable_interrupts();
 
         return 0;
 }

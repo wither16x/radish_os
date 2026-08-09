@@ -1,4 +1,4 @@
-#include <cpu/assembly.hpp>
+#include <cpu/cpu.hpp>
 #include <kernel.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
@@ -20,7 +20,7 @@ namespace kernel::proc {
 
 int exec(const String &path, int argc, char **argv, char **envp)
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         // We want to update the current process
         Process *proc = scheduler::get_current_process();
@@ -32,7 +32,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
         elf::ElfInfo elf_info;
         int load_res = elf::load_elf(&proc_pml4t, path, &elf_info);
         if (load_res != 0) {
-                cpu::sti();
+                cpu::enable_interrupts();
                 return -1;
         }
 
@@ -41,7 +41,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 proc->argv = new char *[argc + 1];
                 if (not proc->argv) {
                         logger.err("failed to allocate argv");
-                        cpu::sti();
+                        cpu::enable_interrupts();
                         return -2;
                 }
                 for (int i = 0; i < argc; i++) {
@@ -62,7 +62,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 proc->envp = new char *[envc + 1];
                 if (not proc->envp) {
                         logger.err("failed to allocate envp");
-                        cpu::sti();
+                        cpu::enable_interrupts();
                         return -3;
                 }
                 for (int i = 0; i < envc; i++) {
@@ -86,7 +86,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
         proc->switch_entry(proc_entry);
         proc->load_pml4t();
 
-        cpu::sti();
+        cpu::enable_interrupts();
 
         return 0;
 }

@@ -1,3 +1,4 @@
+#include "cpu/cpu.hpp"
 #include <proc/fork.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
@@ -9,7 +10,7 @@ namespace kernel::proc {
 
 PID fork()
 {
-        cpu::cli();
+        cpu::disable_interrupts();
 
         Process *parent = scheduler::get_current_process();
 
@@ -21,7 +22,7 @@ PID fork()
         parent->add_child(child);
         scheduler::add_process(child);
 
-        cpu::sti();
+        cpu::enable_interrupts();
         return child->get_id();
 }
 
