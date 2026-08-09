@@ -3,6 +3,7 @@
 #include <lib/logging.hpp>
 #include <lib/print.hpp>
 #include <lib/typing.hpp>
+#include <proc/scheduler.hpp>
 #include <panic.hpp>
 #include <symbols.h>
 
@@ -96,9 +97,15 @@ void panic(const char *fmt, ...)
         println("Stack trace:");
         dump_stack_trace(15);
 
-        logger.info("idling");
-        while (true)
-                cpu::hlt();
+        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        if (not curr_proc) {
+                logger.info("idling");
+                while (true)
+                        cpu::hlt();
+        }
+
+        curr_proc->die();
+        logger.ok("process with ID %u aborted", curr_proc->get_id());
 }
 // --------------------------------------------------
 
