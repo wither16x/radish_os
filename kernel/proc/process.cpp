@@ -102,60 +102,26 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
 }
 void Process::init_user_stack(this Process &self)
 {
-        uptr hhdm_offset = get_kernel_hhdm_offset();
-
         uptr *envp_uaddrs = self.user_stack.push_string_array(self.envp, self.envc);
         uptr *argv_uaddrs = self.user_stack.push_string_array(self.argv, self.argc);
 
         self.user_stack.align(16);
 
         int total_words = self.envc + self.argc + 5;
-        if (total_words % 2 != 0) {
-                self.user_stack.grow(sizeof(u64));
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = 0;
-        }
+        if (total_words % 2 != 0)
+                self.user_stack.push_qword(0);
+        for (int i = 0; i < 2; i++)
+                self.user_stack.push_qword(0);
 
-        for (int i = 0; i < 2; i++) {
-                self.user_stack.grow(sizeof(u64));
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = 0;
-        }
+        self.user_stack.push_qword(0);
+        for (int i = self.envc - 1; i >= 0; i--)
+                self.user_stack.push_qword(envp_uaddrs[i]);
 
-        self.user_stack.grow(sizeof(u64));
-        {
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = 0;
-        }
-        for (int i = self.envc - 1; i >= 0; i--) {
-                self.user_stack.grow(sizeof(u64));
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = envp_uaddrs[i];
-        }
+        self.user_stack.push_qword(0);
+        for (int i = self.argc - 1; i >= 0; i--)
+                self.user_stack.push_qword(argv_uaddrs[i]);
 
-        self.user_stack.grow(sizeof(u64));
-        {
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = 0;
-        }
-        for (int i = self.argc - 1; i >= 0; i--) {
-                self.user_stack.grow(sizeof(u64));
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = argv_uaddrs[i];
-        }
-
-        self.user_stack.grow(sizeof(u64));
-        {
-                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get());
-                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                *reinterpret_cast<u64 *>(kaddr) = static_cast<u64>(self.argc);
-        }
+        self.user_stack.push_qword(self.argc);
 
         delete[] argv_uaddrs;
         delete[] envp_uaddrs;

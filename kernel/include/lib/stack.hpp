@@ -80,6 +80,14 @@ public:
                 return s_uaddrs;
         }
 
+        void push_qword(this Stack<T> &self, u64 value)
+        {
+                self.grow(sizeof(value));
+                uptr uaddr = reinterpret_cast<uptr>(self.pointer);
+                uptr kaddr = self.pml4t->virt_to_phys(uaddr) + get_kernel_hhdm_offset();
+                *reinterpret_cast<u64 *>(kaddr) = value;
+        }
+
         void grow(this Stack<T> &self, usize n)
         {
                 if (not self.pointer)
