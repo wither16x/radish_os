@@ -14,6 +14,8 @@
 #include <mem/page.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
+#include <proc/procstack.hpp>
+#include <proc/procheap.hpp>
 
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
 using kernel::lib::memset, kernel::lib::memcpy;
@@ -53,42 +55,57 @@ void Process::init_kernel_stack(this Process &self)
         self.kernel_stack.push(self.frame->r15);
 }
 
+// --------------------------------------------------
+Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
+        : pml4t(pml4t),
+        heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t),
+        user_stack(this->pml4t, cpu::USER_STACK_BOTTOM, cpu::USER_STACK_TOP)
+{
+        this->id                = id;
+        this->entry             = info->entry;
+        this->status            = ProcessStatus::Alive;
+        this->time              = 0;
+        this->argc              = 0;
+        this->envc              = 0;
+        this->argv              = nullptr;
+        this->envp              = nullptr;
+        this->frame             = &this->frame_storage;
+        memset(this->frame, 0, sizeof(*this->frame));
+        this->frame->cs         = cpu::Segment::UserCS;
+        this->frame->ss         = cpu::Segment::UserSS;
+        this->frame->flags      = 1 << 9;
+        this->frame->rip        = reinterpret_cast<u64>(entry);
+        this->frame->rsp        = cpu::USER_STACK_TOP;
+
+        this->init_user_stack();
+        this->init_kernel_stack();
+}
+// --------------------------------------------------
+
+Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
+        : pml4t(pml4t),
+        heap(parent.heap.get_start(), parent.heap.get_last_page(), parent.heap.get_limit(), this->pml4t),
+        user_stack(parent.user_stack, this->pml4t)
+{
+        uptr hhdm_offset = get_kernel_hhdm_offset();
+        
+        this->id                = id;
+        this->cr3               = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
+        this->time              = 0;
+        this->frame             = &this->frame_storage;
+        memcpy(this->frame, parent.frame, sizeof(*this->frame));
+        this->frame->rax        = 0;
+        this->status            = ProcessStatus::Alive;
+
+        this->set_file_descriptors(parent);
+        this->init_kernel_stack();
+}
 void Process::init_user_stack(this Process &self)
 {
         uptr hhdm_offset = get_kernel_hhdm_offset();
 
-        uptr *argv_uaddrs = self.argc > 0 ? new uptr[self.argc] : nullptr;
-        uptr *envp_uaddrs = self.envc > 0 ? new uptr[self.envc] : nullptr;
-
-        if (self.envp) {
-                for (int i = self.envc - 1; i >= 0; i--) {
-                        usize len = lib::strlen(self.envp[i]) + 1;
-                        self.user_stack.grow(len);
-
-                        for (usize j = 0; j < len; j++) {
-                                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get()) + j;
-                                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                                *reinterpret_cast<char *>(kaddr) = self.envp[i][j];
-                        }
-
-                        envp_uaddrs[i] = reinterpret_cast<uptr>(self.user_stack.get());
-                }
-        }
-
-        if (self.argv) {
-                for (int i = self.argc - 1; i >= 0; i--) {
-                        usize len = lib::strlen(self.argv[i]) + 1;
-                        self.user_stack.grow(len);
-
-                        for (usize j = 0; j < len; j++) {
-                                uptr uaddr = reinterpret_cast<uptr>(self.user_stack.get()) + j;
-                                uptr kaddr = self.user_stack.virt_to_phys(uaddr) + hhdm_offset;
-                                *reinterpret_cast<char *>(kaddr) = self.argv[i][j];
-                        }
-
-                        argv_uaddrs[i] = reinterpret_cast<uptr>(self.user_stack.get());
-                }
-        }
+        uptr *envp_uaddrs = self.user_stack.push_string_array(self.envp, self.envc);
+        uptr *argv_uaddrs = self.user_stack.push_string_array(self.argv, self.argc);
 
         self.user_stack.align(16);
 
@@ -144,52 +161,6 @@ void Process::init_user_stack(this Process &self)
         delete[] envp_uaddrs;
 
         self.frame->rsp = reinterpret_cast<u64>(self.user_stack.get());
-}
-
-// --------------------------------------------------
-Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
-        : pml4t(pml4t),
-        heap(mem::page_align_up(info->highest_vaddr), mem::page_align_up(info->highest_vaddr), cpu::USER_HEAP_LIMIT, this->pml4t),
-        user_stack(this->pml4t, cpu::USER_STACK_BOTTOM, cpu::USER_STACK_TOP)
-{
-        this->id                = id;
-        this->entry             = info->entry;
-        this->status            = ProcessStatus::Alive;
-        this->time              = 0;
-        this->argc              = 0;
-        this->envc              = 0;
-        this->argv              = nullptr;
-        this->envp              = nullptr;
-        this->frame             = &this->frame_storage;
-        memset(this->frame, 0, sizeof(*this->frame));
-        this->frame->cs         = cpu::Segment::UserCS;
-        this->frame->ss         = cpu::Segment::UserSS;
-        this->frame->flags      = 1 << 9;
-        this->frame->rip        = reinterpret_cast<u64>(entry);
-        this->frame->rsp        = cpu::USER_STACK_TOP;
-
-        this->init_user_stack();
-        this->init_kernel_stack();
-}
-// --------------------------------------------------
-
-Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
-        : pml4t(pml4t),
-        heap(parent.heap.get_start(), parent.heap.get_last_page(), parent.heap.get_limit(), this->pml4t),
-        user_stack(parent.user_stack, this->pml4t)
-{
-        uptr hhdm_offset = get_kernel_hhdm_offset();
-        
-        this->id                = id;
-        this->cr3               = reinterpret_cast<u64>(this->pml4t.raw()) - hhdm_offset;
-        this->time              = 0;
-        this->frame             = &this->frame_storage;
-        memcpy(this->frame, parent.frame, sizeof(*this->frame));
-        this->frame->rax        = 0;
-        this->status            = ProcessStatus::Alive;
-
-        this->set_file_descriptors(parent);
-        this->init_kernel_stack();
 }
 
 void Process::set_file_descriptors(this Process &self, const Process &other)
@@ -385,21 +356,6 @@ const ProcessStackFrame *Process::get_stack_frame(this const Process &self)
         return self.frame;
 }
 
-uptr Process::kernel_stack_top(this const Process &self)
-{
-        return self.kernel_stack.get_top();
-}
-
-uptr Process::kernel_stack_frame(this const Process &self)
-{
-        return self.kernel_stack.get_frame();
-}
-
-uptr Process::kernel_stack_pointer(this const Process &self)
-{
-        return self.kernel_stack.get();
-}
-
 const uptr *Process::kernel_stack_pointer_address(this const Process &self)
 {
         return self.kernel_stack.address();
@@ -432,6 +388,11 @@ usize Process::find_fd(this const Process &self, File *file)
 ProcessHeap &Process::get_heap(this Process &self)
 {
         return self.heap;
+}
+
+ProcessKernelStack &Process::get_kernel_stack(this Process &self)
+{
+        return self.kernel_stack;
 }
 
 bool Process::is_dead(this const Process &self)

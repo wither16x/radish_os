@@ -41,7 +41,7 @@ void reap_pending_zombie()
         for (auto &fd : zombie  ->get_file_descriptors())
                 lib::close(fd);
 
-        mem::pmm::free_frame(zombie->kernel_stack_frame());
+        mem::pmm::free_frame(zombie->get_kernel_stack().get_frame());
         remove_process(zombie);
         delete zombie;
 }
@@ -133,7 +133,7 @@ void tick()
         if (old_proc->is_dead()) {
                 uptr discard = 0;
                 ctx.pending_zombie = old_proc;
-                __proc_switch(&discard, new_proc->kernel_stack_pointer());
+                __proc_switch(&discard, new_proc->get_kernel_stack().get());
                 while (true)
                         cpu::hlt();
         }
@@ -194,7 +194,7 @@ void undertaker(Process *p)
         for (auto &fd : p->get_file_descriptors())
                 lib::close(fd);
 
-        mem::pmm::free_frame(p->kernel_stack_frame());
+        mem::pmm::free_frame(p->get_kernel_stack().get_frame());
         remove_process(p);
         delete p;
 }

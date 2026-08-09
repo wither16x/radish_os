@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 #include <lib/memory.hpp>
@@ -54,6 +55,29 @@ public:
                         return;
 
                 *(--self.pointer) = value;
+        }
+
+        uptr *push_string_array(this Stack<T> &self, char **s, int count)
+        {
+                if (not s)
+                        return nullptr;
+
+                uptr *s_uaddrs = count > 0 ? new uptr[count] : nullptr;
+
+                for (int i = count - 1; i >= 0; i--) {
+                        usize len = strlen(s[i]) + 1;
+                        self.grow(len);
+
+                        for (usize j = 0; j < len; j++) {
+                                uptr uaddr = reinterpret_cast<uptr>(self.pointer) + j;
+                                uptr kaddr = self.pml4t->virt_to_phys(uaddr) + get_kernel_hhdm_offset();
+                                *reinterpret_cast<char *>(kaddr) = s[i][j];
+                        }
+
+                        s_uaddrs[i] = reinterpret_cast<uptr>(self.pointer);
+                }
+
+                return s_uaddrs;
         }
 
         void grow(this Stack<T> &self, usize n)

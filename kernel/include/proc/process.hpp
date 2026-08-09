@@ -49,8 +49,6 @@ public:
         char **argv;
         char **envp;
 
-        void init_user_stack(this Process &self);
-
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
         /// Create a process from another. Use when forking processes.
@@ -59,6 +57,7 @@ public:
         /// Replace the file descriptors by the file descriptos from another process.
         void set_file_descriptors(this Process &self, const Process &other);
 
+        void init_user_stack(this Process &self);
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
         void destroy_pml4t(this Process &self);
@@ -82,14 +81,12 @@ public:
         const void *get_entry(this const Process &self);
         const mem::PML4T &get_pml4t(this const Process &self);
         const ProcessStackFrame *get_stack_frame(this const Process &self);
-        lib::uptr kernel_stack_top(this const Process &self);
-        lib::uptr kernel_stack_frame(this const Process &self);
-        lib::uptr kernel_stack_pointer(this const Process &self);
         const lib::uptr *kernel_stack_pointer_address(this const Process &self);
         const lib::Vector<lib::File *> get_file_descriptors(this const Process &self);
         const lib::File *find_file(this const Process &self, lib::usize id);
         lib::usize find_fd(this const Process &self, lib::File *file);
         ProcessHeap &get_heap(this Process &self);
+        ProcessKernelStack &get_kernel_stack(this Process &self);
 
         bool is_dead(this const Process &self);
         void die(this Process &self);
