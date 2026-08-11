@@ -14,12 +14,10 @@ fs::vfs::Status close(File *f);
 fs::vfs::Status mkfile(const String &path);
 /// Create a new directory.
 fs::vfs::Status mkdir(const String &path);
+fs::vfs::Status write(File *f, const void *buf, usize n);
+fs::vfs::Status read(File *f, void *buf, usize n);
 /// Remove a file or a directory.
 fs::vfs::Status rm(const String &path);
-/// Write bytes to a file.
-fs::vfs::Status write(File *f, const void *buf, usize n);
-/// Read bytes from a file.
-fs::vfs::Status read(File *f, void *buf, usize n);
 /// Get a single entry from a directory. 
 fs::vfs::Status getdirent(const String &path, fs::vfs::DirEntry *entry, usize n);
 /// Get the size of a file.

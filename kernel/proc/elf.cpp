@@ -62,7 +62,7 @@ int load_elf(mem::PML4T *pml4t, const String &path, ElfInfo *info)
         buf.resize(size);
 
         lib::File *elf_file = lib::open(path);
-        lib::read(elf_file, buf.get_data(), size);
+        read(elf_file, buf.get_data(), size);
         lib::close(elf_file);
 
         // parse the file
@@ -128,6 +128,7 @@ int load_elf(mem::PML4T *pml4t, const String &path, ElfInfo *info)
 
         // copy the entry address
         memcpy(&info->address, &hdr->e_entry, sizeof(info->address));
+        // the highest virtual address is at the end of the executable
         info->highest_vaddr = highest_vaddr;
 
         return 0;

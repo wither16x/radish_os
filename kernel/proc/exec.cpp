@@ -80,6 +80,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
         elf::elf_entry_t proc_entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
 
         // Update the process
+        // should add a dedicated method
         proc->switch_pml4t(proc_pml4t);
         proc->reset_stack();
         proc->init_user_stack();

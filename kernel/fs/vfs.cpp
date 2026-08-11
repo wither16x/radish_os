@@ -111,7 +111,7 @@ VNode *lookup_node(const String &path)
 
 Status release_node(VNode *vnd)
 {
-        if (!vnd)
+        if (not vnd)
                 return Status::NullNode;
         if (vnd->ref_count == 0)
                 return Status::NoRefs;
@@ -153,13 +153,11 @@ Status close_file(File *file)
         if (curr_proc)
                 curr_proc->remove_file_descriptor(file);
 
-        if (file->ref_count == 0)
-                return Status::NoRefs;
-
         --file->ref_count;
         if (file->ref_count == 0) {
                 file->close();
                 release_node(file->vnode);
+                logger.debug("closed file");
                 delete file;
         }
 

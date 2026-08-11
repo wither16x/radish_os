@@ -39,7 +39,6 @@ public:
         HDR *last(this LinkedList<HDR> &self)
         {
                 HDR *curr = self.hdr;
-
                 while (curr->next)
                         curr = static_cast<HDR *>(curr->next);
 

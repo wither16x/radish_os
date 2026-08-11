@@ -26,7 +26,7 @@ fs::vfs::Status mkdir(const String &path)
 // --------------------------------------------------
 
 // --------------------------------------------------
-fs::vfs::Status remove(const String &path)
+fs::vfs::Status rm(const String &path)
 {
         return fs::vfs::remove(path);
 }

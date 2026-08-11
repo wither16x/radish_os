@@ -110,6 +110,8 @@ void Process::init_user_stack(this Process &self)
         int total_words = self.envc + self.argc + 5;
         if (total_words % 2 != 0)
                 self.user_stack.push_qword(0);
+
+        // TODO: full auxv
         for (int i = 0; i < 2; i++)
                 self.user_stack.push_qword(0);
 
@@ -282,7 +284,7 @@ void Process::remove_file_descriptor(this Process &self, File *file)
         for (usize i = 0; i < self.file_descriptors.size(); i++) {
                 if (self.file_descriptors[i] == file) {
                         self.file_descriptors[i] = nullptr;
-                        break;
+                        return;
                 }
         }
 }
@@ -370,7 +372,7 @@ void Process::die(this Process &self)
 {
         for (usize i = 0; i < self.file_descriptors.size(); i++) {
                 if (self.file_descriptors[i])
-                        lib::close(self.file_descriptors[i]);
+                        self.file_descriptors[i]->close();
         }
 
         self.status = ProcessStatus::Dead;
