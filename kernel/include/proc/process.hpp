@@ -13,6 +13,7 @@
 #include <proc/elf.hpp>
 #include <proc/procheap.hpp>
 #include <proc/procstack.hpp>
+#include <fpu.hpp>
 
 namespace kernel::proc {
 
@@ -40,6 +41,7 @@ class Process {
         ProcessKernelStack      kernel_stack;
         lib::Stack<lib::u8>     user_stack;
         lib::Vector<lib::File *> file_descriptors;
+        fpu::FpuContext fpu_context;
 
         void init_kernel_stack(this Process &self);
 

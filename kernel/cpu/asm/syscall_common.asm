@@ -1,3 +1,5 @@
+%define KERNEL_DS               0x10
+
 [bits 64]
 
 section .text
@@ -35,7 +37,7 @@ syscall_common:
         mov bx, ds
         push rbx
 
-        mov bx, 0x10
+        mov bx, KERNEL_DS
         mov ds, bx
         mov es, bx
         mov fs, bx

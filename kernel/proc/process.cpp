@@ -164,6 +164,11 @@ void Process::destroy_pml4t(this Process &self)
 
 void Process::save_context(this Process &self, cpu::SyscallFrame &frame)
 {
+        __asm__ volatile (
+                "fxsave %0"
+                ::
+                "m"(self.fpu_context)
+        );
         self.frame->rax   = frame.rax;
         self.frame->rbx   = frame.rbx;
         self.frame->rcx   = frame.rcx;
@@ -189,6 +194,11 @@ void Process::save_context(this Process &self, cpu::SyscallFrame &frame)
 
 void Process::load_context(this Process &self, cpu::SyscallFrame &frame)
 {
+        __asm__ volatile (
+                "fxrstor %0"
+                ::
+                "m"(self.fpu_context)
+        );
         frame.rax      = self.frame->rax;
         frame.rbx      = self.frame->rbx;
         frame.rcx      = self.frame->rcx;

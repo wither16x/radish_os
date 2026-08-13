@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/typing.hpp>
+#include <fpu.hpp>
 
 namespace kernel::cpu {
 
