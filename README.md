@@ -1,4 +1,5 @@
 # RadishOS
+*Note: this file is up to date with the next release*
 A x86_64 operating system made from scratch that I am making for learning purposes and for fun.
 
 ![screenshot](screenshots/preview.png)
