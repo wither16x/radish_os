@@ -271,11 +271,12 @@ void Process::use_kernel_stack(this const Process &self)
 void Process::add_file_descriptor(this Process &self, File *file)
 {
         for (usize i = 0; i < self.file_descriptors.size(); i++) {
-                if (!self.file_descriptors[i]) {
+                if (not self.file_descriptors[i]) {
                         self.file_descriptors[i] = file;
                         return;
                 }
         }
+        // if no free slot, extend the vector
         self.file_descriptors.push_back(file);
 }
 

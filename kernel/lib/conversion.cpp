@@ -77,12 +77,11 @@ char* utoa(usize n, char *str, int base)
 // --------------------------------------------------
 
 // --------------------------------------------------
-usize atoi(const char *s, int base)
+usize atoi(const char *s, int base, usize length)
 {
         usize res = 0;
-        int i = 0;
 
-        for (; s[i] != '\0'; ++i)
+        for (usize i = 0; i < length and s[i] != '\0' and s[i] != ' '; ++i)
                 res = res * base + s[i] - '0';
 
         return res;

@@ -35,8 +35,9 @@ private:
         void extend(this HeapAllocator<T> &self)
         {
                 lib::uptr new_page = self.base + PAGE_SIZE * self.pages;
+
                 get_kernel_pml4t().map_page(
-                        self.base + PAGE_SIZE * self.pages,
+                        new_page,
                         pmm::allocate_frame(),
                         PageFlag::ReadWriteUser | PageFlag::NoExec
                 );
@@ -63,13 +64,15 @@ private:
                 BlockHeader *curr = self.block_list.first();
                 while (curr) {
                         lib::uptr curr_addr = reinterpret_cast<lib::uptr>(curr);
-                        if (not curr->free && curr_addr >= last_page)
+                        lib::uptr curr_end = curr_addr + sizeof(BlockHeader) + curr->bytes;
+
+                        if (not curr->free and curr_end >= last_page)
                                 return false;
+
                         curr = static_cast<BlockHeader *>(curr->next);
                 }
 
                 BlockHeader *last_block = self.block_list.last();
-
                 if (not last_block->free)
                         return false;
 
@@ -176,7 +179,7 @@ public:
                         if (!block)
                                 return nullptr; // out of memory
                 }
-
+                        
                 this->curr_block = block;
                 this->split_block(n);
                 block->free = false;

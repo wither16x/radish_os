@@ -119,7 +119,6 @@ void syscall_wait(SyscallFrame &frame)
 void syscall_open(SyscallFrame &frame)
 {
         const char *path = reinterpret_cast<const char *>(frame.rbx);
-
         lib::File *f = lib::open(path);
         if (not f) {
                 frame.rax = static_cast<u64>(-1);

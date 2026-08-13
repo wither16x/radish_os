@@ -60,7 +60,6 @@ int load_elf(mem::PML4T *pml4t, const String &path, ElfInfo *info)
         usize size = 0;
         getfilesz(path, &size);
         buf.resize(size);
-
         lib::File *elf_file = lib::open(path);
         read(elf_file, buf.get_data(), size);
         lib::close(elf_file);

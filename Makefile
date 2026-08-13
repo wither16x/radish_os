@@ -39,7 +39,7 @@ run:
 	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G
 
 debug:
-	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G -d int -no-reboot #-s -S
+	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G -d int -no-reboot -s -S
 
 # test
 test: clean-all build-all run

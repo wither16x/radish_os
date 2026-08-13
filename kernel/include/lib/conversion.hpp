@@ -9,7 +9,7 @@ char *itoa(isize n, char *str, int base);
 /// Get a string from a signed integer.
 char *utoa(usize n, char *str, int base);
 /// Get an unsigned integer from a string.
-usize atoi(const char *s, int base);
+usize atoi(const char *s, int base, usize length);
 /// Get an unsigned integer from a single character. Note that
 /// only base 10 is supported. 
 usize ctoi(char ch);

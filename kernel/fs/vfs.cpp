@@ -147,7 +147,7 @@ File *open_file(const lib::String &path)
 Status close_file(File *file)
 {
         if (not file)
-                return Status::NullFile; // file descriptor is null
+                return Status::NullFile;
 
         proc::Process *curr_proc = proc::scheduler::get_current_process();
         if (curr_proc)
@@ -157,7 +157,6 @@ Status close_file(File *file)
         if (file->ref_count == 0) {
                 file->close();
                 release_node(file->vnode);
-                logger.debug("closed file");
                 delete file;
         }
 

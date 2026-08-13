@@ -99,15 +99,13 @@ void init_console()
 }
 
 /// Idle.
-[[noreturn]]
 void kernel_hang()
 {
         panic("nothing to do");
 }
 
 /// Kernel entry point.
-extern "C" [[noreturn]]
-void kernel_main()
+extern "C" void kernel_main()
 {
         if (not boot::limine::get_base_revision().is_supported())
                 panic("limine base revsion not supported"); // you wont see the message

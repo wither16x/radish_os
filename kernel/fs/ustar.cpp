@@ -128,7 +128,7 @@ void parse_archive(u8 *archive)
                 if (hdr->name[0] == '\0')
                         break;
 
-                usize bytes = atoi(hdr->size, 8);
+                usize bytes = atoi(hdr->size, 8, sizeof(hdr->size));
                 String path = hdr->name;
 
                 Vector<String> parts = parse_path(path);
@@ -187,7 +187,7 @@ vfs::Status UstarFile::read(void *buf, usize n)
         if (n < this->owner->storage->size)
                 return vfs::Status::OutOfBounds;
 
-        memcpy(buf, this->owner->storage->data, this->owner->storage->size);
+        memcpy(buf, this->owner->storage->data, n);
 
         return vfs::Status::Success;
 }
