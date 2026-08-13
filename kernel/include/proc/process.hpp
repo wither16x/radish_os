@@ -41,7 +41,6 @@ class Process {
         ProcessKernelStack      kernel_stack;
         lib::Stack<lib::u8>     user_stack;
         lib::Vector<lib::File *> file_descriptors;
-        fpu::FpuContext fpu_context;
 
         void init_kernel_stack(this Process &self);
 
@@ -50,6 +49,7 @@ public:
         int envc;
         char **argv;
         char **envp;
+        fpu::FpuContext fpu_context;
 
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
