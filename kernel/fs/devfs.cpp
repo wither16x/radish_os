@@ -65,8 +65,9 @@ vfs::Status DevfsFile::read(void *buf, usize n)
                                 ch = drivers::keyboard::read();
 
                         static_cast<char *>(buf)[i] = ch;
-                        break;
                 }
+
+                break;
         }
 
         default:
