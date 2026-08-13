@@ -141,6 +141,13 @@ void Process::set_file_descriptors(this Process &self, const Process &other)
         }
 }
 
+void Process::reset_fpu_context(this Process &self)
+{
+        lib::memset(&self.fpu_context, 0, sizeof(self.fpu_context));
+        self.fpu_context.mxcsr = 0x1f80;
+        self.fpu_context.fcw = 0x37f;
+}
+
 // --------------------------------------------------
 void Process::load_pml4t(this Process &self)
 {

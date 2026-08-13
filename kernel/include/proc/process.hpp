@@ -41,6 +41,7 @@ class Process {
         ProcessKernelStack      kernel_stack;
         lib::Stack<lib::u8>     user_stack;
         lib::Vector<lib::File *> file_descriptors;
+        fpu::FpuContext fpu_context;
 
         void init_kernel_stack(this Process &self);
 
@@ -49,7 +50,6 @@ public:
         int envc;
         char **argv;
         char **envp;
-        fpu::FpuContext fpu_context;
 
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
@@ -58,7 +58,7 @@ public:
 
         /// Replace the file descriptors by the file descriptos from another process.
         void set_file_descriptors(this Process &self, const Process &other);
-
+        void reset_fpu_context(this Process &self);
         void init_user_stack(this Process &self);
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
