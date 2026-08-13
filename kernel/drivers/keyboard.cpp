@@ -94,13 +94,13 @@ void handle_irq(cpu::IRQFrame &frame)
 
         u8 status = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_STATUS);
 
-        u8 scancode = 0;
         if (status & ps2kbd::ControllerStatus::ST_OUTPUT_BUFFER_STATUS) {
-                scancode = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
-                ringbuf.enqueue(scancode);
+                u8 scancode = cpu::input_byte_port(ps2kbd::ControllerPort::PORT_DATA);
                 char ch = scancode_to_key(scancode);
-                if (ch)
+                if (ch) {
+                        ringbuf.enqueue(ch);
                         putchar(ch);
+                }
         }
 
         drivers::pic::send_eoi(drivers::pic::IRQ_KEYBOARD);
@@ -151,11 +151,9 @@ char scancode_to_key(lib::u8 scancode)
 
 char read()
 {
-        u8 scancode = 0;
-        char ch = 0;
+        unsigned char ch = 0;
 
-        ringbuf.dequeue(&scancode);
-        ch = scancode_to_key(scancode);
+        ringbuf.dequeue(&ch);
 
         return ch;
 }
