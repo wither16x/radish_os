@@ -1,0 +1,106 @@
+From d84e8066e1e5b7c5c755428b70e294c2b29114d5 Mon Sep 17 00:00:00 2001
+From: Wither__ <hhex16@gmail.com>
+Date: Thu, 13 Aug 2026 15:23:34 +0200
+Subject: [PATCH] Ported to RadishOS
+
+---
+ Makefile | 26 ++++++++++++++------------
+ repl.c   | 15 ++++++++-------
+ 2 files changed, 22 insertions(+), 19 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index d3db7cf..b3ca9d3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,8 @@
+-CC = gcc
+-CCFLAGS = -Wall -Wshadow -O2
+-LFLAGS = -lm
++include ../../../prefixes.mk
++
++CC = x86_64-radishos-clang
++CCFLAGS = -Wall -fno-pie -fno-lto -fno-pic -std=c99
++LFLAGS = -static -nostdlib -Wl,-Ttext=0x400000 -fuse-ld=lld -Wl,-no-pie -L$(LIBC_PREFIX) -lc
+ 
+ .PHONY = all clean
+ 
+@@ -8,30 +10,30 @@ all: smoke smoke_pr repl bench example example2 example3
+ 
+ 
+ smoke: smoke.c tinyexpr.c
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
+-	./$@
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
++#	./$@
+ 
+ smoke_pr: smoke.c tinyexpr.c
+-	$(CC) $(CCFLAGS) -DTE_POW_FROM_RIGHT -DTE_NAT_LOG -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -DTE_POW_FROM_RIGHT -DTE_NAT_LOG -o $@ $^
+ 	./$@
+ 
+ repl: repl.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
+ 
+ repl-readline: repl-readline.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS) -lreadline
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^ -lreadline
+ 
+ bench: benchmark.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
+ 
+ example: example.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
+ 
+ example2: example2.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
+ 
+ example3: example3.o tinyexpr.o
+-	$(CC) $(CCFLAGS) -o $@ $^ $(LFLAGS)
++	$(CC) $(CCFLAGS) $(LFLAGS) -o $@ $^
+ 
+ repl-readline.o: repl.c
+ 	$(CC) -c -DUSE_READLINE $(CCFLAGS) $< -o $@
+diff --git a/repl.c b/repl.c
+index 91301de..de6bef5 100644
+--- a/repl.c
++++ b/repl.c
+@@ -8,13 +8,14 @@
+ #include <readline/history.h>
+ #else
+ static char *readline(const char *prompt) {
+-    fprintf(stderr, "%s", prompt);
++    printf("%s", prompt);
+     char buf[1024];
+     char *line = fgets(buf, sizeof(buf), stdin);
+-    if (line == NULL && feof(stdin)) {
+-        return NULL;
+-    } else if (line == NULL) {
+-        perror("fgets");
++//     if (line == NULL && feof(stdin)) {
++//         return NULL;
++/*     } else*/ if (line == NULL) {
++        //perror("fgets");
++        printf("fgets failed\n");
+         return NULL;
+     }
+ 
+@@ -41,10 +42,10 @@ static int eval(const char *str) {
+     int err = 0;
+     double r = te_interp(str, &err);
+     if (err != 0) {
+-        printf("Error at position %i\n", err);
++        printf("Error at position %d\n", err);
+         return -1;
+     } else {
+-        printf("%g\n", r);
++        printf("%f\n", r);
+         return 0;
+     }
+ }
+-- 
+2.47.3
+

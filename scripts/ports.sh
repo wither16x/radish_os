@@ -9,3 +9,5 @@ function clone_repo {
 clone_repo https://github.com/codeplea/tinyexpr \
         ./ports/origins/tinyexpr \
         master
+cd https://github.com/codeplea/tinyexpr
+git apply ../../tinyexpr/0001-Ported-to-RadishOS.patch
