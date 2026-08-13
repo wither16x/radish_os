@@ -48,6 +48,8 @@ class Process {
         char **envp;
 
         void init_kernel_stack(this Process &self);
+        int init_argc_argv(this Process &self, int argc, char **argv);
+        int init_envp(this Process &self, char **envp);
 
 public:
         /// Create a brand new process. 

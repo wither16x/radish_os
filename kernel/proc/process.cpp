@@ -56,6 +56,54 @@ void Process::init_kernel_stack(this Process &self)
         self.kernel_stack.push(self.frame->r15);
 }
 
+int Process::init_argc_argv(this Process &self, int argc, char **argv)
+{
+        if (not argv)
+                return -1;
+
+        self.argv = new char *[argc + 1];
+        if (not self.argv) {
+                cpu::enable_interrupts();
+                return -2;
+        }
+
+        for (int i = 0; i < argc; i++) {
+                self.argv[i] = new char[strlen(argv[i]) + 1];
+                strcpy(argv[i], self.argv[i]);
+        }
+
+        self.argv[argc] = nullptr;
+        self.argc = argc;
+
+        return 0;
+}
+
+int Process::init_envp(this Process &self, char **envp)
+{
+        if (not envp)
+                return -1;
+
+        int envc = 0;
+        while (envp[envc] != nullptr)
+                ++envc;
+
+        self.envp = new char *[envc + 1];
+        if (not self.envp) {
+                cpu::enable_interrupts();
+                return -2;
+        }
+
+        for (int i = 0; i < envc; i++) {
+                self.envp[i] = new char[strlen(envp[i]) + 1];
+                strcpy(envp[i], self.envp[i]);
+        }
+
+        self.envp[envc] = nullptr;
+        self.envc = envc;
+
+        return 0;
+}
+
 // --------------------------------------------------
 Process::Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t)
         : pml4t(pml4t),
@@ -101,6 +149,7 @@ Process::Process(PID id, const Process &parent, mem::PML4T &pml4t)
         this->set_file_descriptors(parent);
         this->init_kernel_stack();
 }
+
 void Process::init_user_stack(this Process &self)
 {
         uptr *envp_uaddrs = self.user_stack.push_string_array(self.envp, self.envc);
@@ -151,41 +200,12 @@ void Process::reset_fpu_context(this Process &self)
 
 int Process::init_arguments(this Process &self, int argc, char **argv, char **envp)
 {
-        if (argv) {
-                self.argv = new char *[argc + 1];
-                if (not self.argv) {
-                        logger.err("failed to allocate argv");
-                        cpu::enable_interrupts();
-                        return -2;
-                }
-                for (int i = 0; i < argc; i++) {
-                        self.argv[i] = new char[strlen(argv[i]) + 1];
-                        strcpy(argv[i], self.argv[i]);
-                }
-                self.argv[argc] = nullptr;
-                self.argc = argc;
-        } else {
+        if (self.init_argc_argv(argc, argv) != 0) {
                 self.argc = 0;
                 self.argv = nullptr;
         }
 
-        if (envp) {
-                int envc = 0;
-                while (envp[envc] != nullptr)
-                        ++envc;
-                self.envp = new char *[envc + 1];
-                if (not self.envp) {
-                        logger.err("failed to allocate envp");
-                        cpu::enable_interrupts();
-                        return -3;
-                }
-                for (int i = 0; i < envc; i++) {
-                        self.envp[i] = new char[strlen(envp[i]) + 1];
-                        strcpy(envp[i], self.envp[i]);
-                }
-                self.envp[envc] = nullptr;
-                self.envc = envc;
-        } else {
+        if (self.init_envp(envp) != 0) {
                 self.envc = 0;
                 self.envp = nullptr;
         }
