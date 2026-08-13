@@ -14,7 +14,6 @@
 
 using kernel::lib::String;
 using kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::strcpy, kernel::lib::strlen;
 
 namespace kernel::proc {
 
@@ -36,48 +35,10 @@ int exec(const String &path, int argc, char **argv, char **envp)
                 return -1;
         }
 
-        // TODO: cleanup from here...
-        if (argv) {
-                proc->argv = new char *[argc + 1];
-                if (not proc->argv) {
-                        logger.err("failed to allocate argv");
-                        cpu::enable_interrupts();
-                        return -2;
-                }
-                for (int i = 0; i < argc; i++) {
-                        proc->argv[i] = new char[strlen(argv[i]) + 1];
-                        strcpy(argv[i], proc->argv[i]);
-                }
-                proc->argv[argc] = nullptr;
-                proc->argc = argc;
-        } else {
-                proc->argc = 0;
-                proc->argv = nullptr;
-        }
-
-        if (envp) {
-                int envc = 0;
-                while (envp[envc] != nullptr)
-                        ++envc;
-                proc->envp = new char *[envc + 1];
-                if (not proc->envp) {
-                        logger.err("failed to allocate envp");
-                        cpu::enable_interrupts();
-                        return -3;
-                }
-                for (int i = 0; i < envc; i++) {
-                        proc->envp[i] = new char[strlen(envp[i]) + 1];
-                        strcpy(envp[i], proc->envp[i]);
-                }
-                proc->envp[envc] = nullptr;
-                proc->envc = envc;
-        } else {
-                proc->envc = 0;
-                proc->envp = nullptr;
-        }
-        // ...to here
-
         elf::elf_entry_t proc_entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
+
+        if (proc->init_arguments(argc, argv, envp) != 0)
+                logger.err("failed to initialize process arguments");
 
         // Update the process
         // should add a dedicated method

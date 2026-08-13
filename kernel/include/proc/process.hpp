@@ -42,15 +42,14 @@ class Process {
         lib::Stack<lib::u8>     user_stack;
         lib::Vector<lib::File *> file_descriptors;
         fpu::FpuContext fpu_context;
-
-        void init_kernel_stack(this Process &self);
-
-public:
         int argc;
         int envc;
         char **argv;
         char **envp;
 
+        void init_kernel_stack(this Process &self);
+
+public:
         /// Create a brand new process. 
         Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
         /// Create a process from another. Use when forking processes.
@@ -60,6 +59,7 @@ public:
         void set_file_descriptors(this Process &self, const Process &other);
         void reset_fpu_context(this Process &self);
         void init_user_stack(this Process &self);
+        int init_arguments(this Process &self, int argc, char **argv, char **envp);
         void load_pml4t(this Process &self);
         void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
         void destroy_pml4t(this Process &self);

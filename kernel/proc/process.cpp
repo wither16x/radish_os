@@ -1,4 +1,5 @@
 #include <cpu/gdt.hpp>
+#include <cpu/cpu.hpp>
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
@@ -18,7 +19,7 @@
 #include <proc/procheap.hpp>
 
 using kernel::lib::u8, kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
-using kernel::lib::memset, kernel::lib::memcpy;
+using kernel::lib::memset, kernel::lib::memcpy, kernel::lib::strlen, kernel::lib::strcpy;
 using kernel::lib::Vector;
 using kernel::lib::File;
 
@@ -146,6 +147,50 @@ void Process::reset_fpu_context(this Process &self)
         lib::memset(&self.fpu_context, 0, sizeof(self.fpu_context));
         self.fpu_context.mxcsr = 0x1f80;
         self.fpu_context.fcw = 0x37f;
+}
+
+int Process::init_arguments(this Process &self, int argc, char **argv, char **envp)
+{
+        if (argv) {
+                self.argv = new char *[argc + 1];
+                if (not self.argv) {
+                        logger.err("failed to allocate argv");
+                        cpu::enable_interrupts();
+                        return -2;
+                }
+                for (int i = 0; i < argc; i++) {
+                        self.argv[i] = new char[strlen(argv[i]) + 1];
+                        strcpy(argv[i], self.argv[i]);
+                }
+                self.argv[argc] = nullptr;
+                self.argc = argc;
+        } else {
+                self.argc = 0;
+                self.argv = nullptr;
+        }
+
+        if (envp) {
+                int envc = 0;
+                while (envp[envc] != nullptr)
+                        ++envc;
+                self.envp = new char *[envc + 1];
+                if (not self.envp) {
+                        logger.err("failed to allocate envp");
+                        cpu::enable_interrupts();
+                        return -3;
+                }
+                for (int i = 0; i < envc; i++) {
+                        self.envp[i] = new char[strlen(envp[i]) + 1];
+                        strcpy(envp[i], self.envp[i]);
+                }
+                self.envp[envc] = nullptr;
+                self.envc = envc;
+        } else {
+                self.envc = 0;
+                self.envp = nullptr;
+        }
+
+        return 0;
 }
 
 // --------------------------------------------------
