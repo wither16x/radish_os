@@ -11,3 +11,4 @@ clone_repo https://github.com/codeplea/tinyexpr \
         master
 cd https://github.com/codeplea/tinyexpr
 git apply ../../tinyexpr/0001-Ported-to-RadishOS.patch
+cd -
