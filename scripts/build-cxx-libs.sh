@@ -13,7 +13,7 @@ set -e
 
 cd .build_cxx_libs/
 cmake -G Ninja -S llvm-project/runtimes -B build \
-        -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
+        -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi" \
         -DCMAKE_C_COMPILER="clang" \
         -DCMAKE_CXX_COMPILER="clang++" \
         -DCMAKE_C_COMPILER_TARGET="x86_64-unknown-none" \
@@ -22,9 +22,7 @@ cmake -G Ninja -S llvm-project/runtimes -B build \
         -DCMAKE_INSTALL_PREFIX="$1" \
         -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
         -DLIBCXX_CXX_ABI=libcxxabi \
-        -DLIBCXX_ENABLE_THREADS=OFF \
         -DLIBCXXABI_ENABLE_THREADS=OFF \
-        -DLIBCXX_INCLUDE_TESTS=OFF \
         -DLIBCXXABI_INCLUDE_TESTS=OFF \
         -DLIBUNWIND_INCLUDE_TESTS=OFF \
         -DCMAKE_SYSTEM_NAME=Generic \
@@ -35,5 +33,5 @@ cmake -G Ninja -S llvm-project/runtimes -B build \
         -DCMAKE_C_FLAGS="-Wno-error=return-type" \
         -DCMAKE_CXX_FLAGS="-Wno-error=return-type" \
         -DCXX_SUPPORTS_WERROR_EQ_RETURN_TYPE_FLAG=0
-        
-ninja -C build install-cxx install-cxxabi install-unwind
+
+ninja -C build install-cxxabi install-unwind
