@@ -15,6 +15,7 @@ build-userspace:
 	$(MAKE) -C userspace/shell
 	$(MAKE) -C userspace/init
 	$(MAKE) -C userspace/alloc
+	$(MAKE) -C userspace/cxx-test
 
 build-initrd:
 	./scripts/mkinitrd.sh
@@ -33,6 +34,7 @@ clean-userspace:
 	$(MAKE) -C userspace/shell clean
 	$(MAKE) -C userspace/init clean
 	$(MAKE) -C userspace/alloc clean
+	$(MAKE) -C userspace/cxx-test clean
 
 # run
 run:

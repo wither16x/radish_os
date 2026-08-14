@@ -9,6 +9,7 @@ cp -v userspace/hello/bin/hello initrd/bin/hello
 cp -v userspace/shell/bin/shell initrd/bin/shell
 cp -v userspace/init/bin/init initrd/bin/init
 cp -v userspace/alloc/bin/alloc initrd/bin/alloc
+cp -v userspace/cxx-test/bin/cxx_test initrd/bin/cxx_test
 
 mkdir -p initrd/bin/tinyexpr
 cp -v ports/origins/tinyexpr/repl initrd/bin/tinyexpr/repl
