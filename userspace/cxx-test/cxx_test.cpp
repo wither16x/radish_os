@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 
 class Person
 {
@@ -12,7 +12,7 @@ public:
 
         void greet() const
         {
-                printf("Hello, I am %s and I am %d!\n", this->name, this->age);
+                std::printf("Hello, I am %s and I am %d!\n", this->name, this->age);
         }
 };
 

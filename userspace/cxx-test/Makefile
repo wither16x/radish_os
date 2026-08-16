@@ -19,10 +19,10 @@ CFLAGS := -fno-lto \
 
 LDFLAGS := -static \
 	-nostdlib \
-	-Wl,-Ttext=0x400000 \
 	-z max-page-size=0x1000 \
 	-fuse-ld=lld \
-	-L$(LIBC_PREFIX)
+	-L$(LIBC_PREFIX) \
+	-T ../linker.lds
 
 .PHONY: all clean
 
@@ -30,7 +30,10 @@ all: $(EXEC)
 
 $(EXEC): $(OBJ)
 	@mkdir -p $(BIN)
-	$(LD) $(LDFLAGS) $(OBJ) -lc -o $(EXEC)
+	$(LD) $(LDFLAGS) $(OBJ) \
+		-Wl,--start-group -lc++ -lc++abi -lunwind -lc -Wl,--end-group \
+		-lclang_rt.builtins-x86_64 \
+		-o $(EXEC)
 
 $(OBJ): $(SRC)
 	@mkdir -p $(BUILD)
