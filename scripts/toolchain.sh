@@ -21,6 +21,7 @@ echo -e "clang++ --target=\"x86_64-unknown-none\" \\"           >> $CLANGXX
 echo -e "\t-D__radishos__ \\"                                   >> $CLANGXX
 echo -e "\t-m64 \\"                                             >> $CLANGXX
 echo -e "\t--sysroot="$1" \\"                                >> $CLANGXX
+echo -e "\t-I"$1"/usr/include/c++/v1 \\"                >> $CLANGXX
 echo -e "\t\$@"                                                   >> $CLANGXX
 chmod +x $CLANGXX
 echo "Generated $CLANGXX"
