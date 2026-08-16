@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 function clone_repo {
         git clone "$1" "$2" --depth=1 --branch="$3"
 }
@@ -9,6 +7,6 @@ function clone_repo {
 clone_repo https://github.com/codeplea/tinyexpr \
         ./ports/origins/tinyexpr \
         master
-cd https://github.com/codeplea/tinyexpr
+cd ports/origins/tinyexpr
 git apply ../../tinyexpr/0001-Ported-to-RadishOS.patch
 cd -
