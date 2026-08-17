@@ -32,7 +32,7 @@ $(EXEC): $(OBJ)
 	@mkdir -p $(BIN)
 	$(LD) $(LDFLAGS) $(OBJ) \
 		-Wl,--start-group -lc++ -lc++abi -lunwind -lc -Wl,--end-group \
-		-lclang_rt.builtins-x86_64 \
+		-lclang_rt.builtins-x86_64 -lmelon \
 		-o $(EXEC)
 
 $(OBJ): $(SRC)

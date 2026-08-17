@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <Melon/Exceptions.hpp>
 
 class Person
 {
@@ -23,9 +24,9 @@ int main()
         p.greet();
 
         try {
-                throw 42;
-        } catch (int e) {
-                std::printf("caught %d\n", e);
+                throw Melon::Exceptions::BufferOverflow("buffer overflow detected");
+        } catch (const Melon::Exceptions::BufferOverflow &e) {
+                std::printf("caught %s\n", e.what());
         }
 
         return 0;

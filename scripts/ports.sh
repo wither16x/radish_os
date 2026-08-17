@@ -7,6 +7,7 @@ function clone_repo {
 clone_repo https://github.com/codeplea/tinyexpr \
         ./ports/origins/tinyexpr \
         master
-cd ports/origins/tinyexpr
-git apply ../../tinyexpr/0001-Ported-to-RadishOS.patch
-cd -
+
+clone_repo https://github.com/llvm/llvm-project \
+        ./ports/origins/llvm-project \
+        main

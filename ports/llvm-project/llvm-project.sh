@@ -1,21 +1,9 @@
 #!/bin/bash
 
-# This script will install libc++abi and libunwind
-# $1 = sysroot
-
-# clang > 19.x is required
-
-mkdir -p .build_cxx_libs
-
-git clone https://github.com/llvm/llvm-project \
-        .build_cxx_libs/llvm-project/ \
-        --depth=1 --branch=main
-
 set -e
 
-cd .build_cxx_libs/
 # Gonna remove useless flags later
-cmake -G Ninja -S llvm-project/runtimes -B build \
+cmake -G Ninja -S ../origins/llvm-project/runtimes -B build \
         -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx;compiler-rt" \
         -DCMAKE_C_COMPILER="clang" \
         -DCMAKE_CXX_COMPILER="clang++" \
