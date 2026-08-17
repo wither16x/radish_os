@@ -300,6 +300,11 @@ void Process::reset_stack(this Process &self)
         self.frame->rsp = cpu::USER_STACK_TOP;
 }
 
+void Process::reset_heap(this Process &self, uptr start)
+{
+        self.heap.reset(start, self.pml4t);
+}
+
 void Process::switch_entry(this Process &self, elf::elf_entry_t entry)
 {
         self.entry = entry;

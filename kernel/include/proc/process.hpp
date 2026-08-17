@@ -68,6 +68,7 @@ public:
         void save_context(this Process &self, cpu::SyscallFrame &frame);
         void load_context(this Process &self, cpu::SyscallFrame &frame);
         void reset_stack(this Process &self);
+        void reset_heap(this Process &self, lib::uptr start);
         void switch_entry(this Process &self, elf::elf_entry_t entry);
         int add_child(this Process &self, Process *child);
         int remove_child(this Process &self, PID id);

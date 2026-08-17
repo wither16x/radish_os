@@ -1,7 +1,9 @@
+#include "cpu/userspace.hpp"
 #include <cpu/cpu.hpp>
 #include <proc/procheap.hpp>
 #include <lib/typing.hpp>
 #include <mem/pmm.hpp>
+#include <mem/page.hpp>
 
 using kernel::lib::uptr;
 
@@ -52,6 +54,15 @@ bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
         self.last_page -= pages * mem::PAGE_SIZE;
         cpu::enable_interrupts();
         return true;
+}
+
+void ProcessHeap::reset(this ProcessHeap &self, uptr new_start, mem::PML4T &pml4t)
+{
+        uptr aligned = mem::page_align_up(new_start);
+        self.start = aligned;
+        self.last_page = aligned;
+        self.limit = cpu::USER_HEAP_LIMIT;
+        self.pml4t = pml4t;
 }
 
 uptr ProcessHeap::get_start(this const ProcessHeap &self)

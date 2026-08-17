@@ -44,6 +44,7 @@ int exec(const String &path, int argc, char **argv, char **envp)
         // should add a dedicated method
         proc->reset_fpu_context();
         proc->switch_pml4t(proc_pml4t);
+        proc->reset_heap(elf_info.highest_vaddr);
         proc->reset_stack();
         proc->init_user_stack();
         proc->switch_entry(proc_entry);

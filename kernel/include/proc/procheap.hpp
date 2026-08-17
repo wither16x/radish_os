@@ -19,6 +19,8 @@ public:
 
         bool extend(this ProcessHeap &self, int pages);
         bool shorten(this ProcessHeap &self, int pages);
+        
+        void reset(this ProcessHeap &self, lib::uptr new_start, mem::PML4T &pml4t);
 
         lib::uptr get_start(this const ProcessHeap &self);
         lib::uptr get_last_page(this const ProcessHeap &self);

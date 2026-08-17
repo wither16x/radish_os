@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 
 class Person
 {
@@ -20,6 +21,12 @@ int main()
 {
         Person p("John", 42);
         p.greet();
+
+        try {
+                throw 42;
+        } catch (int e) {
+                std::printf("caught %d\n", e);
+        }
 
         return 0;
 }
