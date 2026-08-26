@@ -14,7 +14,7 @@ namespace Kiwi::Drivers::Serial
                 }
         } // anonymous namespace
 
-        bool init_port(Lib::u16 port)
+        bool initPort(Lib::u16 port)
         {
                 Cpu::outputBytePort(port + 1, 0);
                 Cpu::outputBytePort(port + 3, 0x80);
@@ -33,7 +33,7 @@ namespace Kiwi::Drivers::Serial
                 return true;
         }
 
-        void send_byte(Lib::u16 port, Lib::u8 byte)
+        void sendByte(Lib::u16 port, Lib::u8 byte)
         {
                 waitPortBusy(port);
                 Cpu::outputBytePort(port, byte);

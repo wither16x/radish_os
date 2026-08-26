@@ -7,303 +7,280 @@
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 
-using kernel::lib::u8, kernel::lib::usize;
-using kernel::lib::atoi;
-using kernel::lib::String;
-using kernel::lib::Vector;
-using kernel::lib::memcpy;
-
-namespace kernel::fs::ustar {
-
-namespace {
-
-constexpr int BLOCK_SIZE = 512;
-
-/// Enumeration of the USTAR file types.
-enum class NodeType : char {
-        NormalFile      = '0',
-        HardLink        = '1',
-        SymbolicLink    = '2',
-        CharSpecialDev  = '3',
-        BlockDev        = '4',
-        Directory       = '5',
-        NamedPipe       = '6'
-};
-
-// bruh why is everything in octal
-//
-/// A single header is 512 bytes wide (only 500 bytes are actually used).
-struct [[gnu::packed]] FileHeader {
-        char name[100];
-        char mode[8];           // octal
-        char oid[8];            // owner id (octal)
-        char gid[8];            // group id (octal)
-        char size[12];          // file size in bytes (octal)
-        char last[12];          // last modification time (octal)
-        char checksum[8];
-        char type;
-        char linked_name[100];  // name of linked file
-        char indicator[6];
-        char version[2];
-        char user[32];
-        char group[32];
-        char devmaj[8];         // device major number
-        char devmin[8];         // device minor number
-        char prefix[155];
-};
-
-class Storage {
-public:
-        char *data = nullptr;
-        usize size = 0;
-};
-
-class UstarFile : public vfs::File {
-public:
-        class Node *owner;
-
-        vfs::Status read(void *buf, usize size) override;
-        vfs::Status close() override;
-};
-
-class UstarDir {
-public:
-        Vector<class Node *> nodes;
-};
-
-class Node : public vfs::VNode {
-public:
-        Node *parent;
-
-        FileHeader *hdr;
-        String name;
-
-        Storage *storage;
-        class UstarDir *dir_data;
-
-        vfs::Status readdir(vfs::DirEntry *entry, usize index) override;
-        vfs::VNode *lookup(const String &name) override;
-        vfs::Status getfilesz(usize *buf) override;
-        vfs::Status getdirentn(usize *buf) override;
-        vfs::File *open() override;
-};
-
-Node *root = nullptr;
-
-// --------------------------------------------------
-Node *find_dir(Node *parent, const String &name)
+namespace Kiwi::Fs::Ustar
 {
-        Node *existing = static_cast<Node *>(parent->lookup(name));
-        if (existing and existing->dir_data)
-                return existing;
+        namespace
+        {
+                constexpr int BLOCK_SIZE = 512;
 
-        return nullptr;
-}
-// --------------------------------------------------
+                /// Enumeration of the USTAR file types.
+                enum class NodeType : char
+                {
+                        NormalFile      = '0',
+                        HardLink        = '1',
+                        SymbolicLink    = '2',
+                        CharSpecialDev  = '3',
+                        BlockDev        = '4',
+                        Directory       = '5',
+                        NamedPipe       = '6'
+                };
 
-// --------------------------------------------------
-Node *__create_dir(Node *parent, const String &name)
-{
-        Node *dir       = new Node;
-        dir->parent     = parent;
-        dir->hdr        = nullptr;
-        dir->name       = name;
-        dir->storage    = nullptr;
-        dir->dir_data   = new UstarDir;
-        dir->ref_count  = 1;
+                // bruh why is everything in octal
+                //
+                /// A single header is 512 bytes wide (only 500 bytes are actually used).
+                struct [[gnu::packed]] FileHeader
+                {
+                        char name[100];
+                        char mode[8];           // octal
+                        char oid[8];            // owner id (octal)
+                        char gid[8];            // group id (octal)
+                        char size[12];          // file size in bytes (octal)
+                        char last[12];          // last modification time (octal)
+                        char checksum[8];
+                        char type;
+                        char linked_name[100];  // name of linked file
+                        char indicator[6];
+                        char version[2];
+                        char user[32];
+                        char group[32];
+                        char devmaj[8];         // device major number
+                        char devmin[8];         // device minor number
+                        char prefix[155];
+                };
 
-        parent->dir_data->nodes.push_back(dir);
+                class Storage
+                {
+                public:
+                        char *data = nullptr;
+                        Lib::usize size = 0;
+                };
 
-        return dir;
-}
-// --------------------------------------------------
+                class UstarFile : public Vfs::File
+                {
+                public:
+                        class Node *owner;
 
-// --------------------------------------------------
-void parse_archive(u8 *archive)
-{
-        u8 *archive_p = archive;
+                        Vfs::Status read(void *buf, Lib::usize size) override;
+                        Vfs::Status close() override;
+                };
 
-        while (true) {
-                FileHeader *hdr = reinterpret_cast<FileHeader *>(archive_p);
-                if (hdr->name[0] == '\0')
-                        break;
+                class UstarDir
+                {
+                public:
+                        Lib::Vector<class Node *> nodes;
+                };
 
-                usize bytes = atoi(hdr->size, 8, sizeof(hdr->size));
-                String path = hdr->name;
+                class Node : public Vfs::VNode
+                {
+                public:
+                        Node *parent;
 
-                Vector<String> parts = parse_path(path);
+                        FileHeader *hdr;
+                        Lib::String name;
 
-                if (parts.empty()) {
-                        usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
-                        archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
-                        continue;
+                        Storage *storage;
+                        class UstarDir *dir_data;
+
+                        Vfs::Status readdir(Vfs::DirEntry *entry, Lib::usize index) override;
+                        Vfs::VNode *lookup(const Lib::String &name) override;
+                        Vfs::Status getfilesz(Lib::usize *buf) override;
+                        Vfs::Status getdirentn(Lib::usize *buf) override;
+                        Vfs::File *open() override;
+                };
+
+                Node *root = nullptr;
+
+                Node *findDir(Node *parent, const Lib::String &name)
+                {
+                        Node *existing = static_cast<Node *>(parent->lookup(name));
+                        if (existing and existing->dir_data)
+                                return existing;
+
+                        return nullptr;
                 }
 
-                String name = parts[parts.size() - 1];
+                Node *__createDir(Node *parent, const Lib::String &name)
+                {
+                        Node *dir       = new Node;
+                        dir->parent     = parent;
+                        dir->hdr        = nullptr;
+                        dir->name       = name;
+                        dir->storage    = nullptr;
+                        dir->dir_data   = new UstarDir;
+                        dir->ref_count  = 1;
 
-                Node *parent = root;
-                for (usize i = 0; i < parts.size() - 1; i++) {
-                        Node *next = find_dir(parent, parts[i]);
-                        if (not next)
-                                next = __create_dir(parent, parts[i]);
-                        parent = next;
-                        if (not parent) // failed to create the directory
-                                break;
+                        parent->dir_data->nodes.pushBack(dir);
+
+                        return dir;
                 }
 
-                if (parent) {
-                        Node *nd        = new Node;
-                        nd->parent      = parent;
-                        nd->hdr         = hdr;
-                        nd->name        = name;
-                        nd->ref_count   = 1;
+                void parseArchive(Lib::u8 *archive)
+                {
+                        Lib::u8 *archive_p = archive;
 
-                        if (hdr->type == static_cast<char>(NodeType::Directory)) {
-                                nd->dir_data = new UstarDir;
-                                nd->storage = nullptr;
-                        } else {
-                                nd->storage = new Storage;
-                                nd->storage->data = reinterpret_cast<char *>(archive_p + BLOCK_SIZE);
-                                nd->storage->size = bytes;
-                                nd->dir_data = nullptr;
+                        while (true) {
+                                FileHeader *hdr = reinterpret_cast<FileHeader *>(archive_p);
+                                if (hdr->name[0] == '\0')
+                                        break;
+
+                                Lib::usize bytes = Lib::atoi(hdr->size, 8, sizeof(hdr->size));
+                                Lib::String path = hdr->name;
+
+                                Lib::Vector<Lib::String> parts = parsePath(path);
+
+                                if (parts.empty()) {
+                                        Lib::usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
+                                        archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
+                                        continue;
+                                }
+
+                                Lib::String name = parts[parts.size() - 1];
+
+                                Node *parent = root;
+                                for (Lib::usize i = 0; i < parts.size() - 1; i++) {
+                                        Node *next = findDir(parent, parts[i]);
+                                        if (not next)
+                                                next = __createDir(parent, parts[i]);
+                                        parent = next;
+                                        if (not parent) // failed to create the directory
+                                                break;
+                                }
+
+                                if (parent) {
+                                        Node *nd        = new Node;
+                                        nd->parent      = parent;
+                                        nd->hdr         = hdr;
+                                        nd->name        = name;
+                                        nd->ref_count   = 1;
+
+                                        if (hdr->type == static_cast<char>(NodeType::Directory)) {
+                                                nd->dir_data = new UstarDir;
+                                                nd->storage = nullptr;
+                                        } else {
+                                                nd->storage = new Storage;
+                                                nd->storage->data = reinterpret_cast<char *>(archive_p + BLOCK_SIZE);
+                                                nd->storage->size = bytes;
+                                                nd->dir_data = nullptr;
+                                        }
+
+                                        parent->dir_data->nodes.pushBack(nd);
+                                }
+
+                                Lib::usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
+                                archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
                         }
-
-                        parent->dir_data->nodes.push_back(nd);
                 }
 
-                usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
-                archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
+        } /* anonymous namespace */
+
+        Vfs::Status UstarFile::read(void *buf, Lib::usize n)
+        {
+                if (not this->owner or not this->owner->storage or not this->owner->storage->data)
+                        return Vfs::Status::NullData;
+                if (n < this->owner->storage->size)
+                        return Vfs::Status::OutOfBounds;
+
+                Lib::memcpy(buf, this->owner->storage->data, n);
+
+                return Vfs::Status::Success;
         }
-}
-// --------------------------------------------------
 
-} /* anonymous namespace */
+        Vfs::Status UstarFile::close()
+        {
+                return Vfs::Status::Success;
+        }
 
-// --------------------------------------------------
-vfs::Status UstarFile::read(void *buf, usize n)
-{
-        if (not this->owner or not this->owner->storage or not this->owner->storage->data)
-                return vfs::Status::NullData;
-        if (n < this->owner->storage->size)
-                return vfs::Status::OutOfBounds;
+        Vfs::Status Node::readdir(Vfs::DirEntry *entry, Lib::usize n)
+        {
+                if (not this->dir_data)
+                        return Vfs::Status::NotADirectory;
+                if (n >= this->dir_data->nodes.size())
+                        return Vfs::Status::OutOfBounds;
 
-        memcpy(buf, this->owner->storage->data, n);
+                Node *nd        = this->dir_data->nodes[n];
+                entry->name     = nd->name;
+                entry->type     = nd->dir_data ? Vfs::DirEntryType::Dir : Vfs::DirEntryType::File;
 
-        return vfs::Status::Success;
-}
-// --------------------------------------------------
+                return Vfs::Status::Success;
+        }
 
-vfs::Status UstarFile::close()
-{
-        return vfs::Status::Success;
-}
+        Vfs::VNode *Node::lookup(const Lib::String &name)
+        {
+                if (not this->dir_data)
+                        return nullptr;
 
-// --------------------------------------------------
-vfs::Status Node::readdir(vfs::DirEntry *entry, usize n)
-{
-        if (not this->dir_data)
-                return vfs::Status::NotADirectory;
-        if (n >= this->dir_data->nodes.size())
-                return vfs::Status::OutOfBounds;
+                // because root has no parent, the loop below would not work
+                if (name == "/")
+                        return root;
 
-        Node *nd        = this->dir_data->nodes[n];
-        entry->name     = nd->name;
-        entry->type     = nd->dir_data ? vfs::DirEntryType::Dir : vfs::DirEntryType::File;
+                for (Lib::usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                        if (this->dir_data->nodes[i]->name == name)
+                                return this->dir_data->nodes[i];
+                }
 
-        return vfs::Status::Success;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-vfs::VNode *Node::lookup(const String &name)
-{
-        if (not this->dir_data)
                 return nullptr;
+        }
 
-        // because root has no parent, the loop below would not work
-        if (name == "/")
+        Vfs::Status Node::getfilesz(Lib::usize *buf)
+        {
+                if (this->dir_data)
+                        return Vfs::Status::IsADirectory;
+                if (not this->storage)
+                        return Vfs::Status::NullData;
+
+                Lib::memcpy(buf, &this->storage->size, sizeof(*buf));
+                
+                return Vfs::Status::Success;
+        }
+
+        Vfs::Status Node::getdirentn(Lib::usize *buf)
+        {
+                if (not this->dir_data)
+                        return Vfs::Status::NotADirectory;
+
+                Lib::usize count = this->dir_data->nodes.size();
+                Lib::memcpy(buf, &count, sizeof(*buf));
+
+                return Vfs::Status::Success;
+        }
+
+        Vfs::File *Node::open()
+        {
+                if (this->dir_data)
+                        return nullptr; // is a directory
+
+                UstarFile *file = new UstarFile;
+                file->owner = this;
+
+                return file;
+        }
+
+        USTAR::USTAR(void *archive)
+        {
+                this->archive = static_cast<Lib::u8 *>(archive);
+        }
+
+        Vfs::VNode *USTAR::getRoot()
+        {
+                if (not root) {
+                        root            = new Node;
+                        root->parent    = nullptr;
+                        root->name      = "/";
+                        root->storage   = nullptr;
+                        root->dir_data  = new UstarDir;
+                        root->ref_count = 1;
+
+                        parseArchive(this->archive);
+                }
+
                 return root;
-
-        for (usize i = 0; i < this->dir_data->nodes.size(); i++) {
-                if (this->dir_data->nodes[i]->name == name)
-                        return this->dir_data->nodes[i];
         }
 
-        return nullptr;
-}
-// --------------------------------------------------
+        Vfs::Status USTAR::unmount()
+        {
+                root->rm();
+                root = nullptr;
 
-// --------------------------------------------------
-vfs::Status Node::getfilesz(usize *buf)
-{
-        if (this->dir_data)
-                return vfs::Status::IsADirectory;
-        if (not this->storage)
-                return vfs::Status::NullData;
-
-        memcpy(buf, &this->storage->size, sizeof(*buf));
-        
-        return vfs::Status::Success;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-vfs::Status Node::getdirentn(usize *buf)
-{
-        if (not this->dir_data)
-                return vfs::Status::NotADirectory;
-
-        usize count = this->dir_data->nodes.size();
-        memcpy(buf, &count, sizeof(*buf));
-
-        return vfs::Status::Success;
-}
-// --------------------------------------------------
-
-vfs::File *Node::open()
-{
-        if (this->dir_data)
-                return nullptr; // is a directory
-
-        UstarFile *file = new UstarFile;
-        file->owner = this;
-
-        return file;
-}
-
-// --------------------------------------------------
-USTAR::USTAR(void *archive)
-{
-        this->archive = static_cast<u8 *>(archive);
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-vfs::VNode *USTAR::get_root()
-{
-        if (not root) {
-                root            = new Node;
-                root->parent    = nullptr;
-                root->name      = "/";
-                root->storage   = nullptr;
-                root->dir_data  = new UstarDir;
-                root->ref_count = 1;
-
-                parse_archive(this->archive);
+                return Vfs::Status::Success;
         }
-
-        return root;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-vfs::Status USTAR::unmount()
-{
-        root->rm();
-        root = nullptr;
-
-        return vfs::Status::Success;
-}
-// --------------------------------------------------
-
-} /* namespace kernel::fs::ustar */
+} // namespace Kiwi::Fs::Ustar

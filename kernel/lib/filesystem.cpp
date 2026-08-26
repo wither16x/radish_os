@@ -1,70 +1,55 @@
 #include <fs/vfs.hpp>
 #include <lib/filesystem.hpp>
 
-namespace kernel::lib {
-
-File *open(const String &path)
+namespace Kiwi::Lib
 {
-        return fs::vfs::open_file(path);
-}
+        File *open(const String &path)
+        {
+                return Fs::Vfs::openFile(path);
+        }
 
-fs::vfs::Status close(File *f)
-{
-        return fs::vfs::close_file(f);
-}
+        Fs::Vfs::Status close(File *f)
+        {
+                return Fs::Vfs::closeFile(f);
+        }
 
-fs::vfs::Status mkfile(const String &path)
-{
-        return fs::vfs::mkfile(path);
-}
+        Fs::Vfs::Status mkfile(const String &path)
+        {
+                return Fs::Vfs::mkfile(path);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status mkdir(const String &path)
-{
-        return fs::vfs::mkdir(path);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status mkdir(const String &path)
+        {
+                return Fs::Vfs::mkdir(path);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status rm(const String &path)
-{
-        return fs::vfs::remove(path);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status rm(const String &path)
+        {
+                return Fs::Vfs::remove(path);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status write(File *f, const void *buf, usize n)
-{
-        return fs::vfs::write(f, buf, n);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status write(File *f, const void *buf, usize n)
+        {
+                return Fs::Vfs::write(f, buf, n);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status read(File *f, void *buf, usize n)
-{
-        return fs::vfs::read(f, buf, n);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status read(File *f, void *buf, usize n)
+        {
+                return Fs::Vfs::read(f, buf, n);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status getdirent(const String &path, fs::vfs::DirEntry *entry, usize n)
-{
-        return fs::vfs::readdir(path, entry, n);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status getdirent(const String &path, Fs::Vfs::DirEntry *entry, usize n)
+        {
+                return Fs::Vfs::readdir(path, entry, n);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status getfilesz(const String &path, usize *buf)
-{
-        return fs::vfs::getfilesz(path, buf);
-}
-// --------------------------------------------------
+        Fs::Vfs::Status getfilesz(const String &path, usize *buf)
+        {
+                return Fs::Vfs::getfilesz(path, buf);
+        }
 
-// --------------------------------------------------
-fs::vfs::Status getdirentn(const String &path, usize *buf)
-{
-        return fs::vfs::getdirentn(path, buf);
-}
-// --------------------------------------------------
-
-} /* namespace kernel::lib */
+        Fs::Vfs::Status getdirentn(const String &path, usize *buf)
+        {
+                return Fs::Vfs::getdirentn(path, buf);
+        }
+} // namespace Kiwi::Lib

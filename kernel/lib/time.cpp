@@ -1,20 +1,15 @@
 #include <drivers/pit.hpp>
 #include <lib/time.hpp>
 
-namespace kernel::lib {
-
-// --------------------------------------------------
-void sleep(u64 ms)
+namespace Kiwi::Lib
 {
-        drivers::pit::sleep(ms);
-}
-// --------------------------------------------------
+        void sleep(u64 ms)
+        {
+                Drivers::Pit::sleep(ms);
+        }
 
-// --------------------------------------------------
-u64 get_current_time()
-{
-        return drivers::pit::get_seconds() + drivers::pit::get_tics();
-}
-// --------------------------------------------------
-
-} /* namespace kernel::lib */
+        u64 get_current_time()
+        {
+                return Drivers::Pit::getSeconds() + Drivers::Pit::getTics();
+        }
+} // namespace Kiwi::Lib

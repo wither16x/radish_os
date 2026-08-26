@@ -31,9 +31,9 @@ namespace Kiwi::Lib::Log
                 };
 
                 /// Tell the logger who is logging.
-                void set_context(this Logger &self, const char *ctx);
+                void setContext(this Logger &self, const char *ctx);
 
-                void va_log(this Logger &self, LogLevel lv, const char *fmt, va_list args);
+                void vaLog(this Logger &self, LogLevel lv, const char *fmt, va_list args);
                 void log(this Logger &self, LogLevel lv, const char *fmt, ...);
                 // wrappers
                 void debug(this Logger &self, const char *fmt, ...);
