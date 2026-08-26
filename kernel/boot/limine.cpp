@@ -1,55 +1,48 @@
 #include <boot/limine.hpp>
 #include <limine.h>
 
-using kernel::lib::u64;
-
-namespace kernel::boot::limine {
-
-namespace {
-
-[[gnu::used, gnu::section(".limine_requests")]]
-volatile Revision limine_base_revision = base_revision(6);
-
-[[gnu::used, gnu::section(".limine_requests_start")]]
-volatile StartMarker limine_requests_start_marker = requests_start_marker();
-
-[[gnu::used, gnu::section(".limine_requests_end")]]
-volatile EndMarker limine_requests_end_marker = requests_end_marker();
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-Revision base_revision(u64 n)
+namespace Kiwi::Boot::Limine
 {
-        return LIMINE_BASE_REVISION(n);
-}
-// --------------------------------------------------
+        namespace
+        {
+                [[gnu::used, gnu::section(".limine_requests")]]
+                volatile Revision limine_base_revision = baseRevision(6);
 
-// --------------------------------------------------
-bool Revision::is_supported(this volatile Revision &self)
-{
-        u64 _rev[] = {self.magic0, self.magic1, self.rev};
-        return LIMINE_BASE_REVISION_SUPPORTED(_rev);
-}
-// --------------------------------------------------
+                [[gnu::used, gnu::section(".limine_requests_start")]]
+                volatile StartMarker limine_requests_start_marker = requestsStartMarker();
 
-// --------------------------------------------------
-StartMarker requests_start_marker()
-{
-        return LIMINE_REQUESTS_START_MARKER;
-}
-// --------------------------------------------------
+                [[gnu::used, gnu::section(".limine_requests_end")]]
+                volatile EndMarker limine_requests_end_marker = requestsEndMarker();
+        } // anonymous namespace
 
-// --------------------------------------------------
-EndMarker requests_end_marker()
-{
-        return LIMINE_REQUESTS_END_MARKER;
-}
-// --------------------------------------------------
+        Revision base_revision(Lib::u64 n)
+        {
+                return LIMINE_BASE_REVISION(n);
+        }
 
-volatile Revision &get_base_revision()
-{
-        return limine_base_revision;
-}
+        bool Revision::isSupported(this volatile Revision &self)
+        {
+                Lib::u64 _rev[] = {
+                        self.magic0,
+                        self.magic1,
+                        self.rev
+                };
+                
+                return LIMINE_BASE_REVISION_SUPPORTED(_rev);
+        }
 
-} /* namespace kernel::boot::limine */
+        StartMarker requestsStartMarker()
+        {
+                return LIMINE_REQUESTS_START_MARKER;
+        }
+
+        EndMarker requestsEndMarker()
+        {
+                return LIMINE_REQUESTS_END_MARKER;
+        }
+
+        volatile Revision &getBaseRevision()
+        {
+                return limine_base_revision;
+        }
+} // namespace Kiwi::Boot::Limine

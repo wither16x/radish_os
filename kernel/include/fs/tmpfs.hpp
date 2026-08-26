@@ -2,13 +2,13 @@
 
 #include <fs/vfs.hpp>
 
-namespace kernel::fs::tmpfs {
+namespace Kiwi::Fs::Tmpfs
+{
+        class Tmpfs : public Vfs::FileSystem
+        {
+                ~Tmpfs()           = default;
 
-struct TMPFS : public vfs::FileSystem {
-        ~TMPFS()           = default;
-
-        vfs::VNode *get_root() override;
-        vfs::Status unmount() override;
-};
-
-} /* namespace kernel::fs::tmpfs */
+                Vfs::VNode *getRoot() override;
+                Vfs::Status unmount() override;
+        };
+} // namespace Kiwi::Fs::Tmpfs

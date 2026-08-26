@@ -2,8 +2,7 @@
 
 #include <proc/pid.hpp>
 
-namespace kernel::proc {
-
-int kill(PID pid);
-
-} /* namespace kernel::proc */
+namespace Kiwi::Proc
+{
+        int kill(pid_t pid);
+} // namespace Kiwi::Proc

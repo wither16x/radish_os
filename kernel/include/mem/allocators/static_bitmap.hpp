@@ -5,59 +5,57 @@
 #include <lib/typing.hpp>
 #include <panic.hpp>
 
-namespace kernel::mem::allocators {
-
-/// Allocator based on a static bitmap, so the maximum amount
-/// of memory it can handle is limited by `SIZE`.
-template<typename T, lib::usize SIZE>
-class StaticBitmapAllocator : public Allocator<T> {
-private:
-        lib::StaticBitmap<SIZE> bitmap;
-
-        lib::usize last_allocated = 0;
-
-public:
-        T allocate(lib::usize n) override
+namespace Kiwi::Mem::Allocators
+{
+        /// Allocator based on a static bitmap, so the maximum amount
+        /// of memory it can handle is limited by `SIZE`.
+        template<typename T, Lib::usize SIZE>
+        class StaticBitmapAllocator : public Allocator<T>
         {
-                for (lib::usize i = 0; i < n; i++) {
-                        lib::usize start = this->last_allocated;
-                        bool found = false;
+                Lib::StaticBitmap<SIZE> bitmap;
+                Lib::usize last_allocated = 0;
 
-                        do {
-                                if (not this->bitmap.test(this->last_allocated)) {
-                                        found = true;
-                                        break;
-                                }
+        public:
+                T allocate(Lib::usize n) override
+                {
+                        for (Lib::usize i = 0; i < n; i++) {
+                                Lib::usize start = this->last_allocated;
+                                bool found = false;
 
-                                ++this->last_allocated;
+                                do {
+                                        if (not this->bitmap.test(this->last_allocated)) {
+                                                found = true;
+                                                break;
+                                        }
 
-                                if (this->last_allocated >= SIZE)
-                                        this->last_allocated = 0;
-                        } while (this->last_allocated != start);
+                                        ++this->last_allocated;
 
-                        if (not found)
-                                panic("out of memory");
+                                        if (this->last_allocated >= SIZE)
+                                                this->last_allocated = 0;
+                                } while (this->last_allocated != start);
 
-                        this->bitmap.set(this->last_allocated);
+                                if (not found)
+                                        panic("out of memory");
+
+                                this->bitmap.set(this->last_allocated);
+                        }
+
+                        // returns the value from the last allocation
+                        return this->last_allocated;
                 }
 
-                // returns the value from the last allocation
-                return this->last_allocated;
-        }
+                void free(T n) override
+                {
+                        if (not this->bitmap.test(n))
+                                panic("double free");
 
-        void free(T n) override
-        {
-                if (not this->bitmap.test(n))
-                        panic("double free");
+                        this->bitmap.clear(n);
+                }
 
-                this->bitmap.clear(n);
-        }
-
-        /// Return the `StaticBitmap` instance.
-        lib::StaticBitmap<SIZE> &get_bitmap(this StaticBitmapAllocator<T, SIZE> &self)
-        {
-                return self.bitmap;
-        }
-};
-
-} /* namespace kernel::mem::allocators */
+                /// Return the `StaticBitmap` instance.
+                Lib::StaticBitmap<SIZE> &getBitmap(this StaticBitmapAllocator<T, SIZE> &self)
+                {
+                        return self.bitmap;
+                }
+        };
+} // namespace Kiwi::Mem::Allocators

@@ -3,19 +3,18 @@
 #include <fs/vfs.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel::fs::ustar {
+namespace Kiwi::Fs::Ustar
+{
+        class USTAR : public Vfs::FileSystem
+        {
+                Lib::u8 *archive;
 
-struct USTAR : public vfs::FileSystem {
-public:
-        USTAR(void *archive);
+        public:
+                USTAR(void *archive);
 
-        ~USTAR()        = default;
+                ~USTAR()        = default;
 
-        vfs::VNode *get_root() override;
-        vfs::Status unmount() override;
-
-private:
-        lib::u8 *archive;
-};
-
-} /* namespace kernel::fs::ustar */
+                Vfs::VNode *getRoot() override;
+                Vfs::Status unmount() override;
+        };
+} // namespace Kiwi::Fs::Ustar

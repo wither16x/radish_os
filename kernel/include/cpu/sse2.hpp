@@ -1,7 +1,6 @@
 #pragma once
 
-namespace kernel::cpu {
-
-void enable_sse2();
-
-} /* namespace kernel::cpu */
+namespace Kiwi::Cpu
+{
+        void enableSse2();
+} // namespace Kiwi::Cpu

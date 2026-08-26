@@ -3,47 +3,39 @@
 #include <drivers/serial.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::u8, kernel::lib::u16;
-
-namespace kernel::drivers::serial {
-
-namespace {
-
-/// Wait while a port is busy.
-void wait_port_busy(u16 port)
+namespace Kiwi::Drivers::Serial
 {
-        while ((cpu::input_byte_port(port + 5) & 0x20) == 0);
-}
+        namespace
+        {
+                /// Wait while a port is busy.
+                void waitPortBusy(Lib::u16 port)
+                {
+                        while ((Cpu::inputBytePort(port + 5) & 0x20) == 0);
+                }
+        } // anonymous namespace
 
-} /* anonymous namespace */
+        bool init_port(Lib::u16 port)
+        {
+                Cpu::outputBytePort(port + 1, 0);
+                Cpu::outputBytePort(port + 3, 0x80);
+                Cpu::outputBytePort(port, 0x03);
+                Cpu::outputBytePort(port + 1, 0x00);
+                Cpu::outputBytePort(port + 3, 0x03);
+                Cpu::outputBytePort(port + 2, 0xc7);
+                Cpu::outputBytePort(port + 4, 0x0b);
+                Cpu::outputBytePort(port + 4, 0x1e);
 
-// --------------------------------------------------
-bool init_port(u16 port)
-{
-        cpu::output_byte_port(port + 1, 0);
-	cpu::output_byte_port(port + 3, 0x80);
-	cpu::output_byte_port(port, 0x03);
-	cpu::output_byte_port(port + 1, 0x00);
-	cpu::output_byte_port(port + 3, 0x03);
-	cpu::output_byte_port(port + 2, 0xc7);
-	cpu::output_byte_port(port + 4, 0x0b);
-	cpu::output_byte_port(port + 4, 0x1e);
+                Cpu::outputBytePort(port, 0xae);
+                if (Cpu::inputBytePort(port) != 0xae)
+                        return false;
 
-	cpu::output_byte_port(port, 0xae);
-        if (cpu::input_byte_port(port) != 0xae)
-                return false;
+                Cpu::outputBytePort(port + 4, 0xf);
+                return true;
+        }
 
-        cpu::output_byte_port(port + 4, 0xf);
-        return true;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-void send_byte(u16 port, u8 byte)
-{
-        wait_port_busy(port);
-        cpu::output_byte_port(port, byte);
-}
-// --------------------------------------------------
-
-} /* namespace kernel::drivers::serial */
+        void send_byte(Lib::u16 port, Lib::u8 byte)
+        {
+                waitPortBusy(port);
+                Cpu::outputBytePort(port, byte);
+        }
+} // namespace Kiwi::Drivers::Serial

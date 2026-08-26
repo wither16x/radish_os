@@ -8,235 +8,232 @@
 #include <proc/process.hpp>
 #include <proc/wait.hpp>
 
-using kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
-
-namespace kernel::cpu {
-
-namespace {
-
-/// All types of syscalls.
-enum SyscallType : u64 {
-        SC_WRITE,
-        SC_READ,
-        SC_EXEC,
-        SC_FORK,
-        SC_EXIT,
-        SC_GETPID,
-        SC_WAIT,
-        SC_OPEN,
-        SC_CLOSE,
-        SC_LASTPG,
-        SC_GETCPUTIME,
-        SC_RM,
-
-        SC_LIMIT // number of syscalls, always at the end of the enumeration
-};
-
-/// RBX = file descriptor
-/// RCX = buffer
-/// RDX = bytes to write
-void syscall_write(SyscallFrame &frame)
+namespace Kiwi::Cpu
 {
-        usize fd = frame.rbx;
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
+        namespace
+        {
+                /// All types of syscalls.
+                enum SyscallType : Lib::u64
+                {
+                        SC_WRITE,
+                        SC_READ,
+                        SC_EXEC,
+                        SC_FORK,
+                        SC_EXIT,
+                        SC_GETPID,
+                        SC_WAIT,
+                        SC_OPEN,
+                        SC_CLOSE,
+                        SC_LASTPG,
+                        SC_GETCPUTIME,
+                        SC_RM,
 
-        if (not curr_proc) {
-                frame.rax = static_cast<u64>(-1);
-                return;
-        }
+                        SC_LIMIT // number of syscalls, always at the end of the enumeration
+                };
 
-        const lib::File *file = curr_proc->find_file(fd);
-        const void *buf = reinterpret_cast<const void *>(frame.rcx);
-        usize n = frame.rdx;
+                /// RBX = file descriptor
+                /// RCX = buffer
+                /// RDX = bytes to write
+                void syscallWrite(SyscallFrame &frame)
+                {
+                        Lib::usize fd = frame.rbx;
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
 
-        fs::vfs::Status res = lib::write(const_cast<lib::File *>(file), buf, n);
-        frame.rax = static_cast<u64>(res);
-}
+                        if (not curr_proc) {
+                                frame.rax = static_cast<Lib::u64>(-1);
+                                return;
+                        }
 
-/// RBX = file descriptor
-/// RCX = buffer
-/// RDX = bytes to write
-void syscall_read(SyscallFrame &frame)
-{
-        usize fd = frame.rbx;
+                        const Lib::File *file = curr_proc->findFile(fd);
+                        const void *buf = reinterpret_cast<const void *>(frame.rcx);
+                        Lib::usize n = frame.rdx;
 
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (not curr_proc) {
-                frame.rax = static_cast<u64>(-1);
-                return;
-        }
-
-        const lib::File *file = curr_proc->find_file(fd);
-        void *buf = reinterpret_cast<void *>(frame.rcx);
-        usize n = frame.rdx;
-
-        fs::vfs::Status res = lib::read(const_cast<lib::File* >(file), buf, n);
-        frame.rax = static_cast<u64>(res);
-}
-
-/// RBX = path
-/// RCX = argc
-/// RDX = argv
-/// RDI = envp
-void syscall_exec(SyscallFrame &frame)
-{
-        const char *path = reinterpret_cast<const char *>(frame.rbx);
-        int argc = frame.rcx;
-        char **argv = reinterpret_cast<char **>(frame.rdx);
-        char **envp = reinterpret_cast<char **>(frame.rdi);
-        int res = proc::exec(path, argc, argv, envp);
-        frame.rax = res;
-        proc::Process *current_proc = proc::scheduler::get_current_process();
-        current_proc->load_context(frame);
-}
-
-void syscall_fork(SyscallFrame &frame)
-{
-        int pid = proc::fork();
-        frame.rax = pid;
-}
-
-void syscall_exit(SyscallFrame &frame)
-{
-        proc::Process *proc = proc::scheduler::get_current_process();
-        proc->die();
-        frame.rax = 0;
-        proc::scheduler::yield();
-}
-
-void syscall_getpid(SyscallFrame &frame)
-{
-        int pid = proc::scheduler::get_current_process()->get_id();
-        frame.rax = pid;
-}
-
-void syscall_wait(SyscallFrame &frame)
-{
-        int res = proc::wait();
-        frame.rax = res;
-}
-
-/// RBX = path
-void syscall_open(SyscallFrame &frame)
-{
-        const char *path = reinterpret_cast<const char *>(frame.rbx);
-        lib::File *f = lib::open(path);
-        if (not f) {
-                frame.rax = static_cast<u64>(-1);
-                return;
-        }
-
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-
-        usize fd = curr_proc->find_fd(f);
-        frame.rax = fd;
-}
-
-/// RBX = pointer to file descriptor
-void syscall_close(SyscallFrame &frame)
-{
-        usize fd = frame.rbx;
-
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (not curr_proc) {
-                frame.rax = static_cast<u64>(-1);
-                return;
-        }
-
-        const lib::File *file = curr_proc->find_file(fd);
-        fs::vfs::Status res = lib::close(const_cast<lib::File *>(file));
-        frame.rax = static_cast<u64>(res);
-}
-
-/// RBX = amount of pages
-///     RBX > 0 : extend process heap
-///     RBX = 0 : get last mapped page from process heap
-///     RBX < 0 : shorten process heap
-void syscall_lastpg(SyscallFrame &frame)
-{
-        int pages = frame.rbx;
-
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (not curr_proc) {
-                frame.rax = 2; // no current process
-                return;
-        }
-
-        if (pages > 0) {
-                bool result = curr_proc->get_heap().extend(pages);
-                if (not result) {
-                        frame.rax = 0;
-                        return;
+                        Fs::Vfs::Status res = Lib::write(const_cast<Lib::File *>(file), buf, n);
+                        frame.rax = static_cast<Lib::u64>(res);
                 }
 
-                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
-        } else if (pages == 0) {
-                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;;
-        } else if (pages < 0) {
-                bool result = curr_proc->get_heap().shorten(-pages);
-                if (not result) {
-                        frame.rax = 0;
-                        return;
+                /// RBX = file descriptor
+                /// RCX = buffer
+                /// RDX = bytes to write
+                void syscallRead(SyscallFrame &frame)
+                {
+                        Lib::usize fd = frame.rbx;
+
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = static_cast<Lib::u64>(-1);
+                                return;
+                        }
+
+                        const Lib::File *file = curr_proc->findFile(fd);
+                        void *buf = reinterpret_cast<void *>(frame.rcx);
+                        Lib::usize n = frame.rdx;
+
+                        Fs::Vfs::Status res = Lib::read(const_cast<Lib::File* >(file), buf, n);
+                        frame.rax = static_cast<Lib::u64>(res);
                 }
 
-                frame.rax = curr_proc->get_heap().get_last_page() - mem::PAGE_SIZE;
+                /// RBX = path
+                /// RCX = argc
+                /// RDX = argv
+                /// RDI = envp
+                void syscallExec(SyscallFrame &frame)
+                {
+                        const char *path = reinterpret_cast<const char *>(frame.rbx);
+                        int argc = frame.rcx;
+                        char **argv = reinterpret_cast<char **>(frame.rdx);
+                        char **envp = reinterpret_cast<char **>(frame.rdi);
+                        int res = Proc::exec(path, argc, argv, envp);
+                        frame.rax = res;
+                        Proc::Process *current_proc = Proc::Scheduler::getCurrentProcess();
+                        current_proc->loadContext(frame);
+                }
+
+                void syscallFork(SyscallFrame &frame)
+                {
+                        int pid = Proc::fork();
+                        frame.rax = pid;
+                }
+
+                void syscallExit(SyscallFrame &frame)
+                {
+                        Proc::Process *proc = Proc::Scheduler::getCurrentProcess();
+                        proc->die();
+                        frame.rax = 0;
+                        Proc::Scheduler::yield();
+                }
+
+                void syscallGetpid(SyscallFrame &frame)
+                {
+                        int pid = Proc::Scheduler::getCurrentProcess()->getId();
+                        frame.rax = pid;
+                }
+
+                void syscallWait(SyscallFrame &frame)
+                {
+                        int res = Proc::wait();
+                        frame.rax = res;
+                }
+
+                /// RBX = path
+                void syscallOpen(SyscallFrame &frame)
+                {
+                        const char *path = reinterpret_cast<const char *>(frame.rbx);
+                        Lib::File *f = Lib::open(path);
+                        if (not f) {
+                                frame.rax = static_cast<Lib::u64>(-1);
+                                return;
+                        }
+
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+
+                        Lib::usize fd = curr_proc->findFd(f);
+                        frame.rax = fd;
+                }
+
+                /// RBX = pointer to file descriptor
+                void syscallClose(SyscallFrame &frame)
+                {
+                        Lib::usize fd = frame.rbx;
+
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = static_cast<Lib::u64>(-1);
+                                return;
+                        }
+
+                        const Lib::File *file = curr_proc->findFile(fd);
+                        Fs::Vfs::Status res = Lib::close(const_cast<Lib::File *>(file));
+                        frame.rax = static_cast<Lib::u64>(res);
+                }
+
+                /// RBX = amount of pages
+                ///     RBX > 0 : extend process heap
+                ///     RBX = 0 : get last mapped page from process heap
+                ///     RBX < 0 : shorten process heap
+                void syscallLastpg(SyscallFrame &frame)
+                {
+                        int pages = frame.rbx;
+
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = 2; // no current process
+                                return;
+                        }
+
+                        if (pages > 0) {
+                                bool result = curr_proc->getHeap().extend(pages);
+                                if (not result) {
+                                        frame.rax = 0;
+                                        return;
+                                }
+
+                                frame.rax = curr_proc->getHeap().getLastPage() - Mem::PAGE_SIZE;
+                        } else if (pages == 0) {
+                                frame.rax = curr_proc->getHeap().getLastPage() - Mem::PAGE_SIZE;;
+                        } else if (pages < 0) {
+                                bool result = curr_proc->getHeap().shorten(-pages);
+                                if (not result) {
+                                        frame.rax = 0;
+                                        return;
+                                }
+
+                                frame.rax = curr_proc->getHeap().getLastPage() - Mem::PAGE_SIZE;
+                        }
+                }
+
+                void syscallGetcputime(SyscallFrame &frame)
+                {
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = -1;
+                                return;
+                        }
+
+                        frame.rax = Proc::Scheduler::TIME_PER_PROCESS - curr_proc->getTime();
+                }
+
+                /// RBX = fd
+                void syscallRm(SyscallFrame &frame)
+                {
+                        const char *f = reinterpret_cast<const char *>(frame.rbx);
+
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = static_cast<Lib::u64>(-1);
+                                return;
+                        }
+
+                        Fs::Vfs::Status res = Lib::rm(f);
+                        frame.rax = static_cast<Lib::u64>(res);
+                }
+
+                void (*syscalls[])(SyscallFrame &) = {
+                        syscallWrite,
+                        syscallRead,
+                        syscallExec,
+                        syscallFork,
+                        syscallExit,
+                        syscallGetpid,
+                        syscallWait,
+                        syscallOpen,
+                        syscallClose,
+                        syscallLastpg,
+                        syscallGetcputime,
+                        syscallRm
+                };
+        } // anonymous namespace
+
+        extern "C" void syscall_handler(SyscallFrame &frame)
+        {
+                Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                if (curr_proc)
+                        curr_proc->saveContext(frame);
+
+                if (frame.rax >= SC_LIMIT)
+                        return;
+
+                void (*handler)(SyscallFrame &) = syscalls[frame.rax];
+                handler(frame);
         }
-}
-
-void syscall_getcputime(SyscallFrame &frame)
-{
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (not curr_proc) {
-                frame.rax = -1;
-                return;
-        }
-
-        frame.rax = proc::scheduler::TIME_PER_PROCESS - curr_proc->get_time();
-}
-
-/// RBX = fd
-void syscall_rm(SyscallFrame &frame)
-{
-        const char *f = reinterpret_cast<const char *>(frame.rbx);
-
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (not curr_proc) {
-                frame.rax = static_cast<u64>(-1);
-                return;
-        }
-
-        fs::vfs::Status res = lib::rm(f);
-        frame.rax = static_cast<u64>(res);
-}
-
-void (*syscalls[])(SyscallFrame &) = {
-        syscall_write,
-        syscall_read,
-        syscall_exec,
-        syscall_fork,
-        syscall_exit,
-        syscall_getpid,
-        syscall_wait,
-        syscall_open,
-        syscall_close,
-        syscall_lastpg,
-        syscall_getcputime,
-        syscall_rm
-};
-
-} /* anonymous namespace */
-
-extern "C" void syscall_handler(SyscallFrame &frame)
-{
-        proc::Process *curr_proc = proc::scheduler::get_current_process();
-        if (curr_proc)
-                curr_proc->save_context(frame);
-
-        if (frame.rax >= SC_LIMIT)
-                return;
-
-        void (*handler)(SyscallFrame &) = syscalls[frame.rax];
-        handler(frame);
-}
-
-} /* namespace kernel::cpu */
+} // namespace Kiwi::Cpu

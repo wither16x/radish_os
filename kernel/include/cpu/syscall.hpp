@@ -1,39 +1,38 @@
 #pragma once
 
 #include <lib/typing.hpp>
-#include <fpu.hpp>
 
-namespace kernel::cpu {
+namespace Kiwi::Cpu
+{
+        /// Registers and values pushed before calling the syscall
+        /// handler.
+        struct [[gnu::packed]] SyscallFrame
+        {
+                Lib::u64 ds;
+                Lib::u64 cr2;
+                Lib::u64 cr3;
+                Lib::u64 rax;
+                Lib::u64 rbx;
+                Lib::u64 rcx;
+                Lib::u64 rdx;
+                Lib::u64 rsi;
+                Lib::u64 rdi;
+                Lib::u64 rbp;
+                Lib::u64 r8;
+                Lib::u64 r9;
+                Lib::u64 r10;
+                Lib::u64 r11;
+                Lib::u64 r12;
+                Lib::u64 r13;
+                Lib::u64 r14;
+                Lib::u64 r15;
+                Lib::u64 rip;
+                Lib::u64 cs;
+                Lib::u64 flags;
+                Lib::u64 rsp;
+                Lib::u64 ss;
+        };
 
-/// Registers and values pushed before calling the syscall
-/// handler.
-struct [[gnu::packed]] SyscallFrame {
-        lib::u64 ds;
-	lib::u64 cr2;
-	lib::u64 cr3;
-	lib::u64 rax;
-	lib::u64 rbx;
-	lib::u64 rcx;
-	lib::u64 rdx;
-	lib::u64 rsi;
-	lib::u64 rdi;
-	lib::u64 rbp;
-	lib::u64 r8;
-	lib::u64 r9;
-	lib::u64 r10;
-	lib::u64 r11;
-	lib::u64 r12;
-	lib::u64 r13;
-	lib::u64 r14;
-	lib::u64 r15;
-	lib::u64 rip;
-	lib::u64 cs;
-	lib::u64 flags;
-	lib::u64 rsp;
-	lib::u64 ss;
-};
-
-/// Execute the syscall corresponding to RAX.
-extern "C" void syscall_handler(SyscallFrame &frame);
-
-} /* namespace kernel::cpu */
+        /// Execute the syscall corresponding to RAX.
+        extern "C" void syscallHandler(SyscallFrame &frame);
+} // namespace Kiwi::Cpu

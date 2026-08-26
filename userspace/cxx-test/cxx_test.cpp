@@ -1,6 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
-#include <Melon/Exceptions.hpp>
+#include <Melon/Vector.hpp>
 
 class Person
 {
@@ -23,11 +23,11 @@ int main()
         Person p("John", 42);
         p.greet();
 
-        try {
-                throw Melon::Exceptions::BufferOverflow("buffer overflow detected");
-        } catch (const Melon::Exceptions::BufferOverflow &e) {
-                std::printf("caught %s\n", e.what());
-        }
+        Melon::Vector::Vector<int> integers = {{0, 1, 2, 3, 4, 5}};
+
+        std::printf("integers are:\n");
+        for (auto &i : integers)
+                std::printf("* %d\n", i);
 
         return 0;
 }

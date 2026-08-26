@@ -6,93 +6,79 @@
 #include <lib/typing.hpp>
 #include <proc/scheduler.hpp>
 
-using kernel::lib::u16, kernel::lib::u64;
-using kernel::lib::log::logger;
-
-namespace kernel::drivers::pit {
-
-namespace {
-
-/// Enumeration of the PIT ports.
-enum Port : u16 {
-        PORT_COMMAND         = 0x43,
-        PORT_CHANNEL_0       = 0x40
-};
-
-u64 tics = 0;
-u64 seconds = 0;
-
-bool sleeping = false;
-
-void handle_irq(cpu::IRQFrame &frame)
+namespace Kiwi::Drivers::Pit
 {
-        (void)frame;
+        namespace
+        {
+                /// Enumeration of the PIT ports.
+                enum Port : Lib::u16
+                {
+                        PORT_COMMAND         = 0x43,
+                        PORT_CHANNEL_0       = 0x40
+                };
 
-        // increase time and consider that the interrupt is
-        // finished
-        tick();
-        drivers::pic::send_eoi(drivers::pic::IRQ_TIMER);
+                Lib::u64 tics = 0;
+                Lib::u64 seconds = 0;
 
-        // schedule
-        if (!proc::scheduler::is_active())
-                return;
-        proc::scheduler::tick();
-}
+                bool sleeping = false;
 
-} /* anonymous namespace */
+                void handleIrq(Cpu::IrqFrame &frame)
+                {
+                        (void)frame;
 
-// --------------------------------------------------
-void init()
-{
-        u16 tps = 1000; // tics per second
-        u16 divider = 1193181 / tps;
+                        // increase time and consider that the interrupt is
+                        // finished
+                        tick();
+                        Drivers::Pic::sendEoi(Drivers::Pic::IRQ_TIMER);
 
-        cpu::output_byte_port(Port::PORT_COMMAND, 0b00110100);
-        cpu::output_byte_port(Port::PORT_CHANNEL_0, divider & 0xff);
-        cpu::output_byte_port(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
+                        // schedule
+                        if (not Proc::Scheduler::isActive())
+                                return;
+                        Proc::Scheduler::tick();
+                }
+        } // anonymous namespace
 
-        cpu::register_irq(drivers::pic::IRQType::IRQ_TIMER, handle_irq);
+        void init()
+        {
+                Lib::u16 tps = 1000; // tics per second
+                Lib::u16 divider = 1193181 / tps;
 
-        logger.ok("initialized pit driver");
-}
-// --------------------------------------------------
+                Cpu::outputBytePort(Port::PORT_COMMAND, 0b00110100);
+                Cpu::outputBytePort(Port::PORT_CHANNEL_0, divider & 0xff);
+                Cpu::outputBytePort(Port::PORT_CHANNEL_0, (divider >> 8) & 0xff);
 
-// --------------------------------------------------
-void tick()
-{
-        tics++;
+                Cpu::registerIrq(Drivers::Pic::IrqType::IRQ_TIMER, handleIrq);
 
-	// reset tics every second so the tic counter never
-	// overflows
-	// I will maybe add minutes, hours, days, and so on
-        if (tics % 1000 == 0 and not sleeping) {
-                tics = 0;
-                seconds++;
+                Lib::Log::logger.ok("initialized pit driver");
         }
-}
-// --------------------------------------------------
 
-// --------------------------------------------------
-void sleep(lib::u64 ms)
-{
-        sleeping = true;
-        while (tics < ms);
-        sleeping = false;
-}
-// --------------------------------------------------
+        void tick()
+        {
+                tics++;
 
-// --------------------------------------------------
-u64 get_tics()
-{
-        return tics;
-}
-// --------------------------------------------------
+                // reset tics every second so the tic counter never
+                // overflows
+                // I will maybe add minutes, hours, days, and so on
+                if (tics % 1000 == 0 and not sleeping) {
+                        tics = 0;
+                        seconds++;
+                }
+        }
 
-// --------------------------------------------------
-u64 get_seconds()
-{
-        return seconds;
-}
-// --------------------------------------------------
+        void sleep(Lib::u64 ms)
+        {
+                sleeping = true;
+                while (tics < ms);
+                sleeping = false;
+        }
 
-} /* namespace kernel::drivers::pit */
+        Lib::u64 getTics()
+        {
+                return tics;
+        }
+
+        Lib::u64 getSeconds()
+        {
+                return seconds;
+        }
+} // namespace Kiwi::Drivers::Pit

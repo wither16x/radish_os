@@ -2,9 +2,8 @@
 
 #include <proc/pid.hpp>
 
-namespace kernel::proc {
-
-/// Create a copy of the current process.
-PID fork();
-
-} /* namespace kernel::proc */
+namespace Kiwi::Proc
+{
+        /// Create a copy of the current process.
+        pid_t fork();
+} // namespace Kiwi::Proc

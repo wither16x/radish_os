@@ -3,23 +3,24 @@
 #include <fs/vfs.hpp>
 #include <lib/string.hpp>
 
-namespace kernel::fs::devfs {
+namespace Kiwi::Fs::Devfs
+{
+        struct Devfs : public Vfs::FileSystem
+        {
+                ~Devfs()        = default;
 
-struct DEVFS : public vfs::FileSystem {
-        ~DEVFS()        = default;
+                Vfs::VNode *getRoot() override;
+                Vfs::Status unmount() override;
+        };
 
-        vfs::VNode *get_root() override;
-        vfs::Status unmount() override;
-};
+        /// Every device type is registered here to ensure that no unsupported device can be
+        /// registered.
+        enum class DeviceType
+        {
+                None,
+                Console,
+                Input
+        };
 
-/// Every device type is registered here to ensure that no unsupported device can be
-/// registered.
-enum class DeviceType : int {
-        None,
-        Console,
-        Input
-};
-
-void register_device(DeviceType type, const lib::String &path);
-
-} /* namespace kernel::fs::devfs */
+        void registerDevice(DeviceType type, const Lib::String &path);
+} // namespace Kiwi::Fs::Devfs

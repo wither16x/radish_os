@@ -2,88 +2,71 @@
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::u8, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::memcpy, kernel::lib::memset;
-
-namespace kernel::drivers::framebuffer {
-
-namespace {
-
-u32 *fb_ptr = nullptr;
-u64 fb_width = 0;
-u64 fb_height = 0;
-u64 fb_pitch  = 0;
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void init(void *address, u64 width, u64 height, u64 pitch)
+namespace Kiwi::Drivers::Framebuffer
 {
-        fb_ptr = static_cast<u32 *>(address);
-        fb_width = width;
-        fb_height = height;
-        fb_pitch = pitch;
-}
-// --------------------------------------------------
+        namespace
+        {
+                Lib::u32 *fb_ptr = nullptr;
+                Lib::u64 fb_width = 0;
+                Lib::u64 fb_height = 0;
+                Lib::u64 fb_pitch  = 0;
+        } // anonymous namespace
 
-// --------------------------------------------------
-void draw_pixel(lib::u64 x, lib::u64 y, lib::u32 color)
-{
-        if (x < 0 || x > fb_width || y < 0 || y > fb_height)
-                return;
-
-        fb_ptr[y * (fb_pitch / 4) + x] = color;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-void scroll(u64 height)
-{
-        u8 *base = reinterpret_cast<u8 *>(fb_ptr);
-
-        if (height >= fb_height) {
-                memset(base, 0, fb_pitch * fb_height);
-                return;
+        void init(void *address, Lib::u64 width, Lib::u64 height, Lib::u64 pitch)
+        {
+                fb_ptr = static_cast<Lib::u32 *>(address);
+                fb_width = width;
+                fb_height = height;
+                fb_pitch = pitch;
         }
 
-        for (u64 y = height; y != fb_height; ++y) {
-                void *dest = base + (y - height) * fb_pitch;
-                const void *src = base + y * fb_pitch; 
+        void draw_pixel(Lib::u64 x, Lib::u64 y, Lib::u32 color)
+        {
+                if (x < 0 || x > fb_width || y < 0 || y > fb_height)
+                        return;
 
-                memcpy(dest, src, fb_width * 4);
+                fb_ptr[y * (fb_pitch / 4) + x] = color;
         }
 
-        for (u64 y = fb_height - height; y != fb_height; ++y) {
-                u32 *dest = reinterpret_cast<u32 *>(base + y *fb_pitch);
+        void scroll(Lib::u64 height)
+        {
+                Lib::u8 *base = reinterpret_cast<Lib::u8 *>(fb_ptr);
 
-                for (u64 i = 0; i != fb_width; ++i)
-                        *dest++ = 0;
+                if (height >= fb_height) {
+                        Lib::memset(base, 0, fb_pitch * fb_height);
+                        return;
+                }
+
+                for (Lib::u64 y = height; y != fb_height; ++y) {
+                        void *dest = base + (y - height) * fb_pitch;
+                        const void *src = base + y * fb_pitch; 
+
+                        Lib::memcpy(dest, src, fb_width * 4);
+                }
+
+                for (Lib::u64 y = fb_height - height; y != fb_height; ++y) {
+                        Lib::u32 *dest = reinterpret_cast<Lib::u32 *>(base + y *fb_pitch);
+
+                        for (Lib::u64 i = 0; i != fb_width; ++i)
+                                *dest++ = 0;
+                }
         }
-}
-// --------------------------------------------------
 
-// --------------------------------------------------
-u64 get_width()
-{
-        return fb_width;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-u64 get_height()
-{
-        return fb_height;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-void draw_rectangle(u64 start_x, u64 start_y, u64 width, u64 height, u32 color)
-{
-        for (u64 y = start_y; y < start_y + height; y++) {
-                for (u64 x = start_x; x < start_x + width; x++)
-                        draw_pixel(x, y, color);
+        Lib::u64 getWidth()
+        {
+                return fb_width;
         }
-}
-// --------------------------------------------------
 
-} /* namespace kernel::drivers::framebuffer */
+        Lib::u64 getHeight()
+        {
+                return fb_height;
+        }
+
+        void drawRectangle(Lib::u64 start_x, Lib::u64 start_y, Lib::u64 width, Lib::u64 height, Lib::u32 color)
+        {
+                for (Lib::u64 y = start_y; y < start_y + height; y++) {
+                        for (Lib::u64 x = start_x; x < start_x + width; x++)
+                                drawPixel(x, y, color);
+                }
+        }
+} // namespace Kiwi::Drivers::Framebuffer

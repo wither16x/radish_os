@@ -2,31 +2,32 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel::cpu {
+namespace Kiwi::Cpu
+{
+        /// Representation of a task state segment.
+        /// Note that we only use RSP0.
+        struct [[gnu::packed]] TssData
+        {
+                Lib::u32 __reserved0;
+                Lib::u64 rsp0;
+                Lib::u64 rsp1;
+                Lib::u64 rsp2;
+                Lib::u64 __reserved1;
+                Lib::u64 ist[7];
+                Lib::u64 __reserved2;
+                Lib::u64 __reserved3;
+                Lib::u16 iobp;
+        };
 
-/// Representation of a task state segment.
-/// Note that we only use RSP0.
-struct [[gnu::packed]] TSSData {
-        lib::u32 __reserved0;
-        lib::u64 rsp0;
-        lib::u64 rsp1;
-        lib::u64 rsp2;
-        lib::u64 __reserved1;
-        lib::u64 ist[7];
-        lib::u64 __reserved2;
-        lib::u64 __reserved3;
-        lib::u16 iobp;
-};
+        class Tss
+        {
+                TssData data;
 
-class TSS {
-        TSSData data;
+        public:
+                void init(this Tss &self, Lib::uptr kernel_rsp);
+                void flush() const;
+                void resetStack(this Tss &self, Lib::uptr kernel_rsp);
 
-public:
-        void init(this TSS &self, lib::uptr kernel_rsp);
-        void flush() const;
-        void reset_stack(this TSS &self, lib::uptr kernel_rsp);
-
-        const TSSData &get_data(this const TSS &self);
-};
-
-} /* namespace kernel::cpu */
+                const TssData &getData(this const Tss &self);
+        };
+} // namespace Kiwi::Cpu

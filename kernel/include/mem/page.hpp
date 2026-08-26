@@ -2,41 +2,42 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel::mem {
-
-constexpr lib::usize PAGE_SIZE = 0x1000; // 4096 bytes
-constexpr lib::usize PHYS_ADDR_MASK = ((1ull << 52) - 1) & ~0xfffull;
-constexpr lib::u16 PAGE_TABLE_ENTRIES = 512;
-
-/// Enumeration of some page flags.
-enum PageFlag : lib::u64 {
-        Present         = 0x01,
-        ReadWrite       = 0x03,
-        ReadExecUser    = 0x05,
-        NoExec          = 1ull << 63,
-        ReadWriteUser   = 0x07,
-        ReadExec        = 0x01
-};
-
-struct [[gnu::packed]] PageTable {
-        lib::u64 entries[PAGE_TABLE_ENTRIES];
-};
-
-lib::uptr pt_deep_copy(PageTable *src, int level);
-
-inline lib::uptr page_align_down(lib::uptr base)
+namespace Kiwi::Mem
 {
-        return base / PAGE_SIZE * PAGE_SIZE;
-}
+        constexpr Lib::usize PAGE_SIZE = 0x1000; // 4096 bytes
+        constexpr Lib::usize PHYS_ADDR_MASK = ((1ull << 52) - 1) & ~0xfffull;
+        constexpr Lib::u16 PAGE_TABLE_ENTRIES = 512;
 
-inline lib::uptr page_align_up(lib::uptr base)
-{
-        return (base + PAGE_SIZE - 1) / PAGE_SIZE * PAGE_SIZE;
-}
+        /// Enumeration of some page flags.
+        enum PageFlag : Lib::u64
+        {
+                Present         = 0x01,
+                ReadWrite       = 0x03,
+                ReadExecUser    = 0x05,
+                NoExec          = 1ull << 63,
+                ReadWriteUser   = 0x07,
+                ReadExec        = 0x01
+        };
 
-inline lib::uptr page_div_up(lib::uptr base)
-{
-        return (base + PAGE_SIZE - 1) / PAGE_SIZE;
-}
+        struct [[gnu::packed]] PageTable
+        {
+                Lib::u64 entries[PAGE_TABLE_ENTRIES];
+        };
 
-} /* namespace kernel::mem */
+        Lib::uptr ptDeepCopy(PageTable *src, int level);
+
+        inline Lib::uptr pageAlignDown(Lib::uptr base)
+        {
+                return base / PAGE_SIZE * PAGE_SIZE;
+        }
+
+        inline Lib::uptr pageAlignUp(Lib::uptr base)
+        {
+                return (base + PAGE_SIZE - 1) / PAGE_SIZE * PAGE_SIZE;
+        }
+
+        inline Lib::uptr pageDivUp(Lib::uptr base)
+        {
+                return (base + PAGE_SIZE - 1) / PAGE_SIZE;
+        }
+} // namespace Kiwi::Mem

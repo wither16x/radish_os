@@ -3,98 +3,104 @@
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel::fs::vfs {
+namespace Kiwi::Fs::Vfs
+{
+        using drive_id = unsigned char;
 
-using drive_id = unsigned char;
+        enum class Status
+        {
+                Success,
+                FsMounted,
+                FsNotMounted,
+                NullNode,
+                NoRefs,
+                NullFile,
+                PathTooShort,
+                NullRoot,
+                EmptyPath,
+                ChildNotFound,
+                IsADirectory,
+                NullData,
+                OutOfBounds,
+                NotADirectory,
+                NotImplemented
+        };
 
-enum class Status : unsigned int {
-        Success,
-        FsMounted,
-        FsNotMounted,
-        NullNode,
-        NoRefs,
-        NullFile,
-        PathTooShort,
-        NullRoot,
-        EmptyPath,
-        ChildNotFound,
-        IsADirectory,
-        NullData,
-        OutOfBounds,
-        NotADirectory,
-        NotImplemented
-};
+        enum class DirEntryType
+        {
+                File,
+                Dir
+        };
 
-enum class DirEntryType : unsigned int {
-        File,
-        Dir
-};
+        class DirEntry
+        {
+        public:
+                Lib::String name;
+                DirEntryType type;
+        };
 
-class DirEntry {
-public:
-        lib::String name;
-        DirEntryType type;
-};
+        class VNode
+        {
+        public:
+                virtual ~VNode() = default;
 
-class VNode {
-public:
-        virtual ~VNode() = default;
+                Lib::usize ref_count = 0;
 
-        lib::usize ref_count = 0;
+                virtual class File *open();
+                virtual Status mkfile(const Lib::String &name);
+                virtual Status mkdir(const Lib::String &name);
+                virtual Status rm();
+                virtual Status getdirentn(Lib::usize *buf);
+                virtual Status readdir(DirEntry *entry, Lib::usize index) = 0;
+                virtual Status getfilesz(Lib::usize *buf);
+                virtual VNode *lookup(const Lib::String &name);
+        };
 
-        virtual class File *open();
-        virtual Status mkfile(const lib::String &name);
-        virtual Status mkdir(const lib::String &name);
-        virtual Status rm();
-        virtual Status getdirentn(lib::usize *buf);
-        virtual Status readdir(DirEntry *entry, lib::usize index) = 0;
-        virtual Status getfilesz(lib::usize *buf);
-        virtual VNode *lookup(const lib::String &name);
-};
+        class File
+        {
+        public:
+                virtual ~File() = default;
 
-class File {
-public:
-        virtual ~File() = default;
+                VNode *vnode;
+                Lib::usize size;
+                Lib::usize ref_count = 0;
 
-        VNode *vnode;
-        lib::usize size;
-        lib::usize ref_count = 0;
+                virtual Status write(const void *buf, Lib::usize size);
+                virtual Status read(void *buf, Lib::usize size);
+                virtual Status close();
+        };
 
-        virtual Status write(const void *buf, lib::usize size);
-        virtual Status read(void *buf, lib::usize size);
-        virtual Status close();
-};
+        class FileSystem
+        {
+        public:
+                virtual ~FileSystem() = default;
 
-class FileSystem {
-public:
-        virtual ~FileSystem() = default;
+                virtual VNode *getRoot() = 0;
+                virtual Status unmount() = 0;
+        };
 
-        virtual VNode *get_root() = 0;
-        virtual Status unmount() = 0;
-};
+        class Drive
+        {
+        public:
+                drive_id id;
+                FileSystem *fs;
+                VNode *root;
+        };
 
-class Drive {
-public:
-        drive_id id;
-        FileSystem *fs;
-        VNode *root;
-};
+        Status mount(drive_id drive, FileSystem *fs);
+        Status unmount(drive_id drive);
 
-Status mount(drive_id drive, FileSystem *fs);
-Status unmount(drive_id drive);
+        VNode *lookupNode(const Lib::String &path);
+        Status releaseNode(VNode *vnode);
 
-VNode *lookup_node(const lib::String &path);
-Status release_node(VNode *vnode);
-
-File *open_file(const lib::String &path);
-Status close_file(File *file);
-Status mkfile(const lib::String &path);
-Status mkdir(const lib::String &path);
-Status remove(const lib::String &path);
-Status write(File *file, const void *buf, lib::usize size);
-Status read(File *file, void *buf, lib::usize size);
-Status readdir(const lib::String &path, DirEntry *entry, lib::usize index);
-Status getfilesz(const lib::String &path, lib::usize *buf);
-Status getdirentn(const lib::String &path, lib::usize *buf);
-
-} /* namespace kernel::fs::vfs */
+        File *openFile(const Lib::String &path);
+        Status closeFile(File *file);
+        Status mkfile(const Lib::String &path);
+        Status mkdir(const Lib::String &path);
+        Status remove(const Lib::String &path);
+        Status write(File *file, const void *buf, Lib::usize size);
+        Status read(File *file, void *buf, Lib::usize size);
+        Status readdir(const Lib::String &path, DirEntry *entry, Lib::usize index);
+        Status getfilesz(const Lib::String &path, Lib::usize *buf);
+        Status getdirentn(const Lib::String &path, Lib::usize *buf);
+} // namespace Kiwi::Fs::Vfs

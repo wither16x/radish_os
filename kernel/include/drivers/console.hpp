@@ -4,54 +4,53 @@
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 
-namespace kernel::drivers::console {
+namespace Kiwi::Drivers::Console
+{
+        /// Graphical (framebuffer-based) console.
+        class Console
+        {
+                Lib::u64 cursor_x;
+                Lib::u64 cursor_y;
 
-/// Graphical (framebuffer-based) console.
-class Console {
-public:
-        Console() = default;
-        Console(lib::u64 width, lib::u64 height);
+                // both values below are in pixels
+                Lib::u64 width;
+                Lib::u64 height;
 
-        ~Console();
+                Lib::Vector<Lib::u8> font_data;
 
-        /// Initialize the font used by the console (see implementation
-        /// for more details.)
-        void init_font(this Console &self, const lib::String &font);
-        /// Draw a character at the current cursor position.
-        void draw_char(this Console &self, char ch, lib::u32 color);
+                Lib::u32 glyph_offset;
+                Lib::u32 glyph_size;
+                Lib::u32 glyph_width;
+                Lib::u32 glyph_height;
 
-        /// Check if the console is active or not. If a `Console`
-        /// is active, then it can be used safely.
-        bool is_active(this const Console &self);
-        /// Get the data of the console font as a vector.
-        const lib::Vector<lib::u8> &get_font_data(this const Console &self);
+                bool active = false;
 
-private:
-        lib::u64 cursor_x;
-        lib::u64 cursor_y;
+                /// Draw a character at a given position.
+                void drawCharAt(this Console &self, char ch, int px, int py, Lib::u32 color);
+                /// Scroll the text up.
+                void scroll(this Console &self);
 
-        // both values below are in pixels
-        lib::u64 width;
-        lib::u64 height;
+        public:
+                Console() = default;
+                Console(Lib::u64 width, Lib::u64 height);
 
-        lib::Vector<lib::u8> font_data;
+                ~Console();
 
-        lib::u32 glyph_offset;
-        lib::u32 glyph_size;
-        lib::u32 glyph_width;
-        lib::u32 glyph_height;
+                /// Initialize the font used by the console (see implementation
+                /// for more details.)
+                void initFont(this Console &self, const Lib::String &font);
+                /// Draw a character at the current cursor position.
+                void drawChar(this Console &self, char ch, Lib::u32 color);
 
-        bool active = false;
+                /// Check if the console is active or not. If a `Console`
+                /// is active, then it can be used safely.
+                bool isActive(this const Console &self);
+                /// Get the data of the console font as a vector.
+                const Lib::Vector<Lib::u8> &getFontData(this const Console &self);
+        };
 
-        /// Draw a character at a given position.
-        void draw_char_at(this Console &self, char ch, int px, int py, lib::u32 color);
-        /// Scroll the text up.
-        void scroll(this Console &self);
-};
-
-/// Set the currently used console.
-void set_console(const Console &console);
-/// Get the currently used console.
-Console &get_console();
-
-} /* namespace kernel::drivers::console */
+        /// Set the currently used console.
+        void setConsole(const Console &console);
+        /// Get the currently used console.
+        Console &getConsole();
+} // namespace Kiwi::Drivers::Console

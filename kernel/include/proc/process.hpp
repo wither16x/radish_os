@@ -15,88 +15,88 @@
 #include <proc/procstack.hpp>
 #include <fpu.hpp>
 
-namespace kernel::proc {
+namespace Kiwi::Proc
+{
+        /// Alive: the process can still use the CPU
+        /// Dead: the process can not use the CPU anymore, because it has aborted or exited
+        enum class ProcessStatus
+        {
+                Alive,
+                Dead
+        };
 
-/// Alive: the process can still use the CPU
-/// Dead: the process can not use the CPU anymore, because it has aborted or exited
-enum class ProcessStatus : int {
-        Alive,
-        Dead
-};
+        /// Representation of a process.
+        /// It is recommended to use `allocate_pid_t()` instead
+        /// of assigning a pid_t manually when creating a new process.
+        class Process
+        {
+                Lib::u64                time;  // elapsed time in ms
+                Lib::Vector<Process *>  children;
+                ProcessStatus           status;
+                Elf::elf_entry_t        entry;
+                pid_t                     id;
+                Lib::u64                cr3;
+                Mem::PML4T              pml4t; // each process has its own page tables
+                ProcessStackFrame       *frame;
+                ProcessStackFrame       frame_storage;
+                ProcessHeap             heap;
+                ProcessKernelStack      kernel_stack;
+                Lib::Stack<Lib::u8>     user_stack;
+                Lib::Vector<Lib::File *> file_descriptors;
+                Fpu::FpuContext fpu_context;
+                int argc;
+                int envc;
+                char **argv;
+                char **envp;
 
-/// Representation of a process.
-/// It is recommended to use `allocate_pid()` instead
-/// of assigning a PID manually when creating a new process.
-class Process {
-        lib::u64                time;  // elapsed time in ms
-        lib::Vector<Process *>  children;
-        ProcessStatus           status;
-        elf::elf_entry_t        entry;
-        PID                     id;
-        lib::u64                cr3;
-        mem::PML4T              pml4t; // each process has its own page tables
-        ProcessStackFrame       *frame;
-        ProcessStackFrame       frame_storage;
-        ProcessHeap             heap;
-        ProcessKernelStack      kernel_stack;
-        lib::Stack<lib::u8>     user_stack;
-        lib::Vector<lib::File *> file_descriptors;
-        fpu::FpuContext fpu_context;
-        int argc;
-        int envc;
-        char **argv;
-        char **envp;
+                void initKernelStack(this Process &self);
+                int initArgcArgv(this Process &self, int argc, char **argv);
+                int initEnvcEnvp(this Process &self, char **envp);
 
-        void init_kernel_stack(this Process &self);
-        int init_argc_argv(this Process &self, int argc, char **argv);
-        int init_envp(this Process &self, char **envp);
+        public:
+                /// Create a brand new process. 
+                Process(pid_t id, Elf::ElfInfo *info, Mem::PML4T &pml4t);
+                /// Create a process from another. Use when forking processes.
+                Process(pid_t id, const Process &parent, Mem::PML4T &pml4t);
 
-public:
-        /// Create a brand new process. 
-        Process(PID id, elf::ElfInfo *info, mem::PML4T &pml4t);
-        /// Create a process from another. Use when forking processes.
-        Process(PID id, const Process &parent, mem::PML4T &pml4t);
+                /// Replace the file descriptors by the file descriptos from another process.
+                void setFileDescriptors(this Process &self, const Process &other);
+                void resetFpuContext(this Process &self);
+                void initUserStack(this Process &self);
+                int initArguments(this Process &self, int argc, char **argv, char **envp);
+                void loadPml4t(this Process &self);
+                void switchPml4t(this Process &self, const Mem::PML4T &pml4t);
+                void destroyPml4t(this Process &self);
+                void saveContext(this Process &self, Cpu::SyscallFrame &frame);
+                void loadContext(this Process &self, Cpu::SyscallFrame &frame);
+                void resetStack(this Process &self);
+                void resetHeap(this Process &self, Lib::uptr start);
+                void switchEntry(this Process &self, Elf::elf_entry_t entry);
+                int addChild(this Process &self, Process *child);
+                int removeChild(this Process &self, pid_t id);
+                void resetTime(this Process &self);
+                void consumeTime(this Process &self, int ms);
+                void switchWith(this Process &self, const Process *other);
+                void useKernelStack(this const Process &self);
+                void addFileDescriptor(this Process &self, Lib::File *file);
+                void removeFileDescriptor(this Process &self, Lib::File *file);
+                Lib::u64 getTime(this const Process &self);
+                const Lib::Vector<Process *> &getChildren(this const Process &self);
+                ProcessStatus getStatus(this const Process &self);
+                pid_t getId(this const Process &self);
+                const void *getEntry(this const Process &self);
+                const Mem::PML4T &getPml4t(this const Process &self);
+                const ProcessStackFrame *getStackFrame(this const Process &self);
+                const Lib::uptr *kernelStackPointerAddress(this const Process &self);
+                const Lib::Vector<Lib::File *> getFileDescriptors(this const Process &self);
+                const Lib::File *findFile(this const Process &self, Lib::usize id);
+                Lib::usize findFd(this const Process &self, Lib::File *file);
+                ProcessHeap &getHeap(this Process &self);
+                ProcessKernelStack &getKernelStack(this Process &self);
 
-        /// Replace the file descriptors by the file descriptos from another process.
-        void set_file_descriptors(this Process &self, const Process &other);
-        void reset_fpu_context(this Process &self);
-        void init_user_stack(this Process &self);
-        int init_arguments(this Process &self, int argc, char **argv, char **envp);
-        void load_pml4t(this Process &self);
-        void switch_pml4t(this Process &self, const mem::PML4T &pml4t);
-        void destroy_pml4t(this Process &self);
-        void save_context(this Process &self, cpu::SyscallFrame &frame);
-        void load_context(this Process &self, cpu::SyscallFrame &frame);
-        void reset_stack(this Process &self);
-        void reset_heap(this Process &self, lib::uptr start);
-        void switch_entry(this Process &self, elf::elf_entry_t entry);
-        int add_child(this Process &self, Process *child);
-        int remove_child(this Process &self, PID id);
-        void reset_time(this Process &self);
-        void consume_time(this Process &self, int ms);
-        void switch_with(this Process &self, const Process *other);
-        void use_kernel_stack(this const Process &self);
-        void add_file_descriptor(this Process &self, lib::File *file);
-        void remove_file_descriptor(this Process &self, lib::File *file);
+                bool isDead(this const Process &self);
+                void die(this Process &self);
+        };
 
-        lib::u64 get_time(this const Process &self);
-        const lib::Vector<Process *> &get_children(this const Process &self);
-        ProcessStatus get_status(this const Process &self);
-        PID get_id(this const Process &self);
-        const void *get_entry(this const Process &self);
-        const mem::PML4T &get_pml4t(this const Process &self);
-        const ProcessStackFrame *get_stack_frame(this const Process &self);
-        const lib::uptr *kernel_stack_pointer_address(this const Process &self);
-        const lib::Vector<lib::File *> get_file_descriptors(this const Process &self);
-        const lib::File *find_file(this const Process &self, lib::usize id);
-        lib::usize find_fd(this const Process &self, lib::File *file);
-        ProcessHeap &get_heap(this Process &self);
-        ProcessKernelStack &get_kernel_stack(this Process &self);
-
-        bool is_dead(this const Process &self);
-        void die(this Process &self);
-};
-
-extern "C" void __proc_switch(lib::uptr *old_rsp, lib::uptr new_rsp);
-
-} /* namespace kernel::proc */
+        extern "C" void __proc_switch(Lib::uptr *old_rsp, Lib::uptr new_rsp);
+} // namespace Kiwi::Proc

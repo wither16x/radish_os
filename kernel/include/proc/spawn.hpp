@@ -2,9 +2,8 @@
 
 #include <lib/string.hpp>
 
-namespace kernel::proc {
-
-/// Execute a program as a user process.
-int spawn(const lib::String &path);
-
-} /* namespace kernel::proc */
+namespace Kiwi::Proc
+{
+        /// Execute a program as a user process.
+        int spawn(const Lib::String &path);
+} // namespace Kiwi::Proc

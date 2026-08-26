@@ -2,45 +2,47 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel::boot::limine {
+namespace Kiwi::Boot::Limine
+{
+        /// Limine base revision representation using a structure
+        /// instead of a raw array, which is what `limine.h` does.
+        struct Revision
+        {
+                Lib::u64 magic0;
+                Lib::u64 magic1;
+                Lib::u64 rev;
 
-/// Limine base revision representation using a structure
-/// instead of a raw array, which is what `limine.h` does.
-struct Revision {
-        lib::u64 magic0;
-        lib::u64 magic1;
-        lib::u64 rev;
+                bool isSupported(this volatile Revision &self);
+        };
 
-        bool is_supported(this volatile Revision &self);
-};
+        /// Limine requests start marker representation using a
+        /// structure instead of a raw array, which is what `limine.h`
+        /// does.
+        struct StartMarker
+        {
+                Lib::u64 magic0;
+                Lib::u64 magic1;
+                Lib::u64 magic2;
+                Lib::u64 magic3;
+        };
 
-/// Limine requests start marker representation using a
-/// structure instead of a raw array, which is what `limine.h`
-/// does.
-struct StartMarker {
-        lib::u64 magic0;
-        lib::u64 magic1;
-        lib::u64 magic2;
-        lib::u64 magic3;
-};
+        /// Limine requests end marker representation using a
+        /// structure instead of a raw array, which is what 
+        // `limine.h` does.
+        struct EndMarker
+        {
+                Lib::u64 magic0;
+                Lib::u64 magic1;
+        };
 
-/// Limine requests end marker representation using a
-/// structure instead of a raw array, which is what 
-// `limine.h` does.
-struct EndMarker {
-        lib::u64 magic0;
-        lib::u64 magic1;
-};
-
-/// Wrapper around the `LIMINE_BASE_REVISION()` macro
-/// provided by `limine.h`.
-Revision base_revision(lib::u64 revision);
-/// Wrapper around the `LININE_REQUESTS_START_NARKER` macro
-/// provided by `limine.h`.
-StartMarker requests_start_marker();
-/// Wrapper around the `LININE_REQUESTS_END_NARKER` macro
-/// provided by `limine.h`.
-EndMarker requests_end_marker();
-volatile Revision &get_base_revision();
-
-} /* namespace kernel::boot::limine */
+        /// Wrapper around the `LIMINE_BASE_REVISION()` macro
+        /// provided by `limine.h`.
+        Revision baseRevision(Lib::u64 revision);
+        /// Wrapper around the `LININE_REQUESTS_START_NARKER` macro
+        /// provided by `limine.h`.
+        StartMarker requestsStartMarker();
+        /// Wrapper around the `LININE_REQUESTS_END_NARKER` macro
+        /// provided by `limine.h`.
+        EndMarker requestsEndMarker();
+        volatile Revision &getBaseRevision();
+} // namespace Kiwi::Boot::Limine

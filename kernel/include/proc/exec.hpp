@@ -2,9 +2,7 @@
 
 #include <lib/string.hpp>
 
-namespace kernel::proc {
-
-/// Replace a process by another one.
-int exec(const lib::String &path, int argc, char **argv, char **envp);
-
-} /* namespace kernel::proc */
+namespace Kiwi::Proc {
+        /// Replace a process by another one.
+        int exec(const Lib::String &path, int argc, char **argv, char **envp);
+} // namespace Kiwi::Proc

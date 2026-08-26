@@ -1,36 +1,30 @@
 #include <cpu/tss.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::uptr;
-
-namespace kernel::cpu {
-
-namespace {
-
-extern "C" void __tss_flush();
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void TSS::init(this TSS &self, uptr kernel_rsp)
+namespace Kiwi::Cpu
 {
-        self.data.rsp0 = kernel_rsp;
-}
-// --------------------------------------------------
+        namespace
+        {
+                extern "C" void __Tss_flush();
+        } // anonymous namespace
 
-void TSS::flush() const
-{
-        __tss_flush();
-}
+        void Tss::init(this Tss &self, Lib::uptr kernel_rsp)
+        {
+                self.data.rsp0 = kernel_rsp;
+        }
 
-void TSS::reset_stack(this TSS &self, uptr kernel_rsp)
-{
-        self.data.rsp0 = kernel_rsp;
-}
+        void Tss::flush() const
+        {
+                __Tss_flush();
+        }
 
-const TSSData &TSS::get_data(this const TSS &self)
-{
-        return self.data;
-}
+        void Tss::resetStack(this Tss &self, Lib::uptr kernel_rsp)
+        {
+                self.data.rsp0 = kernel_rsp;
+        }
 
-} /* namespace kernel::cpu */
+        const TssData &Tss::getData(this const Tss &self)
+        {
+                return self.data;
+        }
+} // namespace Kiwi::Cpu

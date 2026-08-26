@@ -3,24 +3,23 @@
 #include <lib/typing.hpp>
 #include <mem/page.hpp>
 
-namespace kernel::mem {
+namespace Kiwi::Mem
+{
+        class PML4T {
+                PageTable *raw_pml4t;
 
-class PML4T {
-        PageTable *raw_pml4t;
+        public:
+                void init(this PML4T &self);
+                void init(this PML4T &self, const PML4T &parent);
+                
+                void destroy(this PML4T &self);
+                void load(this const PML4T &self);
+                void mapPage(this PML4T &self, Lib::uptr vaddr, Lib::uptr paddr, Lib::u64 flags);
+                void unmapPage(this PML4T &self, Lib::uptr vaddr);
+                Lib::uptr virtToPhys(this const PML4T &self, Lib::uptr vaddr);
 
-public:
-        void init(this PML4T &self);
-        void init(this PML4T &self, const PML4T &parent);
-        
-        void destroy(this PML4T &self);
-        void load(this const PML4T &self);
-        void map_page(this PML4T &self, lib::uptr vaddr, lib::uptr paddr, lib::u64 flags);
-        void unmap_page(this PML4T &self, lib::uptr vaddr);
-        lib::uptr virt_to_phys(this const PML4T &self, lib::uptr vaddr);
+                bool isMapped(this const PML4T &self, Lib::uptr vaddr);
 
-        bool is_mapped(this const PML4T &self, lib::uptr vaddr);
-
-        PageTable *raw(this const PML4T &self);
-};
-
-} /* namespace kernel::mem */
+                PageTable *raw(this const PML4T &self);
+        };
+} // namespace Kiwi::Mem

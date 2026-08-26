@@ -5,11 +5,10 @@
 
 #include <lib/typing.hpp>
 
-namespace kernel::drivers::keyboard {
-
-void init();
-lib::u8 handle_key_press();
-char scancode_to_key(lib::u8 scancode);
-char read();
-
-} /* namespace kernel::drivers::keyboard */
+namespace Kiwi::Drivers::Keyboard
+{
+        void init();
+        Lib::u8 handleKeyPress();
+        char scancodeToKey(Lib::u8 scancode);
+        char read();
+} // namespace Kiwi::Drivers::Keyboard

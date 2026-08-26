@@ -10,43 +10,34 @@
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
 
-using kernel::lib::u8, kernel::lib::u64, kernel::lib::callable;
-using kernel::lib::log::logger;
-
-namespace kernel::cpu {
-
-namespace {
-
-constexpr int MAX_IRQ_HANDLERS = 16;
-
-callable<void, IRQFrame &> handlers[MAX_IRQ_HANDLERS];
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void register_irq(int n, callable<void, IRQFrame &> handler)
+namespace Kiwi::Cpu
 {
-        handlers[n] = handler;
-        drivers::pic::irq_unmask(n);
-}
-// --------------------------------------------------
+        namespace
+        {
+                constexpr int MAX_IRQ_HANDLERS = 16;
 
-// --------------------------------------------------
-extern "C" void irq_handler(IRQFrame &f)
-{
-        if (f.irqno >= MAX_IRQ_HANDLERS) {
-                logger.err("received unexpected irq: %u", f.irqno);
-                return;
+                Lib::callable<void, IrqFrame &> handlers[MAX_IRQ_HANDLERS];
+        } // anonymous namespace
+
+        void register_irq(int n, Lib::callable<void, IrqFrame &> handler)
+        {
+                handlers[n] = handler;
+                Drivers::Pic::irqUnmask(n);
         }
 
-        void (*handler)(IRQFrame &) = handlers[f.irqno];
-        if (not handler) {
-                logger.err("no handler available for irq %u", f.irqno);
-                return;
-        }
-        
-        handler(f);
-}
-// --------------------------------------------------
+        extern "C" void irq_handler(IrqFrame &f)
+        {
+                if (f.irqno >= MAX_IRQ_HANDLERS) {
+                        Lib::Log::logger.err("received unexpected irq: %u", f.irqno);
+                        return;
+                }
 
-} /* namespace kernel::cpu */
+                void (*handler)(IrqFrame &) = handlers[f.irqno];
+                if (not handler) {
+                        Lib::Log::logger.err("no handler available for irq %u", f.irqno);
+                        return;
+                }
+                
+                handler(f);
+        }
+} // namespace Kiwi::Cpu

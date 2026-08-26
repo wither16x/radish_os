@@ -4,66 +4,55 @@
 #include <kernel.hpp>
 #include <lib/logging.hpp>
 
-using kernel::lib::u8, kernel::lib::u16, kernel::lib::u32, kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::log::logger;
-
-namespace kernel::cpu {
-
-namespace {
-
-/// Reload the GDT.
-extern "C" void __gdt_flush(u64 gdtr);
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void GDT::init(this GDT &self)
+namespace Kiwi::Cpu
 {
-        self.gdtptr = {
-                .size = sizeof(self.descriptors) - 1,
-                .offset = reinterpret_cast<u64>(&self.descriptors)
-        };
+        namespace
+        {
+                /// Reload the Gdt.
+                extern "C" void __gdt_flush(Lib::u64 Gdtr);
+        } // anonymous namespace
 
-        self.tss.init(KERNEL_STACK_TOP - 8);
+        void Gdt::init(this Gdt &self)
+        {
+                self.gdtptr = {
+                        .size = sizeof(self.descriptors) - 1,
+                        .offset = reinterpret_cast<Lib::u64>(&self.descriptors)
+                };
 
-        self.set_descriptor(0, 0, 0, 0, 0); // null
-        self.set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
-        self.set_descriptor(2, 0, 0, 0x92, 0); // kernel data
-        self.set_descriptor(3, 0, 0, 0xfa, 0xa0); // user code
-        self.set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
-        // in long mode the TSS takes two entries
-        self.set_descriptor(5, reinterpret_cast<u64>(&self.tss.get_data()) & 0xffffffff, sizeof(TSSData) - 1, 0x89, 0);
-        lib::memset(&self.descriptors[6], 0, sizeof(GDTDescriptor));
-        *reinterpret_cast<u32 *>(&self.descriptors[6]) = (reinterpret_cast<u64>(&self.tss.get_data()) >> 32) & 0xffffffff;
+                self.tss.init(KERNEL_STACK_TOP - 8);
 
-        logger.ok("initialized gdt");
-}
-// --------------------------------------------------
+                self.set_descriptor(0, 0, 0, 0, 0); // null
+                self.set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
+                self.set_descriptor(2, 0, 0, 0x92, 0); // kernel data
+                self.set_descriptor(3, 0, 0, 0xfa, 0xa0); // user code
+                self.set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
+                // in long mode the TSS takes two entries
+                self.set_descriptor(5, reinterpret_cast<Lib::u64>(&self.tss.getData()) & 0xffffffff, sizeof(TssData) - 1, 0x89, 0);
+                Lib::memset(&self.descriptors[6], 0, sizeof(GdtDescriptor));
+                *reinterpret_cast<Lib::u32 *>(&self.descriptors[6]) = (reinterpret_cast<Lib::u64>(&self.tss.getData()) >> 32) & 0xffffffff;
 
-// --------------------------------------------------
-void GDT::load(this GDT &self)
-{
-        __gdt_flush(reinterpret_cast<u64>(&self.gdtptr));
+                Lib::Log::logger.ok("initialized gdt");
+        }
 
-        logger.ok("loaded gdt");
-}
-// --------------------------------------------------
+        void Gdt::load(this Gdt &self)
+        {
+                __gdt_flush(reinterpret_cast<Lib::u64>(&self.gdtptr));
 
-// --------------------------------------------------
-void GDT::set_descriptor(this GDT &self, int n, u32 base, u32 limit, u8 access, u8 flags)
-{
-        self.descriptors[n].limit_low        = limit & 0xffff;
-        self.descriptors[n].base_low         = base & 0xffff;
-        self.descriptors[n].base_middle      = (base >> 16) & 0xff;
-        self.descriptors[n].access           = access;
-        self.descriptors[n].limit_and_flags  = (flags & 0xf0) | ((limit >> 16) & 0x0f);
-        self.descriptors[n].base_high        = base >> 24;
-}
-// --------------------------------------------------
+                Lib::Log::logger.ok("loaded gdt");
+        }
 
-TSS &GDT::get_tss(this GDT &self)
-{
-        return self.tss;
-}
+        void Gdt::set_descriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags)
+        {
+                self.descriptors[n].limit_low        = limit & 0xffff;
+                self.descriptors[n].base_low         = base & 0xffff;
+                self.descriptors[n].base_middle      = (base >> 16) & 0xff;
+                self.descriptors[n].access           = access;
+                self.descriptors[n].limit_and_flags  = (flags & 0xf0) | ((limit >> 16) & 0x0f);
+                self.descriptors[n].base_high        = base >> 24;
+        }
 
-} /* namespace kernel::cpu */
+        Tss &Gdt::getTss(this Gdt &self)
+        {
+                return self.tss;
+        }
+} // namespace Kiwi::Cpu

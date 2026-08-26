@@ -3,28 +3,27 @@
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
 
-namespace kernel::cpu {
-
-// NOTE: it is recommended to use the functions implemented
-// below instead of using the assembly wrappers directly as
-// they can wrap several assembly wrappers if needed.
-
-/// Output a byte to a port.
-inline void output_byte_port(lib::u16 port, lib::u8 byte)
+namespace Kiwi::Cpu
 {
-        outb(port, byte);
-}
+        // NOTE: it is recommended to use the functions implemented
+        // below instead of using the assembly wrappers directly as
+        // they can wrap several assembly wrappers if needed.
 
-/// Get a byte from a port.
-inline lib::u8 input_byte_port(lib::u16 port)
-{
-        return inb(port);
-}
+        /// Output a byte to a port.
+        inline void outputBytePort(Lib::u16 port, Lib::u8 byte)
+        {
+                outb(port, byte);
+        }
 
-/// Small delay.
-inline void io_wait()
-{
-        outb(0x80, 0);
-}
+        /// Get a byte from a port.
+        inline Lib::u8 inputBytePort(Lib::u16 port)
+        {
+                return inb(port);
+        }
 
-} /* namespace kernel::cpu */
+        /// Small delay.
+        inline void ioWait()
+        {
+                outb(0x80, 0);
+        }
+} // namespace Kiwi::Cpu
