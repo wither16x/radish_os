@@ -8,7 +8,7 @@ namespace Kiwi::Lib
                 Drivers::Pit::sleep(ms);
         }
 
-        u64 get_current_time()
+        u64 getCurrentTime()
         {
                 return Drivers::Pit::getSeconds() + Drivers::Pit::getTics();
         }

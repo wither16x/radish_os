@@ -5,50 +5,40 @@
 #include <mem/allocators/dynamic_bitmap.hpp>
 #include <mem/pmm.hpp>
 
-using kernel::lib::log::logger;
-using kernel::lib::u8,  kernel::lib::usize, kernel::lib::uptr, kernel::lib::u64;
-
-namespace kernel::mem::pmm {
-
-namespace {
-
-constexpr lib::usize FRAME_BYTES  = 0x1000;       // 4 KiB
-constexpr lib::usize MAX_MEMORY   = 0x40000000;   // 1 GiB
-constexpr lib::usize MAX_FRAMES   = MAX_MEMORY / FRAME_BYTES;
-
-allocators::StaticBitmapAllocator<uptr, MAX_FRAMES> allocator;
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void init(boot::BootInfo::MemmapInfo &memmap)
+namespace Kiwi::Mem::Pmm
 {
-        allocator.get_bitmap().set_all();
+        namespace
+        {
+                constexpr Lib::usize FRAME_BYTES  = 0x1000;       // 4 KiB
+                constexpr Lib::usize MAX_MEMORY   = 0x40000000;   // 1 GiB
+                constexpr Lib::usize MAX_FRAMES   = MAX_MEMORY / FRAME_BYTES;
 
-        for (usize i = 0; i < memmap.entry_count; i++) {
-                if (memmap.entries[i].type == boot::MemmapEntryType::Usable) {
-                        boot::MemmapEntry &e = memmap.entries[i];
-                        for (uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
-                                allocator.get_bitmap().clear(addr / FRAME_BYTES);
+                Allocators::StaticBitmapAllocator<Lib::uptr, MAX_FRAMES> allocator;
+        } // anonymous namespace
+
+        void init(Boot::BootInfo::MemmapInfo &memmap)
+        {
+                allocator.getBitmap().setAll();
+
+                for (Lib::usize i = 0; i < memmap.entry_count; i++) {
+                        if (memmap.entries[i].type == Boot::MemmapEntryType::Usable) {
+                                Boot::MemmapEntry &e = memmap.entries[i];
+                                for (Lib::uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
+                                        allocator.getBitmap().clear(addr / FRAME_BYTES);
+                        }
                 }
+
+                Lib::Log::logger.ok("initialized pmm");
         }
 
-        logger.ok("initialized pmm");
-}
-// --------------------------------------------------
+        Lib::uptr allocateFrame()
+        {
+                return allocator.allocate(1) * FRAME_BYTES;
+        }
 
-// --------------------------------------------------
-uptr allocate_frame()
-{
-        return allocator.allocate(1) * FRAME_BYTES;
-}
-// --------------------------------------------------
+        void freeFrame(Lib::uptr addr)
+        {
+                allocator.free(addr / FRAME_BYTES);
+        }
 
-// --------------------------------------------------
-void free_frame(uptr addr)
-{
-        allocator.free(addr / FRAME_BYTES);
-}
-// --------------------------------------------------
-
-} /* namespace kernel::mem::pmm */
+} // namespace Kiwi::Mem::Pmm

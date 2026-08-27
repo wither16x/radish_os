@@ -1,3 +1,4 @@
+#include "cpu/cpu.hpp"
 #include <mem/pmm.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
@@ -8,223 +9,205 @@
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 
-using kernel::lib::u64, kernel::lib::usize, kernel::lib::uptr;
-using kernel::lib::log::logger;
-using kernel::lib::memcpy;
-using kernel::lib::Vector;
-
-namespace kernel::proc::scheduler {
-
-namespace {
-
-struct SchedulerContext {
-        Status status;
-        Vector<Process *> processes;
-        Process *current_process;
-        usize current_process_index;
-        Process *pending_zombie;
-};
-
-SchedulerContext ctx;
-
-void reap_pending_zombie()
+namespace Kiwi::Proc::Scheduler
 {
-        if (not ctx.pending_zombie)
-                return;
+        namespace
+        {
+                struct SchedulerContext
+                {
+                        Status status;
+                        Lib::Vector<Process *> processes;
+                        Process *current_process;
+                        Lib::usize current_process_index;
+                        Process *pending_zombie;
+                };
 
-        Process *zombie = ctx.pending_zombie;
-        ctx.pending_zombie = nullptr;
+                SchedulerContext ctx;
 
-        for (auto &fd : zombie  ->get_file_descriptors())
-                lib::close(fd);
+                void reapPendingZombie()
+                {
+                        if (not ctx.pending_zombie)
+                                return;
 
-        mem::pmm::free_frame(zombie->get_kernel_stack().get_frame());
-        remove_process(zombie);
-        delete zombie;
-}
+                        Process *zombie = ctx.pending_zombie;
+                        ctx.pending_zombie = nullptr;
 
-Process *find_next_runnable_process(Process *old_proc, usize *new_proc_idx)
-{
-        usize __new_proc_idx = ctx.current_process_index;
+                        for (auto &fd : zombie  ->getFileDescriptors())
+                                Lib::close(fd);
 
-        for (usize i = 0; i < ctx.processes.size(); i++) {
-                usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
-                if (not ctx.processes[idx]->is_dead() and ctx.processes[idx] != old_proc) {
-                        __new_proc_idx = idx;
-                        memcpy(new_proc_idx, &__new_proc_idx, sizeof(*new_proc_idx));
-                        return ctx.processes[idx];
+                        Mem::Pmm::freeFrame(zombie->getKernelStack().getFrame());
+                        removeProcess(zombie);
+                        delete zombie;
                 }
-        }
 
-        return nullptr;
-}
+                Process *findNextRunnableProcess(Process *old_proc, Lib::usize *new_proc_idx)
+                {
+                        Lib::usize __new_proc_idx = ctx.current_process_index;
 
-} /* anonymous namespace */
+                        for (Lib::usize i = 0; i < ctx.processes.size(); i++) {
+                                Lib::usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
+                                if (not ctx.processes[idx]->isDead() and ctx.processes[idx] != old_proc) {
+                                        __new_proc_idx = idx;
+                                        Lib::memcpy(new_proc_idx, &__new_proc_idx, sizeof(*new_proc_idx));
+                                        return ctx.processes[idx];
+                                }
+                        }
 
-// --------------------------------------------------
-void init()
-{
-        ctx.current_process = 0;
-        ctx.current_process = nullptr;
-        ctx.status = Status::Unlocked;
-
-        logger.ok("initialized scheduler");
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-void add_process(Process *p)
-{
-        // this function only adds the process to the vector;
-        // it must have been initialized before
-        ctx.processes.push_back(p);
-        if (not ctx.current_process)
-                ctx.current_process = p;
-}
-// --------------------------------------------------
-
-// void remove_process(PID pid)
-void remove_process(Process *p)
-{
-        for (usize i = 0; i < ctx.processes.size(); i++) {
-                if (ctx.processes[i] == p) {
-                        ctx.processes.erase(i);
-                        break;
+                        return nullptr;
                 }
-        }
-}
+        } // anonymous namespace
 
-// --------------------------------------------------
-void tick()
-{
-        if (ctx.status == Status::Locked or ctx.processes.empty() or not ctx.current_process)
-                return;
-
-        if (ctx.current_process->get_status() != ProcessStatus::Dead) {
-                ctx.current_process->consume_time(1);
-                if (ctx.current_process->get_time() < TIME_PER_PROCESS)
-                        return;
-                ctx.current_process->reset_time();
-        }
-
-        Process *old_proc = ctx.current_process;
-        usize new_proc_idx = 0;
-        Process *new_proc = find_next_runnable_process(nullptr, &new_proc_idx);
-
-        if (not new_proc) {
+        void init()
+        {
+                ctx.current_process = 0;
                 ctx.current_process = nullptr;
-                if (old_proc->is_dead())
-                        undertaker(old_proc);
-                return;
+                ctx.status = Status::Unlocked;
+
+                Lib::Log::logger.ok("initialized scheduler");
         }
 
-        if (new_proc == old_proc)
-                return;
-
-        ctx.current_process = new_proc;
-        ctx.current_process_index = new_proc_idx;
-
-        new_proc->load_pml4t();
-        new_proc->use_kernel_stack();
-
-        if (old_proc->is_dead()) {
-                uptr discard = 0;
-                ctx.pending_zombie = old_proc;
-                __proc_switch(&discard, new_proc->get_kernel_stack().get());
-                while (true)
-                        cpu::hlt();
+        void addProcess(Process *p)
+        {
+                // this function only adds the process to the Lib::Vector<typename T>;
+                // it must have been initialized before
+                ctx.processes.pushBack(p);
+                if (not ctx.current_process)
+                        ctx.current_process = p;
         }
 
-        old_proc->switch_with(new_proc);
-        reap_pending_zombie();
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-bool is_active()
-{
-        return ctx.status != Status::Locked;
-}
-// --------------------------------------------------
-
-// --------------------------------------------------
-Process *get_current_process()
-{
-        return ctx.current_process;
-}
-// --------------------------------------------------
-
-Process *get_process_by_id(PID pid)
-{
-        for (auto &proc : ctx.processes) {
-                if (proc->get_id() == pid)
-                        return proc;
+        // void remove_process(PID pid)
+        void removeProcess(Process *p)
+        {
+                for (Lib::usize i = 0; i < ctx.processes.size(); i++) {
+                        if (ctx.processes[i] == p) {
+                                ctx.processes.erase(i);
+                                break;
+                        }
+                }
         }
 
-        return nullptr; // process not found
-}
+        void tick()
+        {
+                if (ctx.status == Status::Locked or ctx.processes.empty() or not ctx.current_process)
+                        return;
 
-// --------------------------------------------------
-void set_current_process(Process *p)
-{
-        ctx.current_process = p;
-}
-// --------------------------------------------------
+                if (ctx.current_process->getStatus() != ProcessStatus::Dead) {
+                        ctx.current_process->consumeTime(1);
+                        if (ctx.current_process->getTime() < TIME_PER_PROCESS)
+                                return;
+                        ctx.current_process->resetTime();
+                }
 
-const Vector<Process *> &get_processes()
-{
-        return ctx.processes;
-}
+                Process *old_proc = ctx.current_process;
+                Lib::usize new_proc_idx = 0;
+                Process *new_proc = findNextRunnableProcess(nullptr, &new_proc_idx);
 
-/// The undertaker assumes that the process is NOT using the
-/// CPU.
-/// Step 1: remove the dead process from the scheduler
-/// Step 2: destroy the process' page tables
-/// Step 3: destroy the process itself
-void undertaker(Process *p)
-{
-        if (not p) {
-                logger.err("undertaker: process does not exist");
-                return;
+                if (not new_proc) {
+                        ctx.current_process = nullptr;
+                        if (old_proc->isDead())
+                                undertaker(old_proc);
+                        return;
+                }
+
+                if (new_proc == old_proc)
+                        return;
+
+                ctx.current_process = new_proc;
+                ctx.current_process_index = new_proc_idx;
+
+                new_proc->loadPml4t();
+                new_proc->useKernelStack();
+
+                if (old_proc->isDead()) {
+                        Lib::uptr discard = 0;
+                        ctx.pending_zombie = old_proc;
+                        __proc_switch(&discard, new_proc->getKernelStack().get());
+                        while (true)
+                                Cpu::idle();
+                }
+
+                old_proc->switchWith(new_proc);
+                reapPendingZombie();
         }
 
-        for (auto &fd : p->get_file_descriptors())
-                lib::close(fd);
-
-        mem::pmm::free_frame(p->get_kernel_stack().get_frame());
-        remove_process(p);
-        delete p;
-}
-
-void yield()
-{
-        Process *old_proc = ctx.current_process;
-        if (not old_proc) {
-                logger.debug("old process is null");
-                return;
+        bool isActive()
+        {
+                return ctx.status != Status::Locked;
         }
 
-        usize start_idx = 0;
-        Process *new_proc = find_next_runnable_process(old_proc, &start_idx);
+        Process *getCurrentProcess()
+        {
+                return ctx.current_process;
+        }
 
-        if (not new_proc)
-                return;
+        Process *getProcessById(pid_t pid)
+        {
+                for (auto &proc : ctx.processes) {
+                        if (proc->getId() == pid)
+                                return proc;
+                }
 
-        new_proc->load_pml4t();
-        new_proc->use_kernel_stack();
-        ctx.current_process = new_proc;
+                return nullptr; // process not found
+        }
 
-        old_proc->switch_with(new_proc);
-}
+        void set_current_process(Process *p)
+        {
+                ctx.current_process = p;
+        }
 
-void lock()
-{
-        ctx.status = Status::Locked;
-}
+        const Lib::Vector<Process *> &getProcesses()
+        {
+                return ctx.processes;
+        }
 
-void unlock()
-{
-        ctx.status = Status::Unlocked;
-}
+        /// The undertaker assumes that the process is NOT using the
+        /// CPU.
+        /// Step 1: remove the dead process from the scheduler
+        /// Step 2: destroy the process' page tables
+        /// Step 3: destroy the process itself
+        void undertaker(Process *p)
+        {
+                if (not p) {
+                        Lib::Log::logger.err("undertaker: process does not exist");
+                        return;
+                }
 
-} /* namespace kernel::proc::scheduler */
+                for (auto &fd : p->getFileDescriptors())
+                        Lib::close(fd);
+
+                Mem::Pmm::freeFrame(p->getKernelStack().getFrame());
+                removeProcess(p);
+                delete p;
+        }
+
+        void yield()
+        {
+                Process *old_proc = ctx.current_process;
+                if (not old_proc) {
+                        Lib::Log::logger.debug("old process is null");
+                        return;
+                }
+
+                Lib::usize start_idx = 0;
+                Process *new_proc = findNextRunnableProcess(old_proc, &start_idx);
+
+                if (not new_proc)
+                        return;
+
+                new_proc->loadPml4t();
+                new_proc->useKernelStack();
+                ctx.current_process = new_proc;
+
+                old_proc->switchWith(new_proc);
+        }
+
+        void lock()
+        {
+                ctx.status = Status::Locked;
+        }
+
+        void unlock()
+        {
+                ctx.status = Status::Unlocked;
+        }
+} // namespace Kiwi::Proc::Scheduler

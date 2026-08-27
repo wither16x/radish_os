@@ -6,24 +6,23 @@
 #include <mem/pml4t.hpp>
 #include <cpu/assembly.hpp>
 
-namespace kernel::proc {
-
-PID fork()
+namespace Kiwi::Proc
 {
-        cpu::disable_interrupts();
+        pid_t fork()
+        {
+                Cpu::disableInterrupts();
 
-        Process *parent = scheduler::get_current_process();
+                Process *parent = Scheduler::getCurrentProcess();
 
-        mem::PML4T child_pml4t;
-        child_pml4t.init(parent->get_pml4t());
+                Mem::PML4T child_pml4t;
+                child_pml4t.init(parent->getPml4t());
 
-        Process *child = new Process(allocate_pid(), *parent, child_pml4t);
+                Process *child = new Process(allocatePid(), *parent, child_pml4t);
 
-        parent->add_child(child);
-        scheduler::add_process(child);
+                parent->addChild(child);
+                Scheduler::addProcess(child);
 
-        cpu::enable_interrupts();
-        return child->get_id();
-}
-
-} /* namespace kernel::proc */
+                Cpu::enableInterrupts();
+                return child->getId();
+        }
+} // namespace Kiwi::Proc

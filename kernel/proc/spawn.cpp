@@ -6,70 +6,64 @@
 #include <kernel.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
+#include <lib/logging.hpp>
 #include <cpu/cpu.hpp>
 #include <cpu/userspace.hpp>
 #include <panic.hpp>
 
-using kernel::lib::String;
-using kernel::lib::uptr;
-
-namespace kernel::proc {
-
-namespace {
-
-Process *load_program_as_process(const String &path)
+namespace Kiwi::Proc
 {
-        // create the process' pml4t
-        mem::PML4T &kpml4t = get_kernel_pml4t();
-        mem::PML4T proc_pml4t;
-        proc_pml4t.init(kpml4t);
+        namespace
+        {
+                Process *loadProgramAsProcess(const Lib::String &path)
+                {
+                        // create the process' pml4t
+                        Mem::PML4T &kpml4t = getKernelPml4t();
+                        Mem::PML4T proc_pml4t;
+                        proc_pml4t.init(kpml4t);
 
-        // load the file (assume ELF64)
-        elf::ElfInfo elf_info;
-        int load_res = elf::load_elf(&proc_pml4t, path, &elf_info);
-        if (load_res != 0)
-                return nullptr; // could not load executable
+                        // load the file (assume ELF64)
+                        Elf::ElfInfo elf_info;
+                        int load_res = Elf::loadElf(&proc_pml4t, path, &elf_info);
+                        if (load_res != 0)
+                                return nullptr; // could not load executable
 
-        elf_info.entry = reinterpret_cast<elf::elf_entry_t>(elf_info.address);
+                        elf_info.entry = reinterpret_cast<Elf::elf_entry_t>(elf_info.address);
 
-        // create the process
-        Process *proc = new Process(allocate_pid(), &elf_info, proc_pml4t);
+                        // create the process
+                        Process *proc = new Process(allocatePid(), &elf_info, proc_pml4t);
 
-        return proc;
-}
+                        return proc;
+                }
+        } // anonymous namespace
 
-} /* anonymous namespace */
+        int spawn(const Lib::String &path)
+        {
+                Cpu::disableInterrupts();
 
-// --------------------------------------------------
-int spawn(const String &path)
-{
-        cpu::disable_interrupts();
+                Process *proc = loadProgramAsProcess(path);
+                if (not proc) {
+                        Lib::Log::logger.err("failed to spawn process: failed to load %s", path.raw());
+                        return -1;
+                }
 
-        Process *proc = load_program_as_process(path);
-        if (not proc) {
-                logger.err("failed to spawn process: failed to load %s", path.raw());
-                return -1;
+                // tell the scheduler that the process exists
+                Scheduler::addProcess(proc);
+
+                Scheduler::setCurrentProcess(proc);
+                Process *p = Scheduler::getCurrentProcess();
+                p->loadPml4t();
+
+                if (not p->getEntry())
+                        panic("failed to spawn process: null entry point");
+
+                Cpu::enter_userspace(
+                        reinterpret_cast<void *>(p->getStackFrame()->rip),
+                        reinterpret_cast<void *>(p->getStackFrame()->rsp)
+                );
+
+                Cpu::enableInterrupts();
+
+                return 0;
         }
-
-        // tell the scheduler that the process exists
-        scheduler::add_process(proc);
-
-        scheduler::set_current_process(proc);
-        Process *p = scheduler::get_current_process();
-        p->load_pml4t();
-
-        if (not p->get_entry())
-                panic("failed to spawn process: null entry point");
-
-        cpu::enter_userspace(
-                reinterpret_cast<void *>(p->get_stack_frame()->rip),
-                reinterpret_cast<void *>(p->get_stack_frame()->rsp)
-        );
-
-        cpu::enable_interrupts();
-
-        return 0;
-}
-// --------------------------------------------------
-
-} /* namespace kernel::proc */
+} // namespace Kiwi::Proc

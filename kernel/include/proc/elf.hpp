@@ -121,5 +121,5 @@ namespace Kiwi::Proc::Elf
 
         /// Load an ELF and map it in higher-half in a process'
         /// PML4 table.
-        int load_elf(Mem::PML4T *pml4t, const Lib::String &path, ElfInfo *info);
+        int loadElf(Mem::PML4T *pml4t, const Lib::String &path, ElfInfo *info);
 } // namespace Kiwi::Proc::Elf

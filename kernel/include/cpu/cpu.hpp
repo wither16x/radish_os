@@ -9,12 +9,12 @@ namespace Kiwi::Cpu
                 hlt();
         }
 
-        inline void disable_interrupts()
+        inline void disableInterrupts()
         {
                 cli();
         }
 
-        inline void enable_interrupts()
+        inline void enableInterrupts()
         {
                 sti();
         }

@@ -1,16 +1,14 @@
 #include <proc/pid.hpp>
 
-namespace kernel::proc {
-
-namespace {
-
-PID current_pid = 1;
-
-} /* anonymous namespace */
-
-PID allocate_pid()
+namespace Kiwi::Proc
 {
-        return current_pid++;
-}
+        namespace
+        {
+                pid_t current_pid = 1;
+        } // anonymous namespace
 
-} /* namespace kernel::proc */
+        pid_t allocatePid()
+        {
+                return current_pid++;
+        }
+} // namespace Kiwi::Proc

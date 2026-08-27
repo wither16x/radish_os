@@ -3,37 +3,26 @@
 #include <mem/allocators/heap.hpp>
 #include <mem/heap.hpp>
 
-using kernel::lib::uptr;
-using kernel::lib::log::logger;
-
-namespace kernel::mem::heap {
-
-namespace {
-
-allocators::HeapAllocator<void *> allocator;
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-void init()
+namespace Kiwi::Mem::Heap
 {
-        allocator.init(HEAP_START, 16);
-        logger.ok("initialized heap");
-}
-// --------------------------------------------------
+        namespace
+        {
+                Allocators::HeapAllocator<void *> allocator;
+        } // anonymous namespace
 
-// --------------------------------------------------
-void *allocate(lib::usize n)
-{
-        return allocator.allocate(n);
-}
-// --------------------------------------------------
+        void init()
+        {
+                allocator.init(HEAP_START, 16);
+                Lib::Log::logger.ok("initialized heap");
+        }
 
-// --------------------------------------------------
-void free(void *p)
-{
-        allocator.free(p);
-}
-// --------------------------------------------------
+        void *allocate(Lib::usize n)
+        {
+                return allocator.allocate(n);
+        }
 
-} /* namespace kernel::mem::heap */
+        void free(void *p)
+        {
+                allocator.free(p);
+        }
+} // namespace Kiwi::Mem::Heap

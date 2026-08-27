@@ -5,79 +5,76 @@
 #include <mem/pmm.hpp>
 #include <mem/page.hpp>
 
-using kernel::lib::uptr;
-
-namespace kernel::proc {
-
-ProcessHeap::ProcessHeap(uptr start, uptr last_page, uptr limit, mem::PML4T &pml4t)
-        : start(start), last_page(last_page), limit(limit), pml4t(pml4t)
-{}
-
-bool ProcessHeap::extend(this ProcessHeap &self, int pages)
+namespace Kiwi::Proc
 {
-        cpu::disable_interrupts();
+        ProcessHeap::ProcessHeap(Lib::uptr start, Lib::uptr last_page, Lib::uptr limit, Mem::PML4T &pml4t)
+                : start(start), last_page(last_page), limit(limit), pml4t(pml4t)
+        {}
 
-        if (self.last_page + pages * mem::PAGE_SIZE > self.limit) {
-                cpu::enable_interrupts();
-                return false;
+        bool ProcessHeap::extend(this ProcessHeap &self, int pages)
+        {
+                Cpu::disableInterrupts();
+
+                if (self.last_page + pages * Mem::PAGE_SIZE > self.limit) {
+                        Cpu::enableInterrupts();
+                        return false;
+                }
+
+                Lib::uptr vaddr = self.last_page;
+                for (int i = 0; i < pages; i++) {
+                        self.pml4t.mapPage(vaddr,
+                                Mem::Pmm::allocateFrame(),
+                                Mem::PageFlag::NoExec | Mem::PageFlag::ReadWriteUser
+                        );
+                        vaddr += Mem::PAGE_SIZE;
+                }
+
+                self.last_page += pages * Mem::PAGE_SIZE;
+                Cpu::enableInterrupts();
+                return true;
         }
 
-        uptr vaddr = self.last_page;
-        for (int i = 0; i < pages; i++) {
-                self.pml4t.map_page(vaddr,
-                        mem::pmm::allocate_frame(),
-                        mem::PageFlag::NoExec | mem::PageFlag::ReadWriteUser
-                );
-                vaddr += mem::PAGE_SIZE;
+        bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
+        {
+                Cpu::disableInterrupts();
+
+                if (self.last_page - pages * Mem::PAGE_SIZE < self.start) {
+                        Cpu::enableInterrupts();
+                        return false;
+                }
+
+                Lib::uptr vaddr = self.last_page - Mem::PAGE_SIZE;
+                for (int i = 0; i < pages; i++) {
+                        self.pml4t.unmapPage(vaddr);
+                        vaddr -= Mem::PAGE_SIZE;
+                }
+
+                self.last_page -= pages * Mem::PAGE_SIZE;
+                Cpu::enableInterrupts();
+                return true;
         }
 
-        self.last_page += pages * mem::PAGE_SIZE;
-        cpu::enable_interrupts();
-        return true;
-}
-
-bool ProcessHeap::shorten(this ProcessHeap &self, int pages)
-{
-        cpu::disable_interrupts();
-
-        if (self.last_page - pages * mem::PAGE_SIZE < self.start) {
-                cpu::enable_interrupts();
-                return false;
+        void ProcessHeap::reset(this ProcessHeap &self, Lib::uptr new_start, Mem::PML4T &pml4t)
+        {
+                Lib::uptr aligned = Mem::pageAlignUp(new_start);
+                self.start = aligned;
+                self.last_page = aligned;
+                self.limit = Cpu::USER_HEAP_LIMIT;
+                self.pml4t = pml4t;
         }
 
-        uptr vaddr = self.last_page - mem::PAGE_SIZE;
-        for (int i = 0; i < pages; i++) {
-                self.pml4t.unmap_page(vaddr);
-                vaddr -= mem::PAGE_SIZE;
+        Lib::uptr ProcessHeap::getStart(this const ProcessHeap &self)
+        {
+                return self.start;
         }
 
-        self.last_page -= pages * mem::PAGE_SIZE;
-        cpu::enable_interrupts();
-        return true;
-}
+        Lib::uptr ProcessHeap::getLastPage(this const ProcessHeap &self)
+        {
+                return self.last_page;
+        }
 
-void ProcessHeap::reset(this ProcessHeap &self, uptr new_start, mem::PML4T &pml4t)
-{
-        uptr aligned = mem::page_align_up(new_start);
-        self.start = aligned;
-        self.last_page = aligned;
-        self.limit = cpu::USER_HEAP_LIMIT;
-        self.pml4t = pml4t;
-}
-
-uptr ProcessHeap::get_start(this const ProcessHeap &self)
-{
-        return self.start;
-}
-
-uptr ProcessHeap::get_last_page(this const ProcessHeap &self)
-{
-        return self.last_page;
-}
-
-uptr ProcessHeap::get_limit(this const ProcessHeap &self)
-{
-        return self.limit;
-}
-
-} // namespace kernel::proc
+        Lib::uptr ProcessHeap::getLimit(this const ProcessHeap &self)
+        {
+                return self.limit;
+        }
+} // namespace Kiwi::Proc
