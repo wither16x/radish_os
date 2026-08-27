@@ -42,7 +42,7 @@ namespace Kiwi::Cpu
 
                 /// Edit a descriptor in the table.
                 /// Note that 64-bit addresses should take 2 entries.
-                void set_descriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags);
+                void setDescriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags);
 
         public:
                 void init(this Gdt &self);

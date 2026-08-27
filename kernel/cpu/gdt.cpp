@@ -21,13 +21,13 @@ namespace Kiwi::Cpu
 
                 self.tss.init(KERNEL_STACK_TOP - 8);
 
-                self.set_descriptor(0, 0, 0, 0, 0); // null
-                self.set_descriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
-                self.set_descriptor(2, 0, 0, 0x92, 0); // kernel data
-                self.set_descriptor(3, 0, 0, 0xfa, 0xa0); // user code
-                self.set_descriptor(4, 0, 0, 0xf2, 0xc); // user data
+                self.setDescriptor(0, 0, 0, 0, 0); // null
+                self.setDescriptor(1, 0, 0, 0x9a, 0xa0); // kernel code
+                self.setDescriptor(2, 0, 0, 0x92, 0); // kernel data
+                self.setDescriptor(3, 0, 0, 0xfa, 0xa0); // user code
+                self.setDescriptor(4, 0, 0, 0xf2, 0xc); // user data
                 // in long mode the TSS takes two entries
-                self.set_descriptor(5, reinterpret_cast<Lib::u64>(&self.tss.getData()) & 0xffffffff, sizeof(TssData) - 1, 0x89, 0);
+                self.setDescriptor(5, reinterpret_cast<Lib::u64>(&self.tss.getData()) & 0xffffffff, sizeof(TssData) - 1, 0x89, 0);
                 Lib::memset(&self.descriptors[6], 0, sizeof(GdtDescriptor));
                 *reinterpret_cast<Lib::u32 *>(&self.descriptors[6]) = (reinterpret_cast<Lib::u64>(&self.tss.getData()) >> 32) & 0xffffffff;
 
@@ -41,7 +41,7 @@ namespace Kiwi::Cpu
                 Lib::Log::logger.ok("loaded gdt");
         }
 
-        void Gdt::set_descriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags)
+        void Gdt::setDescriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags)
         {
                 self.descriptors[n].limit_low        = limit & 0xffff;
                 self.descriptors[n].base_low         = base & 0xffff;
