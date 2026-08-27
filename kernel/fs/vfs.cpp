@@ -119,7 +119,7 @@ namespace Kiwi::Fs::Vfs
                 return Status::Success;
         }
 
-        File *open_file(const Lib::String &path)
+        File *openFile(const Lib::String &path)
         {
                 VNode *vnd = lookupNode(path);
                 if (not vnd)
@@ -140,7 +140,7 @@ namespace Kiwi::Fs::Vfs
                 return f;
         }
 
-        Status close_file(File *file)
+        Status closeFile(File *file)
         {
                 if (not file)
                         return Status::NullFile;

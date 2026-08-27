@@ -6,27 +6,23 @@
 #include <lib/conversion.hpp>
 #include <lib/memory.hpp>
 
-using kernel::lib::itoa;
-using kernel::lib::strcmp;
-
-namespace kernel::test::LibPackage {
-
-TARWI_MODULE(ConversionModule)
+namespace Kiwi::Test::LibPackage
 {
-        TARWI_SET_NAME("ConversionModule");
-
-        TARWI_UNIT(unitTestItoa)
+        TARWI_MODULE(ConversionModule)
         {
-                char buf[10];
-                int i = 1234;
-                char *s = itoa(i, buf, 10);
-                TARWI_EXPECT(strcmp(s, "1234") == 0);
-        }
+                TARWI_SET_NAME("ConversionModule");
 
-        TARWI_MODULE_MAIN()
-        {
-                TARWI_CALL_UNIT(unitTestItoa);
-        }
-};
+                TARWI_UNIT(unitTestItoa)
+                {
+                        char buf[10];
+                        int i = 1234;
+                        char *s = Lib::itoa(i, buf, 10);
+                        TARWI_EXPECT(Lib::strcmp(s, "1234") == 0);
+                }
 
-} /* namespace kernel::test::LibPackage */
+                TARWI_MODULE_MAIN()
+                {
+                        TARWI_CALL_UNIT(unitTestItoa);
+                }
+        };
+} // namespace Kiwi::Test::LibPackage

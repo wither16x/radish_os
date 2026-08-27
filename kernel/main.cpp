@@ -1,3 +1,4 @@
+#include "cpu/cpu.hpp"
 #include <kernel.hpp>
 #include <panic.hpp>
 #include <boot/bootinfo.hpp>
@@ -27,161 +28,148 @@
 #include <proc/scheduler.hpp>
 #include <test.hpp>
 
-using namespace kernel::drivers;
-using namespace kernel::fs;
-using namespace kernel::mem;
-using namespace kernel::proc;
-
-using kernel::lib::u64, kernel::lib::uptr;
-using kernel::lib::log::logger;
-using kernel::boot::BootInfo;
-using kernel::cpu::GDT, kernel::cpu::IDT, kernel::cpu::sti;
-
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
 
-namespace kernel {
-
-/// Call the global constructors to initialize them.
-/// A heap allocator is required.
-void call_global_constructors()
+namespace Kiwi
 {
-        for (u64 i = 0; &__init_array[i] != __init_array_end; i++) {
-                __init_array[i]();
-                logger.ok("initialized global constructor %u", i);
+        /// Call the global constructors to initialize them.
+        /// A heap allocator is required.
+        void callGlobalConstructors()
+        {
+                for (Lib::u64 i = 0; &__init_array[i] != __init_array_end; i++) {
+                        __init_array[i]();
+                        Lib::Log::logger.ok("initialized global constructor %u", i);
+                }
+
+                Lib::Log::logger.ok("called global constructors");
         }
 
-        logger.ok("called global constructors");
-}
+        /// Mount the initrd.
+        void mountInitrd(Boot::BootInfo::ModuleInfo &info)
+        {
+                // 'I' for initrd
+                Lib::u64 idx = Boot::BootInfo::ModuleInfo::MAX_MODULES + 1;
+                for (Lib::u64 i = 0; i < info.count; i++) {
+                        if (Kiwi::Lib::strcmp(info.modules[i].path, "/initrd.tar") == 0)
+                                idx = i;
+                }
+                if (idx == Boot::BootInfo::ModuleInfo::MAX_MODULES + 1)
+                        Lib::Log::logger.err("initrd not found");
+                else
+                        Lib::Log::logger.ok("found initrd");
 
-/// Mount the initrd.
-void mount_initrd(BootInfo::ModuleInfo &info)
-{
-        // 'I' for initrd
-        u64 idx = BootInfo::ModuleInfo::MAX_MODULES + 1;
-        for (u64 i = 0; i < info.count; i++) {
-                if (kernel::lib::strcmp(info.modules[i].path, "/initrd.tar") == 0)
-                        idx = i;
+                Fs::Vfs::mount('I', new Fs::Ustar::USTAR(info.modules[idx].address));
+
+                Lib::Log::logger.ok("mounted initrd as I");
         }
-        if (idx == BootInfo::ModuleInfo::MAX_MODULES + 1)
-                logger.err("initrd not found");
-        else
-                logger.ok("found initrd");
 
-        vfs::mount('I', new ustar::USTAR(info.modules[idx].address));
+        void mountDevices()
+        {
+                Fs::Vfs::mount('D', new Fs::Devfs::Devfs());
+                Lib::Log::logger.ok("mounted devfs as D");
+        }
 
-        logger.ok("mounted initrd as I");
-}
+        /// Unmount the initrd (do it at the end).
+        void unmountInitrd()
+        {
+                Fs::Vfs::unmount('I');
+                Lib::Log::logger.ok("unmounted initrd");
+        }
 
-void mount_devices()
-{
-        vfs::mount('D', new devfs::DEVFS());
-        logger.ok("mounted devfs as D");
-}
+        /// Set up the kernel console.
+        void initConsole()
+        {
+                Drivers::Console::Console kconsole(Drivers::Framebuffer::getWidth(), Drivers::Framebuffer::getHeight());
+                Drivers::Console::setConsole(kconsole);
+                Drivers::Console::Console &console = Drivers::Console::getConsole();
+                console.initFont("I:/fonts/zap-light20.psf");
 
-/// Unmount the initrd (do it at the end).
-void unmount_initrd()
-{
-        vfs::unmount('I');
-        logger.ok("unmounted initrd");
-}
+                Lib::Log::logger.ok("initialized console");
+                Lib::Log::logger.info("framebuffer should now be used for display");
+        }
 
-/// Set up the kernel console.
-void init_console()
-{
-        console::Console kconsole(framebuffer::get_width(), framebuffer::get_height());
-        console::set_console(kconsole);
-        console::Console &console = console::get_console();
-        console.init_font("I:/fonts/zap-light20.psf");
+        /// Idle.
+        void kernelHang()
+        {
+                panic("nothing to do");
+        }
 
-        logger.ok("initialized console");
-        logger.info("framebuffer should now be used for display");
-}
+        /// Kernel entry point.
+        extern "C" void kernel_main()
+        {
+                if (not Boot::Limine::getBaseRevision().isSupported())
+                        panic("limine base revsion not supported"); // you wont see the message
 
-/// Idle.
-void kernel_hang()
-{
-        panic("nothing to do");
-}
+                if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
+                        panic("no display device"); // so the message cannot be printed lol
 
-/// Kernel entry point.
-extern "C" void kernel_main()
-{
-        if (not boot::limine::get_base_revision().is_supported())
-                panic("limine base revsion not supported"); // you wont see the message
+                Lib::Log::logger.setContext("kernel");
 
-        if (not serial::init_port(serial::Port::SERIAL_COM1))
-                panic("no display device"); // so the message cannot be printed lol
+                Cpu::Gdt gdt;
+                setKernelGdt(gdt);
+                getKernelGdt().init();
+                getKernelGdt().load();
 
-        logger.set_context("kernel");
+                Cpu::Idt idt;
+                setKernelIdt(idt);
+                getKernelIdt().init();
+                getKernelIdt().load();
 
-        GDT gdt;
-        set_kernel_gdt(gdt);
-        get_kernel_gdt().init();
-        get_kernel_gdt().load();
+                getKernelGdt().getTss().flush();
 
-        IDT idt;
-        set_kernel_idt(idt);
-        get_kernel_idt().init();
-        get_kernel_idt().load();
+                Boot::BootInfo bootinfo;
+                setKernelHhdmOffset(bootinfo.hhdm.offset);
 
-        get_kernel_gdt().get_tss().flush();
+                Mem::Pmm::init(bootinfo.memmap);
 
-        BootInfo bootinfo;
-        set_kernel_hhdm_offset(bootinfo.hhdm.offset);
+                Mem::PML4T kpml4t = Mem::Vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+                kpml4t.load();
+                setKernelPml4t(kpml4t);
 
-        pmm::init(bootinfo.memmap);
+                Mem::Heap::init();
 
-        PML4T kpml4t = vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
-        kpml4t.load();
-        set_kernel_pml4t(kpml4t);
+                Drivers::Pic::remap();
+                Lib::Log::logger.ok("remapped 8259 pic");
+                Drivers::Pic::irqMaskAll();
+                Lib::Log::logger.ok("masked all irq");
 
-        heap::init();
+                Drivers::Pit::init();
 
-        pic::remap();
-        logger.ok("remapped 8259 pic");
-        pic::irq_mask_all();
-        logger.ok("masked all irq");
+                Drivers::Ps2Kbd::init();
 
-        pit::init();
+                Cpu::enableInterrupts();
 
-        ps2kbd::init();
+                callGlobalConstructors();
 
-        sti();
+                mountDevices();
 
-        call_global_constructors();
+                Drivers::Keyboard::init();
 
-        mount_devices();
+                mountInitrd(bootinfo.modules);
 
-        keyboard::init();
+                Drivers::Framebuffer::init(
+                        bootinfo.framebuffer.address,
+                        bootinfo.framebuffer.width,
+                        bootinfo.framebuffer.height,
+                        bootinfo.framebuffer.pitch
+                );
+                Lib::Log::logger.ok("initialized framebuffer");
 
-        mount_initrd(bootinfo.modules);
+                Proc::Scheduler::init();
+                Cpu::enableSse2();
+                Lib::Log::logger.ok("enabled sse2");
 
-        framebuffer::init(
-                bootinfo.framebuffer.address,
-                bootinfo.framebuffer.width,
-                bootinfo.framebuffer.height,
-                bootinfo.framebuffer.pitch
-        );
-        logger.ok("initialized framebuffer");
+                initConsole();
 
-        scheduler::init();
-        cpu::enable_sse2();
-        logger.ok("enabled sse2");
+                Test::testLib();
+                Test::testFloat();
 
-        init_console();
+                Proc::spawn("I:/bin/init");
+                
+                unmountInitrd();
+                Fs::Vfs::unmount('D');
 
-        scheduler::init();
-
-        test::test_lib();
-        test::test_float();
-
-        spawn("I:/bin/init");
-        
-        unmount_initrd();
-        vfs::unmount('D');
-
-        kernel_hang();
-}
-
-} /* namespace kernel */
+                kernelHang();
+        }
+} // namespace kernel

@@ -342,7 +342,7 @@ namespace Kiwi::Proc
 
         void Process::useKernelStack(this const Process &self)
         {
-                get_kernel_gdt().getTss().resetStack(self.kernel_stack.get());
+                getKernelGdt().getTss().resetStack(self.kernel_stack.get());
         }
 
         void Process::addFileDescriptor(this Process &self, Lib::File *file)

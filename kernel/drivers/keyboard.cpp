@@ -116,7 +116,7 @@ namespace Kiwi::Drivers::Keyboard
                 Lib::Log::logger.ok("initialized generic keyboard driver");
         }
 
-        char scancode_to_key(Lib::u8 scancode)
+        char scancodeToKey(Lib::u8 scancode)
         {
                 if (scancode == 0xf0) {
                         expecting_break = true;

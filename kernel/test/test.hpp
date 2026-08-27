@@ -1,8 +1,7 @@
 #pragma once
 
-namespace kernel::test {
-
-void test_lib();
-void test_float();
-
-} /* namespace kernel::test */
+namespace Kiwi::Test
+{
+        void testLib();
+        void testFloat();
+} // namespace Kiwi::Test

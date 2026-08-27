@@ -5,7 +5,7 @@ namespace Kiwi::Cpu
 {
         namespace
         {
-                extern "C" void __Tss_flush();
+                extern "C" void __tss_flush();
         } // anonymous namespace
 
         void Tss::init(this Tss &self, Lib::uptr kernel_rsp)
@@ -15,7 +15,7 @@ namespace Kiwi::Cpu
 
         void Tss::flush() const
         {
-                __Tss_flush();
+                __tss_flush();
         }
 
         void Tss::resetStack(this Tss &self, Lib::uptr kernel_rsp)

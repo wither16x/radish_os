@@ -6,25 +6,25 @@
 #include <LibPackage/ConversionModule.hpp>
 #include <LibPackage/VectorModule.hpp>
 
-namespace kernel::test::LibPackage {
-
-TARWI_PACKAGE(LibPackage) {
-        TARWI_SET_NAME("LibPackage");
-
-        ConversionModule        conversion_module;
-        VectorModule            vector_module;
-
-        TARWI_PACKAGE_MAIN()
+namespace Kiwi::Test::LibPackage
+{
+        TARWI_PACKAGE(LibPackage)
         {
-                TARWI_RUN_MODULE(conversion_module);
-                TARWI_RUN_MODULE(vector_module);
+                TARWI_SET_NAME("LibPackage");
 
-                TARWI_DISPLAY_RESULTS(
-                        conversion_module.successfull_tests + vector_module.successfull_tests,
-                        conversion_module.failed_tests + vector_module.failed_tests,
-                        conversion_module.skipped_tests + vector_module.skipped_tests
-                );
-        }
-};
+                ConversionModule        conversion_module;
+                VectorModule            vector_module;
 
-} /* namespave kernel::test::LibPackage */
+                TARWI_PACKAGE_MAIN()
+                {
+                        TARWI_RUN_MODULE(conversion_module);
+                        TARWI_RUN_MODULE(vector_module);
+
+                        TARWI_DISPLAY_RESULTS(
+                                conversion_module.successfull_tests + vector_module.successfull_tests,
+                                conversion_module.failed_tests + vector_module.failed_tests,
+                                conversion_module.skipped_tests + vector_module.skipped_tests
+                        );
+                }
+        };
+} // namespave Kiwi::Test::LibPackage

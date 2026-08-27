@@ -5,6 +5,6 @@
         #include <lib/print.hpp>
         #define TARWI_OUTPUT(...) \
                 do { \
-                        kernel::lib::printf("[tarwi] " __VA_ARGS__); \
+                        Kiwi::Lib::printf("[tarwi] " __VA_ARGS__); \
                 } while (0)
 #endif

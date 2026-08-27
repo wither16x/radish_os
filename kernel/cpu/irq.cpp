@@ -19,13 +19,13 @@ namespace Kiwi::Cpu
                 Lib::callable<void, IrqFrame &> handlers[MAX_IRQ_HANDLERS];
         } // anonymous namespace
 
-        void register_irq(int n, Lib::callable<void, IrqFrame &> handler)
+        void registerIrq(int n, Lib::callable<void, IrqFrame &> handler)
         {
                 handlers[n] = handler;
                 Drivers::Pic::irqUnmask(n);
         }
 
-        extern "C" void irq_handler(IrqFrame &f)
+        extern "C" void irqHandler(IrqFrame &f)
         {
                 if (f.irqno >= MAX_IRQ_HANDLERS) {
                         Lib::Log::logger.err("received unexpected irq: %u", f.irqno);

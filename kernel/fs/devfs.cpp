@@ -215,7 +215,7 @@ namespace Kiwi::Fs::Devfs
                 return Vfs::Status::Success;
         }
 
-        void register_device(DeviceType type, const Lib::String &path)
+        void registerDevice(DeviceType type, const Lib::String &path)
         {
                 Vfs::mkfile(path);
                 Lib::String devname = path.sub(3);

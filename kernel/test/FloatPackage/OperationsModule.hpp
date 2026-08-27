@@ -3,22 +3,21 @@
 #include <Tarwi/Tarwi.hpp>
 #include <Tarwi/Globals.hpp>
 
-namespace kernel::test::FloatPackage {
-
-TARWI_MODULE(OperationsModule)
+namespace Kiwi::Test::FloatPackage
 {
-        TARWI_SET_NAME("OperationsModule");
-
-        TARWI_UNIT(unitAddition)
+        TARWI_MODULE(OperationsModule)
         {
-                float result = 2.0f + 5.4f;
-                TARWI_EXPECT(result == 7.4f);
-        }
+                TARWI_SET_NAME("OperationsModule");
 
-        TARWI_MODULE_MAIN()
-        {
-                TARWI_CALL_UNIT(unitAddition);
-        }
-};
+                TARWI_UNIT(unitAddition)
+                {
+                        float result = 2.0f + 5.4f;
+                        TARWI_EXPECT(result == 7.4f);
+                }
 
-} /* namespace kernel::test::FloatPackage */
+                TARWI_MODULE_MAIN()
+                {
+                        TARWI_CALL_UNIT(unitAddition);
+                }
+        };
+} // namespace Kiwi::Test::FloatPackage

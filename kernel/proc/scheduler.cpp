@@ -150,7 +150,7 @@ namespace Kiwi::Proc::Scheduler
                 return nullptr; // process not found
         }
 
-        void set_current_process(Process *p)
+        void setCurrentProcess(Process *p)
         {
                 ctx.current_process = p;
         }

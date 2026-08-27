@@ -8,7 +8,7 @@ __irq_stub%1:
 [bits 64]
 
 section .text
-extern irq_handler
+extern irqHandler
 
 irq 0                   ; timer
 irq 1                   ; keyboard
@@ -38,7 +38,7 @@ irq_common:
 
         cld
         mov rdi, rsp
-        call irq_handler
+        call irqHandler
 
         pop rax
         pop rax

@@ -25,6 +25,6 @@ namespace Kiwi
         Cpu::Idt &getKernelIdt();
         void setKernelIdt(const Cpu::Idt &idt);
 
-        Cpu::Gdt &get_kernel_gdt();
-        void set_kernel_gdt(const Cpu::Gdt &gdt);
+        Cpu::Gdt &getKernelGdt();
+        void setKernelGdt(const Cpu::Gdt &gdt);
 } // namespace Kiwi

@@ -15,7 +15,7 @@ namespace Kiwi::Boot::Limine
                 volatile EndMarker limine_requests_end_marker = requestsEndMarker();
         } // anonymous namespace
 
-        Revision base_revision(Lib::u64 n)
+        Revision baseRevision(Lib::u64 n)
         {
                 return LIMINE_BASE_REVISION(n);
         }

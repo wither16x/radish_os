@@ -4,69 +4,53 @@
 #include <kernel.hpp>
 #include <lib/typing.hpp>
 
-using kernel::lib::u8, kernel::lib::u64;
-
-namespace kernel {
-
-namespace {
-
-mem::PML4T kpml4t;
-u64 hhdm_offset;
-cpu::IDT kidt;
-cpu::GDT kgdt;
-
-} /* anonymous namespace */
-
-// --------------------------------------------------
-mem::PML4T &get_kernel_pml4t()
+namespace Kiwi
 {
-        return kpml4t;
-}
-// --------------------------------------------------
+        namespace
+        {
+                Mem::PML4T kpml4t;
+                Lib::u64 hhdm_offset;
+                Cpu::Idt kidt;
+                Cpu::Gdt kgdt;
+        } // anonymous namespace
 
-// --------------------------------------------------
-void set_kernel_pml4t(mem::PML4T &pml4t)
-{
-        kpml4t = pml4t;
-}
-// --------------------------------------------------
+        Mem::PML4T &getKernelPml4t()
+        {
+                return kpml4t;
+        }
 
-// --------------------------------------------------
-u64 get_kernel_hhdm_offset()
-{
-        return hhdm_offset;
-}
-// --------------------------------------------------
+        void setKernelPml4t(Mem::PML4T &pml4t)
+        {
+                kpml4t = pml4t;
+        }
 
-// --------------------------------------------------
-void set_kernel_hhdm_offset(lib::u64 offset)
-{
-        hhdm_offset = offset;
-}
-// --------------------------------------------------
+        Lib::u64 getKernelHhdmOffset()
+        {
+                return hhdm_offset;
+        }
 
-// --------------------------------------------------
-cpu::IDT &get_kernel_idt()
-{
-        return kidt;
-}
-// --------------------------------------------------
+        void setKernelHhdmOffset(Lib::u64 offset)
+        {
+                hhdm_offset = offset;
+        }
 
-// --------------------------------------------------
-void set_kernel_idt(const cpu::IDT &idt)
-{
-        kidt = idt;
-}
-// --------------------------------------------------
+        Cpu::Idt &getKernelIdt()
+        {
+                return kidt;
+        }
 
-cpu::GDT &get_kernel_gdt()
-{
-        return kgdt;
-}
+        void setKernelIdt(const Cpu::Idt &idt)
+        {
+                kidt = idt;
+        }
 
-void set_kernel_gdt(const cpu::GDT &gdt)
-{
-        kgdt = gdt;
-}
+        Cpu::Gdt &getKernelGdt()
+        {
+                return kgdt;
+        }
 
-} /* namespace kernel */
+        void setKernelGdt(const Cpu::Gdt &gdt)
+        {
+                kgdt = gdt;
+        }
+} // namespace Kiwi

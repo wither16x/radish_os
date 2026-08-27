@@ -20,7 +20,7 @@ namespace Kiwi::Drivers::Framebuffer
                 fb_pitch = pitch;
         }
 
-        void draw_pixel(Lib::u64 x, Lib::u64 y, Lib::u32 color)
+        void drawPixel(Lib::u64 x, Lib::u64 y, Lib::u32 color)
         {
                 if (x < 0 || x > fb_width || y < 0 || y > fb_height)
                         return;
