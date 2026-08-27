@@ -20,7 +20,6 @@ A x86_64 operating system made from scratch that I am making for learning purpos
 - 4-level paging
 
 ## Components and related projects
-* [Lichee](bootloader/): the bootloader (not mature enough, use Limine lol)
 * [Kiwi](kernel/): the kernel
 * [Tomato](https://github.com/wither16x/tomato-libc): a C99 library
 * [Tarwi](https://github.com/wither16x/tarwi): a unit test library in C++
