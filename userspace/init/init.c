@@ -5,7 +5,7 @@
 int main()
 {
         char buf[50];
-        const char *shell_file = "I:/bin/shell";
+        const char *shell_file = "I:/bin/cash";
 
         printf("Hello from init!\n");
 

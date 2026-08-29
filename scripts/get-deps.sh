@@ -28,9 +28,14 @@ clone_repo https://github.com/wither16x/tarwi \
         "$DEPENDENCIES_DIR/tarwi" \
         master
 
+clone_repo https://github.com/wither16x/cash \
+        "$DEPENDENCIES_DIR"/cash \
+        master
+
 # build stuff
 make -C "$DEPENDENCIES_DIR/Limine"
 make -C "$DEPENDENCIES_DIR/tomato-libc"
+make -C "$DEPENDENCIES_DIR/cash"
 
 # copy stuff
 cp -v "$DEPENDENCIES_DIR/limine-protocol/include/limine.h" \

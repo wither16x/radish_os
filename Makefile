@@ -12,7 +12,6 @@ build-kernel:
 
 build-userspace:
 	$(MAKE) -C userspace/hello
-	$(MAKE) -C userspace/shell
 	$(MAKE) -C userspace/init
 	$(MAKE) -C userspace/alloc
 	$(MAKE) -C userspace/cxx-test
@@ -31,7 +30,6 @@ clean-kernel:
 
 clean-userspace:
 	$(MAKE) -C userspace/hello clean
-	$(MAKE) -C userspace/shell clean
 	$(MAKE) -C userspace/init clean
 	$(MAKE) -C userspace/alloc clean
 	$(MAKE) -C userspace/cxx-test clean
