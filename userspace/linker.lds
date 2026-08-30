@@ -17,6 +17,14 @@ SECTIONS
         }
 
         . = ALIGN(0x1000);
+        .init_array : {
+        PROVIDE_HIDDEN(__init_array_start = .);
+        KEEP(*(.init_array))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+        PROVIDE_HIDDEN(__init_array_end = .);
+        }
+
+        . = ALIGN(0x1000);
         .bss : {
                 *(.bss*)
         }
