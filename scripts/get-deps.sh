@@ -35,7 +35,6 @@ clone_repo https://github.com/wither16x/cash \
 # build stuff
 make -C "$DEPENDENCIES_DIR/Limine"
 make -C "$DEPENDENCIES_DIR/tomato-libc"
-make -C "$DEPENDENCIES_DIR/cash" -f radish.mk
 
 # copy stuff
 cp -v "$DEPENDENCIES_DIR/limine-protocol/include/limine.h" \
