@@ -59,7 +59,7 @@ namespace Kiwi::Fs::Devfs
                                 while (not ch)
                                         ch = Drivers::Keyboard::read();
 
-                                static_cast<char *>(buf)[i] = ch;
+                                static_cast<char *>(buf)[this->cursor + i] = ch;
                         }
 
                         break;

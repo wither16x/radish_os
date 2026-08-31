@@ -3,7 +3,7 @@
 [bits 64]
 
 section .text
-extern syscall_handler
+extern syscallHandler
 global syscall_common
 
 ;; This subroutine is responsible for saving the registers, calling the
@@ -44,7 +44,7 @@ syscall_common:
         mov gs, bx
 
         mov rdi, rsp
-        call syscall_handler
+        call syscallHandler
 
         pop rbx
         mov ds, bx

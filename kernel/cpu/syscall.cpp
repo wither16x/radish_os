@@ -8,6 +8,8 @@
 #include <proc/process.hpp>
 #include <proc/wait.hpp>
 
+#include <lib/logging.hpp>
+
 namespace Kiwi::Cpu
 {
         namespace
@@ -27,6 +29,7 @@ namespace Kiwi::Cpu
                         SC_LASTPG,
                         SC_GETCPUTIME,
                         SC_RM,
+                        SC_SEEK,
 
                         SC_LIMIT // number of syscalls, always at the end of the enumeration
                 };
@@ -208,6 +211,24 @@ namespace Kiwi::Cpu
                         frame.rax = static_cast<Lib::u64>(res);
                 }
 
+                /// RBX = fd
+                /// RCX = position
+                /// RDX = whence (0, 1, 2)
+                void syscallSeek(SyscallFrame &frame)
+                {
+                        Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
+                        if (not curr_proc) {
+                                frame.rax = static_cast<Lib::usize>(-1);
+                                return;
+                        }
+
+                        Lib::File *file = const_cast<Lib::File *>(curr_proc->findFile(frame.rbx));
+                        Lib::usize position = frame.rcx;
+                        Fs::Vfs::SeekOrigin whence = static_cast<Fs::Vfs::SeekOrigin>(frame.rdx);
+
+                        frame.rax = static_cast<Lib::usize>(file->seek(position, whence));
+                }
+
                 void (*syscalls[])(SyscallFrame &) = {
                         syscallWrite,
                         syscallRead,
@@ -220,11 +241,12 @@ namespace Kiwi::Cpu
                         syscallClose,
                         syscallLastpg,
                         syscallGetcputime,
-                        syscallRm
+                        syscallRm,
+                        syscallSeek
                 };
         } // anonymous namespace
 
-        extern "C" void syscall_handler(SyscallFrame &frame)
+        extern "C" void syscallHandler(SyscallFrame &frame)
         {
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
                 if (curr_proc)

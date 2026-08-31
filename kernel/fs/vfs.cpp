@@ -1,3 +1,4 @@
+#include "lib/typing.hpp"
 #include <fs/vfs.hpp>
 #include <fs/path.hpp>
 #include <proc/process.hpp>
@@ -41,6 +42,24 @@ namespace Kiwi::Fs::Vfs
                         return curr_nd;
                 }
         } // anonymous namespace
+
+        Status File::seek(this File &self, Lib::usize cursor, SeekOrigin whence)
+        {
+                switch (whence) {
+                case SeekOrigin::Begin:
+                        self.cursor = 0;
+
+                case SeekOrigin::Curr:
+                        break;
+
+                case SeekOrigin::End:
+                        self.cursor = self.size;
+                        break;
+                }
+
+                self.cursor += cursor;
+                return Status::Success;
+        }
 
         Status mount(drive_id drive, FileSystem *fs)
         {

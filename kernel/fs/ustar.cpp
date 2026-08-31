@@ -180,7 +180,7 @@ namespace Kiwi::Fs::Ustar
                 if (n < this->owner->storage->size)
                         return Vfs::Status::OutOfBounds;
 
-                Lib::memcpy(buf, this->owner->storage->data, n);
+                Lib::memcpy(reinterpret_cast<Lib::uptr *>(buf) + this->cursor, this->owner->storage->data, n);
 
                 return Vfs::Status::Success;
         }

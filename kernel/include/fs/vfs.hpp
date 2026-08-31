@@ -51,9 +51,16 @@ namespace Kiwi::Fs::Vfs
                 virtual Status mkdir(const Lib::String &name);
                 virtual Status rm();
                 virtual Status getdirentn(Lib::usize *buf);
-                virtual Status readdir(DirEntry *entry, Lib::usize index) = 0;
+                virtual Status readdir(DirEntry *entry, Lib::usize index);
                 virtual Status getfilesz(Lib::usize *buf);
                 virtual VNode *lookup(const Lib::String &name);
+        };
+
+        enum class SeekOrigin
+        {
+                Begin,
+                Curr,
+                End
         };
 
         class File
@@ -64,10 +71,13 @@ namespace Kiwi::Fs::Vfs
                 VNode *vnode;
                 Lib::usize size;
                 Lib::usize ref_count = 0;
+                Lib::usize cursor = 0;
 
                 virtual Status write(const void *buf, Lib::usize size);
                 virtual Status read(void *buf, Lib::usize size);
                 virtual Status close();
+                
+                Status seek(this File &self, Lib::usize pos, SeekOrigin whence);
         };
 
         class FileSystem
