@@ -8,7 +8,7 @@ namespace Kiwi::Mem
 {
         Lib::uptr ptDeepCopy(PageTable *src, int level)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 Lib::uptr frame = Pmm::allocateFrame();
                 PageTable *new_pt = reinterpret_cast<PageTable *>(frame + hhdm_offset);

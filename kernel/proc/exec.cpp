@@ -23,7 +23,7 @@ namespace Kiwi::Proc
                 Process *proc = Scheduler::getCurrentProcess();
 
                 // Load the program located at `path`
-                Mem::PML4T &kpml4t = getKernelPml4t();
+                Mem::PML4T &kpml4t = kcontext.pml4t();
                 Mem::PML4T proc_pml4t;
                 proc_pml4t.init(kpml4t);
                 Elf::ElfInfo elf_info;

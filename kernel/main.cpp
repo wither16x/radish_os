@@ -1,10 +1,10 @@
-#include "cpu/cpu.hpp"
 #include <kernel.hpp>
 #include <panic.hpp>
 #include <boot/bootinfo.hpp>
 #include <boot/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
+#include <cpu/cpu.hpp>
 #include <cpu/idt.hpp>
 #include <cpu/sse2.hpp>
 #include <drivers/console.hpp>
@@ -107,25 +107,25 @@ namespace Kiwi
                 Lib::Log::logger.setContext("kernel");
 
                 Cpu::Gdt gdt;
-                setKernelGdt(gdt);
-                getKernelGdt().init();
-                getKernelGdt().load();
+                kcontext.setGdt(gdt);
+                kcontext.gdt().init();
+                kcontext.gdt().load();
 
                 Cpu::Idt idt;
-                setKernelIdt(idt);
-                getKernelIdt().init();
-                getKernelIdt().load();
+                kcontext.setIdt(idt);
+                kcontext.idt().init();
+                kcontext.idt().load();
 
-                getKernelGdt().getTss().flush();
+                kcontext.gdt().getTss().flush();
 
                 Boot::BootInfo bootinfo;
-                setKernelHhdmOffset(bootinfo.hhdm.offset);
+                kcontext.setHhdm(bootinfo.hhdm.offset);
 
                 Mem::Pmm::init(bootinfo.memmap);
 
                 Mem::PML4T kpml4t = Mem::Vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
                 kpml4t.load();
-                setKernelPml4t(kpml4t);
+                kcontext.setPml4t(kpml4t);
 
                 Mem::Heap::init();
 

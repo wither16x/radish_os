@@ -19,7 +19,7 @@ namespace Kiwi::Cpu
                         .offset = reinterpret_cast<Lib::u64>(&self.descriptors)
                 };
 
-                self.tss.init(KERNEL_STACK_TOP - 8);
+                self.tss.init(KernelContext::STACK_TOP - 8);
 
                 self.setDescriptor(0, 0, 0, 0, 0); // null
                 self.setDescriptor(1, 0, 0, 0x9a, 0xa0); // kernel code

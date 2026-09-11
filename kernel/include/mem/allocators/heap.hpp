@@ -35,7 +35,7 @@ namespace Kiwi::Mem::Allocators
                 {
                         Lib::uptr new_page = self.base + PAGE_SIZE * self.pages;
 
-                        getKernelPml4t().mapPage(
+                        kcontext.pml4t().mapPage(
                                 new_page,
                                 Pmm::allocateFrame(),
                                 PageFlag::ReadWriteUser | PageFlag::NoExec
@@ -89,7 +89,7 @@ namespace Kiwi::Mem::Allocators
                                 return false;
                         }
 
-                        getKernelPml4t().unmapPage(last_page);
+                        kcontext.pml4t().unmapPage(last_page);
                         --self.pages;
                         
                         return true;
@@ -149,7 +149,7 @@ namespace Kiwi::Mem::Allocators
                         self.alignment = alignment;
                         self.curr_block = nullptr;
 
-                        getKernelPml4t().mapPage(
+                        kcontext.pml4t().mapPage(
                                 self.base,
                                 Pmm::allocateFrame(),
                                 PageFlag::ReadWriteUser | PageFlag::NoExec

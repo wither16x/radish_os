@@ -35,8 +35,8 @@ namespace Kiwi::Mem::Vmm
                                 virt_addr += PAGE_SIZE;
                         }
 
-                        Lib::u64 stack_pages = KERNEL_STACK_SIZE / PAGE_SIZE;
-                        virt_addr = KERNEL_STACK_BOTTOM;
+                        Lib::u64 stack_pages = KernelContext::STACK_SIZE / PAGE_SIZE;
+                        virt_addr = KernelContext::STACK_BOTTOM;
                         
                         for (Lib::usize i = 0; i < stack_pages; i++) {
                                 pml4t->mapPage(virt_addr, Pmm::allocateFrame(), PageFlag::ReadWrite | PageFlag::NoExec);

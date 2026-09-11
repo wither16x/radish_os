@@ -11,7 +11,7 @@ namespace Kiwi::Mem
 {
         void PML4T::init(this PML4T &self)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 Lib::uptr frame = Pmm::allocateFrame();
                 self.raw_pml4t = reinterpret_cast<PageTable *>(frame + hhdm_offset);
@@ -20,7 +20,7 @@ namespace Kiwi::Mem
 
         void PML4T::init(this PML4T &self, const PML4T &parent)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 self.init();
 
@@ -43,7 +43,7 @@ namespace Kiwi::Mem
 
         void PML4T::destroy(this PML4T &self)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 for (Lib::usize pml4t_idx = 0; pml4t_idx < PAGE_TABLE_ENTRIES / 2; pml4t_idx++) {
                         if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
@@ -83,14 +83,14 @@ namespace Kiwi::Mem
 
         void PML4T::load(this const PML4T &self)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 __asm__ volatile ("movq %0, %%cr3" :: "r"(reinterpret_cast<Lib::u64>(self.raw_pml4t) - hhdm_offset));
         }
 
         void PML4T::mapPage(this PML4T &self, Lib::uptr vaddr, Lib::uptr paddr, Lib::u64 flags)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 // create intermediate page tables containing informations
                 // that tell the CPU where the corresponding frame is
@@ -139,7 +139,7 @@ namespace Kiwi::Mem
 
         void PML4T::unmapPage(this PML4T &self, Lib::uptr vaddr)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 Lib::u64 pml4t_idx   = (vaddr >> 39) & 0x1ff;
                 Lib::u64 pdpt_idx    = (vaddr >> 30) & 0x1ff;
@@ -190,7 +190,7 @@ namespace Kiwi::Mem
 
         Lib::uptr PML4T::virtToPhys(this const PML4T &self, Lib::uptr vaddr)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 Lib::u64 pml4t_idx   = (vaddr >> 39) & 0x1ff;
                 Lib::u64 pdpt_idx    = (vaddr >> 30) & 0x1ff;
@@ -214,7 +214,7 @@ namespace Kiwi::Mem
 
         bool PML4T::isMapped(this const PML4T &self, Lib::uptr vaddr)
         {
-                Lib::uptr hhdm_offset = getKernelHhdmOffset();
+                Lib::uptr hhdm_offset = kcontext.hhdm();
 
                 Lib::u64 pml4t_idx   = (vaddr >> 39) & 0x1ff;
                 Lib::u64 pdpt_idx    = (vaddr >> 30) & 0x1ff;

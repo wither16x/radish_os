@@ -8,23 +8,28 @@
 
 namespace Kiwi
 {
-        constexpr Lib::uptr KERNEL_STACK_TOP = 0xfffffffffffff000;
-        constexpr Lib::uptr KERNEL_STACK_SIZE = 64 * Mem::PAGE_SIZE;
-        constexpr Lib::uptr KERNEL_STACK_BOTTOM = KERNEL_STACK_TOP - KERNEL_STACK_SIZE;
+        class KernelContext
+        {
+                Mem::PML4T _pml4t;
+                Lib::u64 _hhdm;
+                Cpu::Idt _idt;
+                Cpu::Gdt _gdt;
 
-        /// Return the PML4 table used by the kernel.
-        Mem::PML4T &getKernelPml4t();
-        /// Set the PML4 table that the kernel must use.
-        void setKernelPml4t(Mem::PML4T &pml4t);
+        public:
+                static constexpr Lib::uptr STACK_TOP = 0xfffffffffffff000;
+                static constexpr Lib::uptr STACK_SIZE = 64 * Mem::PAGE_SIZE;
+                static constexpr Lib::uptr STACK_BOTTOM = STACK_TOP - STACK_SIZE;
 
-        /// Return the higher-half direct mapping offset.
-        Lib::u64 getKernelHhdmOffset();
-        /// Set the higher-half direct mapping offset.
-        void setKernelHhdmOffset(Lib::u64 offset);
+                void setPml4t(this KernelContext &self, const Mem::PML4T &pml4t);
+                void setHhdm(this KernelContext &self, Lib::u64 hhdm);
+                void setIdt(this KernelContext &self, const Cpu::Idt &idt);
+                void setGdt(this KernelContext &self, const Cpu::Gdt &gdt);
 
-        Cpu::Idt &getKernelIdt();
-        void setKernelIdt(const Cpu::Idt &idt);
+                Mem::PML4T &pml4t(this KernelContext &self);
+                Lib::u64 hhdm(this const KernelContext &self);
+                Cpu::Idt &idt(this KernelContext &self);
+                Cpu::Gdt &gdt(this KernelContext &self);
+        };
 
-        Cpu::Gdt &getKernelGdt();
-        void setKernelGdt(const Cpu::Gdt &gdt);
+        inline KernelContext kcontext;
 } // namespace Kiwi

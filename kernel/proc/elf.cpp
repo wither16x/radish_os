@@ -42,7 +42,7 @@ namespace Kiwi::Proc::Elf
 
         int loadElf(Mem::PML4T *pml4t, const Lib::String &path, ElfInfo *info)
         {
-                Lib::uptr hhdm = getKernelHhdmOffset();
+                Lib::uptr hhdm = kcontext.hhdm();
 
                 // read the file
                 Lib::Vector<Lib::u8> buf;

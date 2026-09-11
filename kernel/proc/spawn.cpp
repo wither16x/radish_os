@@ -18,7 +18,7 @@ namespace Kiwi::Proc
                 Process *loadProgramAsProcess(const Lib::String &path)
                 {
                         // create the process' pml4t
-                        Mem::PML4T &kpml4t = getKernelPml4t();
+                        Mem::PML4T &kpml4t = kcontext.pml4t();
                         Mem::PML4T proc_pml4t;
                         proc_pml4t.init(kpml4t);
 

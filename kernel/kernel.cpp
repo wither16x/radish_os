@@ -6,51 +6,43 @@
 
 namespace Kiwi
 {
-        namespace
+        void KernelContext::setPml4t(this KernelContext &self, const Mem::PML4T &pml4t)
         {
-                Mem::PML4T kpml4t;
-                Lib::u64 hhdm_offset;
-                Cpu::Idt kidt;
-                Cpu::Gdt kgdt;
-        } // anonymous namespace
-
-        Mem::PML4T &getKernelPml4t()
-        {
-                return kpml4t;
+                self._pml4t = pml4t;
         }
 
-        void setKernelPml4t(Mem::PML4T &pml4t)
+        void KernelContext::setHhdm(this KernelContext &self, Lib::u64 hhdm)
         {
-                kpml4t = pml4t;
+                self._hhdm = hhdm;
         }
 
-        Lib::u64 getKernelHhdmOffset()
+        void KernelContext::setIdt(this KernelContext &self, const Cpu::Idt &idt)
         {
-                return hhdm_offset;
+                self._idt = idt;
         }
 
-        void setKernelHhdmOffset(Lib::u64 offset)
+        void KernelContext::setGdt(this KernelContext &self, const Cpu::Gdt &gdt)
         {
-                hhdm_offset = offset;
+                self._gdt = gdt;
         }
 
-        Cpu::Idt &getKernelIdt()
+        Mem::PML4T &KernelContext::pml4t(this KernelContext &self)
         {
-                return kidt;
+                return self._pml4t;
         }
 
-        void setKernelIdt(const Cpu::Idt &idt)
+        Lib::u64 KernelContext::hhdm(this const KernelContext &self)
         {
-                kidt = idt;
+                return self._hhdm;
         }
 
-        Cpu::Gdt &getKernelGdt()
+        Cpu::Idt &KernelContext::idt(this KernelContext &self)
         {
-                return kgdt;
+                return self._idt;
         }
 
-        void setKernelGdt(const Cpu::Gdt &gdt)
+        Cpu::Gdt &KernelContext::gdt(this KernelContext &self)
         {
-                kgdt = gdt;
+                return self._gdt;
         }
 } // namespace Kiwi
