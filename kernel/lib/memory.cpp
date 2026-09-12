@@ -71,12 +71,15 @@ namespace Kiwi::Lib
         int strncmp(const char *s1, const char *s2, usize length)
         {
                 while (length && *s1 && (*s1 == *s2)) {
-                        s1++;
-                        s2++;
+                        ++s1;
+                        ++s2;
                         --length;
                 }
 
-                return (*s1 - '0') - (*s2 - '0');
+                if (length == 0)
+                        return 0;
+                else
+                        return (*(unsigned char *)s1 - *(unsigned char *)s2);
         }
 
         usize strlen(const char *s)
