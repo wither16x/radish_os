@@ -130,6 +130,7 @@ namespace Kiwi
                 kcontext.setPml4t(kpml4t);
 
                 Mem::Heap::init();
+                Test::testLib();
 
                 Drivers::Pic::remap();
                 Lib::Log::logger.ok("remapped 8259 pic");
@@ -163,9 +164,6 @@ namespace Kiwi
                 Lib::Log::logger.ok("enabled sse2");
 
                 initConsole();
-
-                Test::testLib();
-                Test::testFloat();
 
                 Proc::spawn("I:/bin/init");
                 

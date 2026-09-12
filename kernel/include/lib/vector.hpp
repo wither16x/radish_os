@@ -51,7 +51,7 @@ namespace Kiwi::Lib
                         this->obj_count = other.obj_count;
                 }
 
-                Vector(Vector<T> &&other)
+                Vector(Vector<T> &&other) noexcept
                         : buf(move(other.buf)), obj_count(other.obj_count), __capacity(other.__capacity)
                 {
                         other.__capacity = 0;
