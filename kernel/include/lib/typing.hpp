@@ -23,4 +23,24 @@ namespace Kiwi::Lib
 
         template<typename RET, typename... ARGS>
         using callable = RET (*)(ARGS...);
+
+        struct false_t
+        {
+                static constexpr bool value = false;
+
+                constexpr operator bool(this const false_t &self) noexcept
+                {
+                        return self.value;
+                }
+        };
+
+        struct true_t
+        {
+                static constexpr bool value = true;
+
+                constexpr operator bool(this const false_t &self) noexcept
+                {
+                        return self.value;
+                }
+        };
 } // namespace Kiwi::Lib
