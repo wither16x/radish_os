@@ -5,13 +5,13 @@
 namespace Kiwi::Lib
 {
         template<class T>
-        T&& forward( remove_reference_t<T> &&param)
+        T&& forward(RemoveReferenceType<T> &&param)
         {                                   
                 return static_cast<T&&>(param);
         }
 
         template<class T>
-        T&& forward(remove_reference_t<T> &param)
+        T&& forward(RemoveReferenceType<T> &param)
         {                                   
                 return static_cast<T&&>(param);
         }

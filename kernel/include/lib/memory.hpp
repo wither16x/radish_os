@@ -19,28 +19,28 @@ namespace Kiwi::Lib
 
         // for copy() and move()
         //
-        // remove_reference
+        // RemoveReference
         // -----------------------------------------------------------
         template<typename T>
-        struct remove_reference
+        struct RemoveReference
         {
                 using type = T;
         };
 
         template<typename T>
-        struct remove_reference<T&>
+        struct RemoveReference<T&>
         {
                 using type = T;
         };
 
         template<typename T>
-        struct remove_reference<T&&>
+        struct RemoveReference<T&&>
         {
                 using type = T; 
         };
 
         template<typename T>
-        using remove_reference_t = typename remove_reference<T>::type;
+        using RemoveReferenceType = typename RemoveReference<T>::type;
         // -----------------------------------------------------------
 
         template<typename T>
@@ -53,9 +53,9 @@ namespace Kiwi::Lib
         }
 
         template<typename T>
-        constexpr remove_reference_t<T>&& move(T&& value) noexcept
+        constexpr RemoveReferenceType<T>&& move(T&& value) noexcept
         {
-                return static_cast<remove_reference_t<T>&&>(value);
+                return static_cast<RemoveReferenceType<T>&&>(value);
         }
 
         // NOTE: all the functions below assume that the strings
