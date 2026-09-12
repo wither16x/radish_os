@@ -31,7 +31,7 @@ namespace Kiwi::Fs::Vfs
                 VNode *getNodesFromDriveRoot(const Drive &drv, const Lib::Vector<Lib::String> &parts)
                 {
                         VNode *curr_nd = drv.root;
-                        for (Lib::usize i = 0; i < parts.size() - 1; i++) {
+                        for (Lib::usize i = 0; i < parts.length() - 1; i++) {
                                 VNode *child = curr_nd->lookup(parts[i]);
                                 if (not child)
                                         return nullptr;
@@ -106,7 +106,7 @@ namespace Kiwi::Fs::Vfs
                 VNode *curr_nd = drv.root;
                 ++curr_nd->ref_count;
 
-                for (Lib::usize i = 0; i < parts.size(); i++) {
+                for (Lib::usize i = 0; i < parts.length(); i++) {
                         void *child = curr_nd->lookup(parts[i]);
                         if (not child) {
                                 releaseNode(curr_nd);
@@ -189,12 +189,12 @@ namespace Kiwi::Fs::Vfs
                 if (not drv.root)
                         return Status::NullRoot;
                 Lib::Vector<Lib::String> parts = parsePath(rel);
-                if (parts.empty())
+                if (parts.isEmpty())
                         return Status::EmptyPath;
 
                 VNode *vnd = getNodesFromDriveRoot(drv, parts);
 
-                Status ret = vnd->mkfile(parts[parts.size() - 1]);
+                Status ret = vnd->mkfile(parts[parts.length() - 1]);
                 if (vnd != drv.root)
                         releaseNode(vnd);
 
@@ -212,14 +212,14 @@ namespace Kiwi::Fs::Vfs
                 if (not drv.root)
                         return Status::NullRoot;
                 Lib::Vector<Lib::String> parts = parsePath(rel);
-                if (parts.empty())
+                if (parts.isEmpty())
                         return Status::EmptyPath;
 
                 VNode *vnd = getNodesFromDriveRoot(drv, parts);
                 if (not vnd)
                         return Status::NullNode;
 
-                Status ret = vnd->mkdir(parts[parts.size() - 1]);
+                Status ret = vnd->mkdir(parts[parts.length() - 1]);
                 if (vnd != drv.root)
                         releaseNode(vnd);
                 

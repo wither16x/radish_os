@@ -50,12 +50,12 @@ namespace Kiwi::Proc::Elf
                 getfilesz(path, &size);
                 buf.resize(size);
                 Lib::File *elf_file = Lib::open(path);
-                read(elf_file, buf.getData(), size);
+                read(elf_file, const_cast<unsigned char *>(buf.data()), size);
                 Lib::close(elf_file);
 
                 // parse the file
-                Elf64Ehdr *hdr = reinterpret_cast<Elf64Ehdr *>(buf.getData());
-                int is_file_valid = elf_check(hdr);
+                const Elf64Ehdr *hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());
+                int is_file_valid = elf_check(const_cast<Elf64Ehdr *>(hdr));
                 if (is_file_valid != 0) {
                         Lib::Log::logger.err("elf is not valid");
                         return -1;
@@ -107,7 +107,7 @@ namespace Kiwi::Proc::Elf
                                 if (to_copy > 0) {
                                         Lib::memcpy(
                                                 reinterpret_cast<void *>(hhdm + frame + (j == 0 ? intra_offset : 0)),
-                                                buf.getData() + src_off,
+                                                buf.data() + src_off,
                                                 to_copy
                                         );
                                 }

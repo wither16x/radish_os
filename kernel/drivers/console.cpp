@@ -65,10 +65,10 @@ namespace Kiwi::Drivers::Console
                 self.font_data.resize(filesz);
 
                 Lib::File *font_file = open(font);
-                Lib::read(font_file, reinterpret_cast<char *>(self.font_data.getData()), filesz);
+                Lib::read(font_file, const_cast<unsigned char *>(self.font_data.data()), filesz);
                 Lib::close(font_file);
 
-                Psf2Header *hdr = reinterpret_cast<Psf2Header *>(self.font_data.getData());
+                const Psf2Header *hdr = reinterpret_cast<const Psf2Header *>(self.font_data.data());
 
                 if (hdr->magic != PSF2_MAGIC) {
                         Lib::Log::logger.err("invalid PSF2 magic dword: 0x%x", hdr->magic);
@@ -144,7 +144,7 @@ namespace Kiwi::Drivers::Console
         {
                 Lib::u32 idx = static_cast<Lib::u8>(ch);
                 Lib::u32 bytes_per_row = (self.glyph_width + 7) / 8;
-                const Lib::u8 *glyph = self.font_data.getData() + self.glyph_offset + idx * self.glyph_size;
+                const Lib::u8 *glyph = self.font_data.data() + self.glyph_offset + idx * self.glyph_size;
 
                 for (Lib::u32 x = 0; x < self.glyph_width; x++) {
                         for (Lib::u32 y = 0; y < self.glyph_height; y++) {

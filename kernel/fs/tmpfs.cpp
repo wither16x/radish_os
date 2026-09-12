@@ -72,7 +72,7 @@ namespace Kiwi::Fs::Tmpfs
                                 return;      // node is null
 
                         if (node->dir_data) {
-                                for (Lib::usize i = 0; i < node->dir_data->nodes.size(); i++)
+                                for (Lib::usize i = 0; i < node->dir_data->nodes.length(); i++)
                                         removeNode(node->dir_data->nodes[i]);
 
                                 delete node->dir_data;
@@ -171,7 +171,7 @@ namespace Kiwi::Fs::Tmpfs
                 if (this->parent and this->parent->dir_data) {
                         Lib::Vector<Node *> &siblings = this->parent->dir_data->nodes;
 
-                        for (Lib::usize i = 0; i < siblings.size(); i++) {
+                        for (Lib::usize i = 0; i < siblings.length(); i++) {
                                 if (siblings[i] == this) {
                                         siblings.erase(i);
                                         break;
@@ -180,7 +180,7 @@ namespace Kiwi::Fs::Tmpfs
                 }
 
                 if (this->dir_data) {
-                        for (Lib::usize i = 0; i < this->dir_data->nodes.size(); i++)
+                        for (Lib::usize i = 0; i < this->dir_data->nodes.length(); i++)
                                 removeNode(this->dir_data->nodes[i]);
 
                         delete this->dir_data;
@@ -206,7 +206,7 @@ namespace Kiwi::Fs::Tmpfs
         {
                 if (this->type != NodeType::Dir)
                         return Vfs::Status::NotADirectory;
-                if (n >= this->dir_data->nodes.size())
+                if (n >= this->dir_data->nodes.length())
                         return Vfs::Status::OutOfBounds;
 
                 Node *nd        = this->dir_data->nodes[n];
@@ -226,7 +226,7 @@ namespace Kiwi::Fs::Tmpfs
                 if (name == "/")
                         return root;
 
-                for (Lib::usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                for (Lib::usize i = 0; i < this->dir_data->nodes.length(); i++) {
                         if (this->dir_data->nodes[i]->name == name)
                                 return this->dir_data->nodes[i];
                 }
@@ -249,7 +249,7 @@ namespace Kiwi::Fs::Tmpfs
                 if (this->type != NodeType::Dir)
                         return Vfs::Status::NotADirectory;
                 
-                Lib::usize count = this->dir_data->nodes.size();
+                Lib::usize count = this->dir_data->nodes.length();
                 Lib::memcpy(buf, &count, sizeof(*buf));
 
                 return Vfs::Status::Success;;
@@ -288,7 +288,7 @@ namespace Kiwi::Fs::Tmpfs
         {
                 if (root) {
                         if (root->dir_data) {
-                                for (Lib::usize i = 0; i < root->dir_data->nodes.size(); i++)
+                                for (Lib::usize i = 0; i < root->dir_data->nodes.length(); i++)
                                         removeNode(root->dir_data->nodes[i]);
                                 delete root->dir_data;
                         }

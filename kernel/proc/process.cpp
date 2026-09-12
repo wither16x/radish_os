@@ -315,7 +315,7 @@ namespace Kiwi::Proc
 
         int Process::removeChild(this Process &self, pid_t id)
         {
-                for (Lib::usize i = 0; i < self.children.size(); i++) {
+                for (Lib::usize i = 0; i < self.children.length(); i++) {
                         if (self.children[i]->id == id) {
                                 self.children.erase(i);
                                 return 0;
@@ -347,7 +347,7 @@ namespace Kiwi::Proc
 
         void Process::addFileDescriptor(this Process &self, Lib::File *file)
         {
-                for (Lib::usize i = 0; i < self.file_descriptors.size(); i++) {
+                for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (not self.file_descriptors[i]) {
                                 self.file_descriptors[i] = file;
                                 return;
@@ -359,7 +359,7 @@ namespace Kiwi::Proc
 
         void Process::removeFileDescriptor(this Process &self, Lib::File *file)
         {
-                for (Lib::usize i = 0; i < self.file_descriptors.size(); i++) {
+                for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (self.file_descriptors[i] == file) {
                                 self.file_descriptors[i] = nullptr;
                                 return;
@@ -414,14 +414,14 @@ namespace Kiwi::Proc
 
         const Lib::File *Process::findFile(this const Process &self, Lib::usize id)
         {
-                if (id >= self.file_descriptors.size())
+                if (id >= self.file_descriptors.length())
                         return nullptr;
                 return self.file_descriptors[id];
         }
 
         Lib::usize Process::findFd(this const Process &self, Lib::File *file)
         {
-                for (Lib::usize i = 0; i < self.file_descriptors.size(); i++) {
+                for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (self.file_descriptors[i] == file)
                                 return i;
                 }
@@ -448,7 +448,7 @@ namespace Kiwi::Proc
 
         void Process::die(this Process &self)
         {
-                for (Lib::usize i = 0; i < self.file_descriptors.size(); i++) {
+                for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (self.file_descriptors[i])
                                 self.file_descriptors[i]->close();
                 }

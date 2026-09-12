@@ -128,16 +128,16 @@ namespace Kiwi::Fs::Ustar
 
                                 Lib::Vector<Lib::String> parts = parsePath(path);
 
-                                if (parts.empty()) {
+                                if (parts.isEmpty()) {
                                         Lib::usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
                                         archive_p += BLOCK_SIZE + blocks * BLOCK_SIZE;
                                         continue;
                                 }
 
-                                Lib::String name = parts[parts.size() - 1];
+                                Lib::String name = parts[parts.length() - 1];
 
                                 Node *parent = root;
-                                for (Lib::usize i = 0; i < parts.size() - 1; i++) {
+                                for (Lib::usize i = 0; i < parts.length() - 1; i++) {
                                         Node *next = findDir(parent, parts[i]);
                                         if (not next)
                                                 next = __createDir(parent, parts[i]);
@@ -194,7 +194,7 @@ namespace Kiwi::Fs::Ustar
         {
                 if (not this->dir_data)
                         return Vfs::Status::NotADirectory;
-                if (n >= this->dir_data->nodes.size())
+                if (n >= this->dir_data->nodes.length())
                         return Vfs::Status::OutOfBounds;
 
                 Node *nd        = this->dir_data->nodes[n];
@@ -213,7 +213,7 @@ namespace Kiwi::Fs::Ustar
                 if (name == "/")
                         return root;
 
-                for (Lib::usize i = 0; i < this->dir_data->nodes.size(); i++) {
+                for (Lib::usize i = 0; i < this->dir_data->nodes.length(); i++) {
                         if (this->dir_data->nodes[i]->name == name)
                                 return this->dir_data->nodes[i];
                 }
@@ -238,7 +238,7 @@ namespace Kiwi::Fs::Ustar
                 if (not this->dir_data)
                         return Vfs::Status::NotADirectory;
 
-                Lib::usize count = this->dir_data->nodes.size();
+                Lib::usize count = this->dir_data->nodes.length();
                 Lib::memcpy(buf, &count, sizeof(*buf));
 
                 return Vfs::Status::Success;

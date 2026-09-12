@@ -120,7 +120,7 @@ namespace Kiwi::Fs::Devfs
                 if (this->type != NodeType::Device)
                         return Vfs::Status::IsADirectory;
 
-                for (Lib::usize i = 0; i < devices.size(); i++) {
+                for (Lib::usize i = 0; i < devices.length(); i++) {
                         if (devices[i] == this) {
                                 devices.erase(i);
                                 break;
@@ -138,7 +138,7 @@ namespace Kiwi::Fs::Devfs
         {
                 if (this->type != NodeType::Root)
                         return Vfs::Status::IsADirectory;
-                if (n >= devices.size())
+                if (n >= devices.length())
                         return Vfs::Status::OutOfBounds;
 
                 entry->name = devices[n]->name;
@@ -155,7 +155,7 @@ namespace Kiwi::Fs::Devfs
                 if (name == "/")
                         return root;
 
-                for (Lib::usize i = 0; i < devices.size(); i++) {
+                for (Lib::usize i = 0; i < devices.length(); i++) {
                         if (devices[i]->name == name)
                                 return devices[i];
                 }
@@ -168,7 +168,7 @@ namespace Kiwi::Fs::Devfs
                 if (this->type != NodeType::Root)
                         return Vfs::Status::NotADirectory;
 
-                Lib::usize count = devices.size();
+                Lib::usize count = devices.length();
                 Lib::memcpy(buf, &count, sizeof(*buf));
 
                 return Vfs::Status::Success;
@@ -203,7 +203,7 @@ namespace Kiwi::Fs::Devfs
 
         Vfs::Status Devfs::unmount()
         {
-                for (Lib::usize i = 0; i < devices.size(); i++) {
+                for (Lib::usize i = 0; i < devices.length(); i++) {
                         if (devices[i]->file_data)
                                 delete devices[i]->file_data;
                         delete devices[i];

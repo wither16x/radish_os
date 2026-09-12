@@ -27,7 +27,8 @@ void *operator new(size_t size)
 
 void operator delete(void *ptr) noexcept
 {
-        Kiwi::Lib::free(ptr);
+        if (ptr)
+                Kiwi::Lib::free(ptr);
 }
 
 void *operator new[](size_t size)
@@ -40,5 +41,6 @@ void *operator new[](size_t size)
 
 void operator delete[](void *ptr) noexcept
 {
-        Kiwi::Lib::free(ptr);
+        if (ptr)
+                Kiwi::Lib::free(ptr);
 }

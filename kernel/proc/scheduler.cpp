@@ -44,8 +44,8 @@ namespace Kiwi::Proc::Scheduler
                 {
                         Lib::usize __new_proc_idx = ctx.current_process_index;
 
-                        for (Lib::usize i = 0; i < ctx.processes.size(); i++) {
-                                Lib::usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.size();
+                        for (Lib::usize i = 0; i < ctx.processes.length(); i++) {
+                                Lib::usize idx = (ctx.current_process_index + 1 + i) % ctx.processes.length();
                                 if (not ctx.processes[idx]->isDead() and ctx.processes[idx] != old_proc) {
                                         __new_proc_idx = idx;
                                         Lib::memcpy(new_proc_idx, &__new_proc_idx, sizeof(*new_proc_idx));
@@ -78,7 +78,7 @@ namespace Kiwi::Proc::Scheduler
         // void remove_process(PID pid)
         void removeProcess(Process *p)
         {
-                for (Lib::usize i = 0; i < ctx.processes.size(); i++) {
+                for (Lib::usize i = 0; i < ctx.processes.length(); i++) {
                         if (ctx.processes[i] == p) {
                                 ctx.processes.erase(i);
                                 break;
@@ -88,7 +88,7 @@ namespace Kiwi::Proc::Scheduler
 
         void tick()
         {
-                if (ctx.status == Status::Locked or ctx.processes.empty() or not ctx.current_process)
+                if (ctx.status == Status::Locked or ctx.processes.isEmpty() or not ctx.current_process)
                         return;
 
                 if (ctx.current_process->getStatus() != ProcessStatus::Dead) {

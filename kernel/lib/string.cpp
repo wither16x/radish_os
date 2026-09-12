@@ -18,16 +18,16 @@ namespace Kiwi::Lib
 
         const char *String::raw(this const String &self)
         {
-                return self.data.getData();
+                return self.data.data();
         }
 
         usize String::length(this const String &self)
         {
                 // avoid returning -1
-                if (self.data.empty())
+                if (self.data.isEmpty())
                         return 0;
 
-                return self.data.size() - 1;
+                return self.data.length() - 1;
         }
 
         String String::sub(this const String &self, usize start)
@@ -35,7 +35,7 @@ namespace Kiwi::Lib
                 String s;
 
                 s.data.popBack();
-                usize len = self.data.size();
+                usize len = self.data.length();
 
                 if (start >= len)
                         return s;
@@ -53,7 +53,7 @@ namespace Kiwi::Lib
 
                 s.data.popBack();
 
-                for (usize i = 0; i < other.data.size(); ++i)
+                for (usize i = 0; i < other.data.length(); ++i)
                         s.data.pushBack(other.data[i]);
                 s.data.pushBack('\0');
 
@@ -95,6 +95,6 @@ namespace Kiwi::Lib
 
         bool String::operator ==(this const String &self, const String &other)
         {
-                return strcmp(self.data.getData(), other.data.getData()) == 0;
+                return strcmp(self.data.data(), other.data.data()) == 0;
         }
 } // namespace Kiwi::Lib

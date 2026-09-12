@@ -12,7 +12,7 @@ namespace Kiwi::Proc
                 if (not proc)
                         return -1; // there is no current process
 
-                if (proc->getChildren().size() == 0)
+                if (proc->getChildren().isEmpty())
                         return -2; // process has no child
 
                 Process *dead_child = nullptr;
