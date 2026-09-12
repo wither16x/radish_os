@@ -98,6 +98,8 @@ namespace Kiwi
         /// Kernel entry point.
         extern "C" void kernel_main()
         {
+                kcontext.init();
+
                 if (not Boot::Limine::getBaseRevision().isSupported())
                         panic("limine base revsion not supported"); // you wont see the message
 

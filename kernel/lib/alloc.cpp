@@ -1,5 +1,7 @@
 #include <lib/alloc.hpp>
 #include <mem/heap.hpp>
+#include <kernel.hpp>
+#include <panic.hpp>
 
 namespace Kiwi::Lib
 {
@@ -16,6 +18,9 @@ namespace Kiwi::Lib
 
 void *operator new(size_t size)
 {
+        if (not Kiwi::kcontext.heap_available)
+                Kiwi::panic("no heap available");
+
         void *p = Kiwi::Lib::malloc(size);
         return p;
 }
@@ -27,6 +32,9 @@ void operator delete(void *ptr) noexcept
 
 void *operator new[](size_t size)
 {
+        if (not Kiwi::kcontext.heap_available)
+                Kiwi::panic("no heap available");
+
         return Kiwi::Lib::malloc(size);
 }
 

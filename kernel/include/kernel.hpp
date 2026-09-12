@@ -20,6 +20,9 @@ namespace Kiwi
                 static constexpr Lib::uptr STACK_SIZE = 64 * Mem::PAGE_SIZE;
                 static constexpr Lib::uptr STACK_BOTTOM = STACK_TOP - STACK_SIZE;
 
+                bool heap_available;
+
+                void init(this KernelContext &self);
                 void setPml4t(this KernelContext &self, const Mem::PML4T &pml4t);
                 void setHhdm(this KernelContext &self, Lib::u64 hhdm);
                 void setIdt(this KernelContext &self, const Cpu::Idt &idt);

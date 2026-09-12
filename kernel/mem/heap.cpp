@@ -2,6 +2,7 @@
 #include <lib/typing.hpp>
 #include <mem/allocators/heap.hpp>
 #include <mem/heap.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Mem::Heap
 {
@@ -13,6 +14,7 @@ namespace Kiwi::Mem::Heap
         void init()
         {
                 allocator.init(HEAP_START, 16);
+                kcontext.heap_available = true;
                 Lib::Log::logger.ok("initialized heap");
         }
 
