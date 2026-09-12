@@ -99,9 +99,9 @@ namespace Kiwi::Lib
 
                         self.has_value = other.has_value;
                         if (self.has_value)
-                                new (self._value) T(move(other._value));
+                                new (&self._value) T(move(other._value));
                         else
-                                new (self._error) E(move(other._error));
+                                new (&self._error) E(move(other._error));
 
                         return self;
                 }
