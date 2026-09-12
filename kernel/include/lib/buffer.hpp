@@ -17,7 +17,7 @@ namespace Kiwi::Lib
                 static T *allocate(usize size)
                 {
                         if (size)
-                                return static_cast<T *>(::operator new(size * sizeof(T)));
+                                return static_cast<T *>(::operator new[](size * sizeof(T)));
                         return nullptr;
                 }
 
@@ -39,7 +39,9 @@ namespace Kiwi::Lib
                 
                 Buffer(const Buffer<T> &other)
                         : data(allocate(other.__size)), __size(other.__size)
-                {}
+                {
+                        memcpy(this->data, other.data, this->__size);
+                }
 
                 Buffer(Buffer<T> &&other)
                         : data(other.data), __size(other.__size)
@@ -50,7 +52,7 @@ namespace Kiwi::Lib
 
                 ~Buffer()
                 {
-                        ::operator delete(this->data);
+                        ::operator delete[](this->data);
                 }
 
                 template<typename... ARGS>
@@ -94,7 +96,7 @@ namespace Kiwi::Lib
                         return self;
                 }
 
-                Result<Buffer<T> &, bool>move(this const Buffer<T> &self, Buffer<T> &dest, usize size)
+                Result<Buffer<T> &, bool> move(this const Buffer<T> &self, Buffer<T> &dest, usize size)
                 {
                         if (size > self.__size)
                                 return Error(false);
@@ -152,7 +154,8 @@ namespace Kiwi::Lib
                 {
                         T *new_data = new T[new_size];
 
-                        for (usize i = 0; i < self.__size; ++i)
+                        usize count = self.__size < new_size ? self.__size : new_size;
+                        for (usize i = 0; i < count; ++i)
                                 new_data[i] = self.data[i];
 
                         delete[] self.data;
@@ -162,7 +165,7 @@ namespace Kiwi::Lib
 
                 bool operator ==(this const Buffer<T> &self, const Buffer<T> &other)
                 {
-                        return self.__size == other.__size and self.compare(other, self.__size) == 0;
+                        return self.__size == other.__size and self.compare(other, self.__size).value() == 0;
                 }
 
                 bool operator !=(this const Buffer<T> &self, const Buffer<T> &other)
@@ -173,18 +176,18 @@ namespace Kiwi::Lib
                 bool operator <(this const Buffer<T> &self, const Buffer<T> &other)
                 {
                         usize size = self.__size < other.__size ? self.__size : other.__size;
-                        int result = self.compare(other, size);
-                        if (result != 0)
-                                return result < 0;
+                        auto result = self.compare(other, size);
+                        if (result.value() != 0)
+                                return result.value() < 0;
                         return self.__size < other.__size;
                 }
 
                 bool operator >(this const Buffer<T> &self, const Buffer<T> &other)
                 {
                         usize size = self.__size < other.__size ? self.__size : other.__size;
-                        int result = self.compare(other, size);
-                        if (result != 0)
-                                return result > 0;
+                        auto result = self.compare(other, size);
+                        if (result.value() != 0)
+                                return result.value() > 0;
                         return self.__size > other.__size;
                 }
 
@@ -217,9 +220,10 @@ namespace Kiwi::Lib
                 Buffer<T> &operator =(this Buffer<T> &self, const Buffer<T> &other)
                 {
                         if (&self != &other) {
-                                ::operator delete(self.data);
+                                ::operator delete[](self.data);
                                 self.data = allocate(other.__size);
                                 self.__size = other.__size;
+                                memcpy(self.data, other.data, self.__size);
                         }
 
                         return self;
@@ -228,7 +232,7 @@ namespace Kiwi::Lib
                 Buffer<T> &operator =(this Buffer<T> &self, Buffer<T> &&other)
                 {
                         if (&self != &other) {
-                                ::operator delete(self.data);
+                                ::operator delete[](self.data);
                                 self.data = other.data;
                                 self.__size = other.__size;
 
