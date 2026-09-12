@@ -4,6 +4,7 @@
 #include <lib/buffer.hpp>
 #include <lib/memory.hpp>
 #include <lib/forward.hpp>
+#include <lib/result.hpp>
 
 namespace Kiwi::Lib
 {
@@ -101,7 +102,7 @@ namespace Kiwi::Lib
                         ++self.obj_count;
                 }
 
-                T popBack(this Vector<T> &self)
+                Result<T, bool> popBack(this Vector<T> &self)
                 {
                         if (self.obj_count > 0) {
                                 --self.obj_count;
@@ -109,7 +110,7 @@ namespace Kiwi::Lib
                                 self.buf.destroy(self.obj_count);
                                 return obj;
                         } else {
-                                return T(0);
+                                return Error(false);
                         }
                 }
 
@@ -182,7 +183,7 @@ namespace Kiwi::Lib
                 T &operator [](this Vector<T> &self, usize index)
                 {
                         if (index >= self.obj_count)
-                                return self.buf[0];
+                                panic("index out of range");
 
                         return self.buf[index];
                 }
@@ -190,7 +191,7 @@ namespace Kiwi::Lib
                 const T &operator [](this const Vector<T> &self, usize index)
                 {
                         if (index >= self.obj_count)
-                                return self.buf[0];
+                                panic("index out of range");
 
                         return self.buf[index];
                 }

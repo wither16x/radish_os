@@ -3,6 +3,8 @@
 #include <lib/typing.hpp>
 #include <lib/forward.hpp>
 #include <lib/alloc.hpp>
+#include <lib/result.hpp>
+#include <panic.hpp>
 
 namespace Kiwi::Lib
 {
@@ -70,46 +72,46 @@ namespace Kiwi::Lib
                         return true;
                 }
 
-                Buffer<T> &copy(this const Buffer<T> &self, Buffer<T> &dest, usize size)
+                Result<Buffer<T> &, bool> copy(this const Buffer<T> &self, Buffer<T> &dest, usize size)
                 {
                         if (size > self.__size)
-                                return dest;
+                                return Error(false);
                         if (size > dest.__size)
-                                return dest;
+                                return Error(false);
 
                         memcpy(dest.data, self.data, size);
 
                         return dest;
                 }
 
-                Buffer<T> &set(this Buffer<T> &self, T c, usize size)
+                Result<Buffer<T> &, bool>set(this Buffer<T> &self, T c, usize size)
                 {
                         if (size > self.__size)
-                                return self;
+                                return Error(false);
 
                         memset(self.data, c, size);
 
                         return self;
                 }
 
-                Buffer<T> &move(this const Buffer<T> &self, Buffer<T> &dest, usize size)
+                Result<Buffer<T> &, bool>move(this const Buffer<T> &self, Buffer<T> &dest, usize size)
                 {
                         if (size > self.__size)
-                                return dest;
+                                return Error(false);
                         if (size > dest.__size)
-                                return dest;
+                                return Error(false);
 
                         memmove(dest.data, self.data, size);
 
                         return dest;
                 }
 
-                int compare(this const Buffer<T> &self, const Buffer<T> &other, usize size)
+                Result<int, bool> compare(this const Buffer<T> &self, const Buffer<T> &other, usize size)
                 {
                         if (size > self.__size)
-                                return -2;;
+                                return Error(false);
                         if (size > other.__size)
-                                return -2;
+                                return Error(false);
 
                         int result = memcmp(self.data, other.data, size);
 
@@ -199,7 +201,7 @@ namespace Kiwi::Lib
                 T &operator [](this Buffer<T> &self, usize index)
                 {
                         if (index >= self.__size)
-                                return self.data[0];
+                                panic("index out of range");
 
                         return self.data[index];
                 }
@@ -207,7 +209,7 @@ namespace Kiwi::Lib
                 const T &operator [](this const Buffer<T> &self, usize index)
                 {
                         if (index >= self.__size)
-                                return self.data[0];
+                                panic("index out of range");
 
                         return self.data[index];
                 }

@@ -5,9 +5,6 @@
 
 namespace Kiwi::Lib
 {
-        /// Use this class if a heap allocator is available and if you need
-        /// dynamic strings.
-        /// Otherwise, please keep it simple and use char pointers.
         class String
         {
                 Vector<char> data;
