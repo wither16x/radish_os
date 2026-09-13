@@ -26,7 +26,10 @@
 #include <mem/vmm.hpp>
 #include <proc/spawn.hpp>
 #include <proc/scheduler.hpp>
-#include <test.hpp>
+
+#ifdef KIWI_BUILD_MODE_TEST
+        #include <test.hpp>
+#endif
 
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
@@ -162,7 +165,9 @@ namespace Kiwi
                 Cpu::enableSse2();
                 Lib::Log::logger.ok("enabled sse2");
 
-                Test::testLib();
+                #ifdef KIWI_BUILD_MODE_TEST
+                        Test::testLib();
+                #endif
 
                 initConsole();
 

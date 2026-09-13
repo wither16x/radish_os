@@ -2,7 +2,7 @@
 
 set -e
 
-KERNEL="kernel/bin/kernel.elf"
+KERNEL="kernel/bin/kernel"
 
 mkdir -p images
 

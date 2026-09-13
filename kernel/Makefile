@@ -1,101 +1,64 @@
-include ../prefixes.mk
+include config.mk
 
-# tools
-CXX      := $(TOOL_PREFIX)-clang++
-CC       := $(TOOL_PREFIX)-clang
-LD       := $(TOOL_PREFIX)-clang++
-ASM      := nasm
+# Configuration
+SOURCE_DIR			= .
+OBJECTS_DIR			= build
+BINARIES_DIR			= bin
 
-# dirs
-SRC_DIR  := .
-BUILD    := build
-BIN      := bin
+# Sub directories
+BOOT_SUBDIR			= $(SOURCE_DIR)/boot
+CPU_SUBDIR			= $(SOURCE_DIR)/cpu
+DRIVERS_SUBDIR			= $(SOURCE_DIR)/drivers
+FS_SUBDIR			= $(SOURCE_DIR)/fs
+LIB_SUBDIR			= $(SOURCE_DIR)/lib
+MEM_SUBDIR			= $(SOURCE_DIR)/mem
+PROC_SUBDIR			= $(SOURCE_DIR)/proc
+BASE_SUBDIR			= $(SOURCE_DIR)/base
 
-TARGET   := $(BIN)/kernel.elf
-LDSCRIPT := kernel.lds
+# Target executable
+TARGET				= $(BINARIES_DIR)/kernel
 
-# sources
-CPP_SRCS := $(shell find $(SRC_DIR) -type f -name "*.cpp")
-C_SRCS   := $(shell find $(SRC_DIR) -type f -name "*.c")
-ASM_SRCS := $(shell find $(SRC_DIR) -type f -name "*.asm")
+# Object and source files
+CXX_SOURCES			= $(shell find $(SOURCE_DIR) -type f -name "*.cpp")
+C_SOURCES			= $(shell find $(SOURCE_DIR) -type f -name "*.c")
+ASM_SOURCES			= $(shell find $(SOURCE_DIR) -type f -name "*.asm")
 
-# objects
-CPP_OBJS := $(patsubst ./%, $(BUILD)/%, $(CPP_SRCS:.cpp=.o))
-C_OBJS   := $(patsubst ./%, $(BUILD)/%, $(C_SRCS:.c=.o))
-ASM_OBJS := $(patsubst ./%, $(BUILD)/%, $(ASM_SRCS:.asm=.o))
+OBJECTS				= $(patsubst ./%, $(OBJECTS_DIR)/%, $(CXX_SOURCES:.cpp=.o)) \
+				$(patsubst ./%, $(OBJECTS_DIR)/%, $(C_SOURCES:.c=.o)) \
+				$(patsubst ./%, $(OBJECTS_DIR)/%, $(ASM_SOURCES:.asm=.o))
 
-OBJS := $(CPP_OBJS) $(C_OBJS) $(ASM_OBJS)
+# Rules
+.PHONY: all nolink clean
 
-# flags
-COMMON_FLAGS := \
-	-ffreestanding \
-	-fno-stack-protector \
-	-fno-stack-check \
-	-fno-lto \
-	-fno-pic \
-	-fno-pie \
-	-mno-red-zone \
-	-Wall \
-	-Wextra \
-	-nostdlib \
-	-nostdinc \
-	-mcmodel=kernel \
-	-Iinclude \
-	-Itest -g
-
-CXXFLAGS := $(COMMON_FLAGS) \
-	-std=c++23 \
-	-fno-exceptions \
-	-fno-rtti \
-	-fno-threadsafe-statics \
-	-fno-use-cxa-atexit \
-	-fno-unwind-tables \
-	-fno-asynchronous-unwind-tables \
-	-fno-builtin \
-	-fvisibility=hidden \
-	-fno-sized-deallocation
-	
-CFLAGS := $(COMMON_FLAGS) \
-	-std=c23 \
-	-fno-builtin \
-	-fvisibility=hidden
-
-ASMFLAGS := -f elf64
-
-LDFLAGS := -static \
-	-nostdlib \
-	-Wl,--build-id=none \
-	-z max-page-size=0x1000 \
-	-T $(LDSCRIPT) \
-	-fuse-ld=lld
-
-# build rules
 all: $(TARGET)
 
-# link
-$(TARGET): $(OBJS)
-	@mkdir -p $(BIN)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+$(TARGET): nolink
+	@mkdir -p $(BINARIES_DIR)
+	$(LINKER) $(LINKER_FLAGS) -o $@ $(OBJECTS)
 
-# c++
-$(BUILD)/%.o: ./%.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+nolink:
+	$(MAKE) -C $(BOOT_SUBDIR)
+	$(MAKE) -C $(CPU_SUBDIR)
+	$(MAKE) -C $(DRIVERS_SUBDIR)
+	$(MAKE) -C $(FS_SUBDIR)
+	$(MAKE) -C $(LIB_SUBDIR)
+	$(MAKE) -C $(MEM_SUBDIR)
+	$(MAKE) -C $(PROC_SUBDIR)
+	$(MAKE) -C $(BASE_SUBDIR)
+ifeq ($(BUILD_MODE),$(BUILD_MODE_TEST))
+	$(MAKE) -C $(TEST_DIR)
+endif
 
-# c
-$(BUILD)/%.o: ./%.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# asm
-$(BUILD)/%.o: ./%.asm
-	@mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $< -o $@
-
-# utils
 clean:
-	rm -rf $(BUILD) $(BIN)
-
-re: clean all
-
-.PHONY: all clean re
+	$(MAKE) -C $(BOOT_SUBDIR) clean
+	$(MAKE) -C $(CPU_SUBDIR) clean
+	$(MAKE) -C $(DRIVERS_SUBDIR) clean
+	$(MAKE) -C $(FS_SUBDIR) clean
+	$(MAKE) -C $(LIB_SUBDIR) clean
+	$(MAKE) -C $(MEM_SUBDIR) clean
+	$(MAKE) -C $(PROC_SUBDIR) clean
+	$(MAKE) -C $(BASE_SUBDIR) clean
+ifeq ($(BUILD_MODE),$(BUILD_MODE_TEST))
+	$(MAKE) -C $(TEST_DIR) clean
+endif
+	rm -rf $(BINARIES_DIR)
