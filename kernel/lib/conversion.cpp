@@ -13,7 +13,7 @@ namespace Kiwi::Lib
 
                 usize u;
 
-                bool neg = (n < 0) and (base == 10);
+                bool neg = n < 0;
 
                 if (n < 0)
                         u = static_cast<usize>(-(n + 1)) + 1;
@@ -76,8 +76,18 @@ namespace Kiwi::Lib
         {
                 usize res = 0;
 
-                for (usize i = 0; i < length and s[i] != '\0' and s[i] != ' '; ++i)
-                        res = res * base + s[i] - '0';
+                for (usize i = 0; i < length && s[i] != '\0' && s[i] != ' '; ++i) {
+                        int digit;
+
+                        if (s[i] >= '0' && s[i] <= '9')
+                                digit = s[i] - '0';
+                        else if (s[i] >= 'a' && s[i] <= 'z')
+                                digit = s[i] - 'a' + 10;
+                        else
+                                digit = s[i] - 'A' + 10;
+
+                        res = res * (usize)base + (usize)digit;
+                }
 
                 return res;
         }
@@ -89,28 +99,34 @@ namespace Kiwi::Lib
 
         double atof(const char *s)
         {
-                int i = 0;
-                int j = 0;
-                int flag = 0;
-                double value = 0;
-                char c;
+                double rez = 0;
+                double fact = 1;
 
-                while ((c = *(s + i)) != '\0') {
-                        if (c != '.') {
-                                value = (value * 10) + (c - '0');
-                                if (flag == 1)
-                                        --j;
-                        } else {
-                                if (flag == 1)
-                                        return 0;
+                if (*s == '-') {
+                        ++s;
+                        fact = -1;
+                };
 
-                                flag = 1;
-                                ++i;
-                        }
-                }
+                double divisor = 1.0;
+                bool point_seen = false;
 
-                value = value * pow<int>(10, j);
-                return value;
+                for (; *s; s++) {
+                        if (*s == '.') {
+                                point_seen = 1;
+                                continue;
+                        };
+
+                        int d = *s - '0';
+
+                        if (d < 0 or d > 9)
+                                continue;
+
+                        rez = rez * 10.0 + static_cast<double>(d);
+                        if (point_seen)
+                                divisor *= 10.0;
+                };
+
+                return (rez / divisor) * fact;
         }
 
         char *ftoa(double n, char *buf)
@@ -136,8 +152,9 @@ namespace Kiwi::Lib
 
                 usize i = 0;
                 for(; i < padding; i++)
-                        padded[i] = '\0';
+                        padded[i] = '0';
                 strcpy(after_point_str, padded + i);
+                padded[DECIMALS] = '\0';
 
                 usize pos = 0;
                 if (negative)

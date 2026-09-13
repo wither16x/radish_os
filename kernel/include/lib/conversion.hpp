@@ -4,9 +4,9 @@
 
 namespace Kiwi::Lib
 {
-        /// Get a string from an unsigned integer.
-        char *itoa(isize n, char *str, int base);
         /// Get a string from a signed integer.
+        char *itoa(isize n, char *str, int base);
+        /// Get a string from an unsigned integer.
         char *utoa(usize n, char *str, int base);
         /// Get an unsigned integer from a string.
         usize atoi(const char *s, int base, usize length);
