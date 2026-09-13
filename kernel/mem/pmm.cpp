@@ -2,7 +2,6 @@
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 #include <mem/allocators/static_bitmap.hpp>
-#include <mem/allocators/dynamic_bitmap.hpp>
 #include <mem/pmm.hpp>
 
 namespace Kiwi::Mem::Pmm

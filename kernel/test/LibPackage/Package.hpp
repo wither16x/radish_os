@@ -11,6 +11,7 @@
 #include <LibPackage/MathModule.hpp>
 #include <LibPackage/ConversionModule.hpp>
 #include <LibPackage/VectorModule.hpp>
+#include <LibPackage/BitmapModule.hpp>
 
 namespace Kiwi::Test
 {
@@ -26,6 +27,7 @@ namespace Kiwi::Test
                 MathModule              math_module;
                 ConversionModule        conversion_module;
                 VectorModule            vector_module;
+                BitmapModule            bitmap_module;
 
                 TARWI_PACKAGE_MAIN()
                 {
@@ -37,6 +39,7 @@ namespace Kiwi::Test
                         TARWI_RUN_MODULE(math_module);
                         TARWI_RUN_MODULE(conversion_module);
                         TARWI_RUN_MODULE(vector_module);
+                        TARWI_RUN_MODULE(bitmap_module);
 
                         TARWI_DISPLAY_RESULTS(
                                 result_module.successfull_tests +
@@ -46,7 +49,8 @@ namespace Kiwi::Test
                                 array_module.successfull_tests +
                                 math_module.successfull_tests +
                                 conversion_module.successfull_tests +
-                                vector_module.successfull_tests,
+                                vector_module.successfull_tests +
+                                bitmap_module.successfull_tests,
 
                                 result_module.failed_tests +
                                 memory_module.failed_tests +
@@ -55,7 +59,8 @@ namespace Kiwi::Test
                                 array_module.failed_tests +
                                 math_module.failed_tests +
                                 conversion_module.failed_tests +
-                                vector_module.failed_tests,
+                                vector_module.failed_tests +
+                                bitmap_module.failed_tests,
 
                                 result_module.skipped_tests +
                                 memory_module.skipped_tests +
@@ -64,7 +69,8 @@ namespace Kiwi::Test
                                 array_module.skipped_tests +
                                 math_module.skipped_tests +
                                 conversion_module.skipped_tests +
-                                vector_module.skipped_tests
+                                vector_module.skipped_tests +
+                                bitmap_module.skipped_tests
                         );
                 }
         };

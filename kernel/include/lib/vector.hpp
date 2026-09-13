@@ -164,10 +164,15 @@ namespace Kiwi::Lib
 
                 void resize(this Vector<T> &self, usize new_size)
                 {
+                        for (usize i = new_size; i < self.obj_count; ++i)
+                                self.buf.destroy(i);
+
                         self.buf.resize(new_size);
-                        if (self.buf.size() < self.__capacity)
-                                self.obj_count = self.__capacity;
-                        self.__capacity = self.buf.size();
+
+                        if (new_size < self.obj_count)
+                                self.obj_count = new_size;
+
+                        self.__capacity = new_size;
                 }
 
                 bool operator ==(this const Vector<T> &self, const Vector<T> &other)

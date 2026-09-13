@@ -158,7 +158,7 @@ namespace Kiwi::Lib
                         for (usize i = 0; i < count; ++i)
                                 new_data[i] = self.data[i];
 
-                        delete[] self.data;
+                        ::operator delete[] (self.data);
                         self.data = new_data;
                         self.__size = new_size;
                 }
