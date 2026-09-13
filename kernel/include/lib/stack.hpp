@@ -11,7 +11,8 @@
 namespace Kiwi::Lib
 {
         template<typename T>
-        class Stack {
+        class Stack
+        {
                 uptr bottom;
                 uptr top;
                 T *pointer;
@@ -43,11 +44,6 @@ namespace Kiwi::Lib
                 }
 
                 Stack(const Stack<T> &) = delete;
-
-                ~Stack()
-                {
-                        // TODO
-                }
 
                 void push(this Stack<T> &self, T &value)
                 {
