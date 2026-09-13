@@ -1,5 +1,6 @@
 # RadishOS
 *Note: this file is up to date with the last release*
+
 A x86_64 operating system made from scratch that I am making for learning purposes and for fun.
 
 ![screenshot](screenshots/preview.png)
@@ -107,4 +108,4 @@ As you can I see I am not one to write the best algorithms...
 I try to keep my code as clean as possible.
 
 ## Use of AI in this project
-Because it is a learning project, I don't use AI.
+Because it is a learning project, I don't use AI but to generate unit tests.
