@@ -86,7 +86,7 @@ namespace Kiwi::Lib
                         return dest;
                 }
 
-                Result<Buffer<T> &, bool>set(this Buffer<T> &self, T c, usize size)
+                Result<Buffer<T> &, bool> set(this Buffer<T> &self, T c, usize size)
                 {
                         if (size > self.__size)
                                 return Error(false);

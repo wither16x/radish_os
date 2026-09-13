@@ -2,6 +2,7 @@
 
 #include <lib/typing.hpp>
 #include <lib/forward.hpp>
+#include <lib/alloc.hpp>
 #include <panic.hpp>
 
 namespace Kiwi::Lib
@@ -10,25 +11,6 @@ namespace Kiwi::Lib
         class Array
         {
                 T data[LENGTH];
-
-                template<typename... ARGS>
-                bool construct(this Array<T, LENGTH> &self, usize index, ARGS &&...args)
-                {
-                        if (index >= LENGTH)
-                                return false;
-
-                        self.data[index](forward(args)...);
-                        return true;
-                }
-
-                bool destroy(this Array<T, LENGTH> &self, usize index)
-                {
-                        if (index >= LENGTH)
-                                return false;
-
-                        self.data[index].~T();
-                        return true;
-                }
 
         public:
                 Array() = default;
@@ -42,15 +24,24 @@ namespace Kiwi::Lib
                 }
 
                 Array(const Array<T, LENGTH> &other)
-                        : data(other.data)
                 {
+                        for (usize i = 0; i < LENGTH; ++i)
+                                memcpy(&this->data[i], &other.data[i], sizeof(T));
+
                         for (usize i = 0; i < LENGTH; ++i)
                                 this->construct(i, other.data[i]);
                 }
 
                 Array(Array<T, LENGTH> &&other) noexcept
-                        : data(move(other.data))
-                {}
+                {
+                        for (usize i = 0; i < LENGTH; ++i) {
+                                memcpy(&this->data[i], &other.data[i], sizeof(T));
+                                this->destroy(other.data[i]);
+                        }
+
+                        for (usize i = 0; i < LENGTH; ++i)
+                                this->construct(i, other.data[i]);
+                }
 
                 ~Array()
                 {
@@ -70,20 +61,51 @@ namespace Kiwi::Lib
                         return self.data;
                 }
 
-                T *begin(this const Array<T, LENGTH> &self)
+                T *begin(this Array<T, LENGTH> &self)
                 {
                         return self.data;
                 }
 
-                T *end(this const Array<T, LENGTH> &self)
+                T *end(this Array<T, LENGTH> &self)
                 {
                         return self.data + LENGTH;
+                }
+
+                const T *begin(this const Array<T, LENGTH> &self)
+                {
+                        return self.data;
+                }
+
+                const T *end(this const Array<T, LENGTH> &self)
+                {
+                        return self.data + LENGTH;
+                }
+
+                template<typename... ARGS>
+                bool construct(this Array<T, LENGTH> &self, usize index, ARGS &&...args)
+                {
+                        if (index >= LENGTH)
+                                return false;
+
+                        new (&self.data[index]) T(forward<ARGS>(args)...);
+                        return true;
+                }
+
+                bool destroy(this Array<T, LENGTH> &self, usize index)
+                {
+                        if (index >= LENGTH)
+                                return false;
+
+                        self.data[index].~T();
+                        return true;
                 }
 
                 Array<T, LENGTH> &operator =(this Array<T, LENGTH> &self, const Array<T, LENGTH> &other)
                 {
                         if (&self != &other) {
-                                self.data = other.data;
+                                for (usize i = 0; i < LENGTH; ++i)
+                                        memcpy(&self.data[i], &other.data[i], sizeof(T));
+
                                 for (usize i = 0; i < LENGTH; ++i)
                                         self.construct(i, other.data[i]); 
                         }
@@ -93,10 +115,33 @@ namespace Kiwi::Lib
 
                 Array<T, LENGTH> &operator =(this Array<T, LENGTH> &self, Array<T, LENGTH> &&other) noexcept
                 {
-                        if (&self != &other)
-                                self.data = move(other.data);
+                        if (&self != &other) {
+                                for (usize i = 0; i < LENGTH; ++i) {
+                                        memcpy(&self.data[i], &other.data[i], sizeof(T));
+                                        self.destroy(other.data[i]);
+                                }
 
-                        return self;    
+                                for (usize i = 0; i < LENGTH; ++i)
+                                        self.construct(i, other.data[i]);
+                        }
+
+                        return self;
+                }
+
+                T &operator [](this Array<T, LENGTH> &self, usize index)
+                {
+                        if (index >= LENGTH)
+                                panic("index out of range");
+
+                        return self.data[index];
+                }
+
+                const T &operator [](this const Array<T, LENGTH> &self, usize index)
+                {
+                        if (index >= LENGTH)
+                                panic("index out of range");
+
+                        return self.data[index]; 
                 }
         };
 } // namespace Kiwi::Lib
