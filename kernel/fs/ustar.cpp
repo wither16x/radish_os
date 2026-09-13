@@ -1,3 +1,4 @@
+#include "lib/logging.hpp"
 #include <fs/path.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
@@ -177,10 +178,20 @@ namespace Kiwi::Fs::Ustar
         {
                 if (not this->owner or not this->owner->storage or not this->owner->storage->data)
                         return Vfs::Status::NullData;
-                if (n < this->owner->storage->size)
-                        return Vfs::Status::OutOfBounds;
 
-                Lib::memcpy(reinterpret_cast<Lib::uptr *>(buf) + this->cursor, this->owner->storage->data, n);
+                if (this->cursor >= this->owner->storage->size)
+                        return Vfs::Status::Eof;
+
+                Lib::usize remaining = this->owner->storage->size - this->cursor;
+                Lib::usize to_copy = n < remaining ? n : remaining;
+
+                Lib::memcpy(
+                        buf,
+                        reinterpret_cast<Lib::u8 *>(this->owner->storage->data) + this->cursor,
+                        to_copy
+                );
+
+                this->cursor += to_copy;
 
                 return Vfs::Status::Success;
         }

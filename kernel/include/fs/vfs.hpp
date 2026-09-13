@@ -23,7 +23,8 @@ namespace Kiwi::Fs::Vfs
                 NullData,
                 OutOfBounds,
                 NotADirectory,
-                NotImplemented
+                NotImplemented,
+                Eof
         };
 
         enum class DirEntryType
