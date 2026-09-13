@@ -10,8 +10,9 @@
 #include <LibPackage/ArrayModule.hpp>
 #include <LibPackage/MathModule.hpp>
 #include <LibPackage/ConversionModule.hpp>
+#include <LibPackage/VectorModule.hpp>
 
-namespace Kiwi::Test::LibPackage
+namespace Kiwi::Test
 {
         TARWI_PACKAGE(LibPackage)
         {
@@ -24,6 +25,7 @@ namespace Kiwi::Test::LibPackage
                 ArrayModule             array_module;
                 MathModule              math_module;
                 ConversionModule        conversion_module;
+                VectorModule            vector_module;
 
                 TARWI_PACKAGE_MAIN()
                 {
@@ -34,6 +36,7 @@ namespace Kiwi::Test::LibPackage
                         TARWI_RUN_MODULE(array_module);
                         TARWI_RUN_MODULE(math_module);
                         TARWI_RUN_MODULE(conversion_module);
+                        TARWI_RUN_MODULE(vector_module);
 
                         TARWI_DISPLAY_RESULTS(
                                 result_module.successfull_tests +
@@ -42,7 +45,8 @@ namespace Kiwi::Test::LibPackage
                                 bytes_module.successfull_tests +
                                 array_module.successfull_tests +
                                 math_module.successfull_tests +
-                                conversion_module.successfull_tests,
+                                conversion_module.successfull_tests +
+                                vector_module.successfull_tests,
 
                                 result_module.failed_tests +
                                 memory_module.failed_tests +
@@ -50,7 +54,8 @@ namespace Kiwi::Test::LibPackage
                                 bytes_module.failed_tests +
                                 array_module.failed_tests +
                                 math_module.failed_tests +
-                                conversion_module.failed_tests,
+                                conversion_module.failed_tests +
+                                vector_module.failed_tests,
 
                                 result_module.skipped_tests +
                                 memory_module.skipped_tests +
@@ -58,8 +63,9 @@ namespace Kiwi::Test::LibPackage
                                 bytes_module.skipped_tests +
                                 array_module.skipped_tests +
                                 math_module.skipped_tests +
-                                conversion_module.skipped_tests
+                                conversion_module.skipped_tests +
+                                vector_module.skipped_tests
                         );
                 }
         };
-} // namespave Kiwi::Test::LibPackage
+} // namespave Kiwi::Test

@@ -9,7 +9,7 @@ namespace Kiwi::Test
 {
         void testLib()
         {
-                LibPackage::LibPackage lib_package;
+                LibPackage lib_package;
                 TARWI_RUN_PACKAGE(lib_package);
         }
 
