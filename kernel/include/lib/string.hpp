@@ -26,12 +26,12 @@ namespace Kiwi::Lib
                 }
 
                 _String(const _String<N> &other)
-                {
-                        for (usize i = 0; i < N; i++)
-                                this->arr[i] = other.arr[i];
-                }
+                        : arr(other.arr)
+                {}
 
-                _String(_String<N> &&other) = default;
+                _String(_String<N> &&other)
+                        : arr(move(other.arr))
+                {}
 
                 char *begin(this _String<N> &self)
                 {
@@ -70,8 +70,8 @@ namespace Kiwi::Lib
 
                         _String<N> new_str;
 
-                        for (usize i = start; i < N; i++)
-                                new_str.arr[i] = self.arr[i];
+                        for (usize i = 0; i < N - start; i++)
+                                new_str.arr[i] = self.arr[start + i];
 
                         return new_str;
                 }

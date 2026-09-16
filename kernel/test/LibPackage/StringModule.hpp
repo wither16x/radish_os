@@ -39,11 +39,29 @@ namespace Kiwi::Test
                         TARWI_EXPECT(copy == origin);
                 }
 
+                TARWI_UNIT(unitStaticMoveConstructor)
+                {
+                        Lib::String<15> origin("to move");
+                        Lib::String<15> copy(Lib::move(origin));
+
+                        TARWI_EXPECT(copy == "to move");
+                }
+
+                TARWI_UNIT(unitStaticSubString)
+                {
+                        Lib::String<20> base("Apple pie");
+                        Lib::String<20> derived = base.subString(6);
+
+                        TARWI_EXPECT(derived == "pie");
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
                         TARWI_CALL_UNIT(unitStaticDefaultConstructor);
                         TARWI_CALL_UNIT(unitStaticCopyConstructor);
+                        TARWI_CALL_UNIT(unitStaticMoveConstructor);
+                        TARWI_CALL_UNIT(unitStaticSubString);
                 }
         };
 } // namespace Kiwi::Test
