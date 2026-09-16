@@ -48,16 +48,16 @@ namespace Kiwi::Fs::Tmpfs
                 public:
                         Node *parent;
                         NodeType type;
-                        Lib::String name;
+                        Lib::String<> name;
                         Storage *storage;
                         TmpfsFile *file_data;
                         TmpfsDir *dir_data;
 
-                        Vfs::Status mkfile(const Lib::String &name) override;
-                        Vfs::Status mkdir(const Lib::String &name) override;
+                        Vfs::Status mkfile(const Lib::String<> &name) override;
+                        Vfs::Status mkdir(const Lib::String<> &name) override;
                         Vfs::Status rm() override;
                         Vfs::Status readdir(Vfs::DirEntry *entry, Lib::usize index) override;
-                        Vfs::VNode *lookup(const Lib::String &name) override;
+                        Vfs::VNode *lookup(const Lib::String<> &name) override;
                         Vfs::Status getfilesz(Lib::usize *buf) override;
                         Vfs::Status getdirentn(Lib::usize *buf) override;
                         Vfs::File *open() override;
@@ -125,7 +125,7 @@ namespace Kiwi::Fs::Tmpfs
                 return Vfs::Status::Success;
         }
 
-        Vfs::Status Node::mkfile(const Lib::String &name)
+        Vfs::Status Node::mkfile(const Lib::String<> &name)
         {
                 if (this->type != NodeType::Dir)
                         return Vfs::Status::NotADirectory;
@@ -145,7 +145,7 @@ namespace Kiwi::Fs::Tmpfs
                 return Vfs::Status::Success;
         }
 
-        Vfs::Status Node::mkdir(const Lib::String &name)
+        Vfs::Status Node::mkdir(const Lib::String<> &name)
         {
                 if (this->type != NodeType::Dir)
                         return Vfs::Status::NotADirectory;
@@ -218,7 +218,7 @@ namespace Kiwi::Fs::Tmpfs
                 return Vfs::Status::Success;
         }
 
-        Vfs::VNode *Node::lookup(const Lib::String &name)
+        Vfs::VNode *Node::lookup(const Lib::String<> &name)
         {
                 if (this->type != NodeType::Dir)
                         return nullptr;

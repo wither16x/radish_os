@@ -56,7 +56,7 @@ namespace Kiwi::Drivers::Console
 
         /// Here we assume that the provided font is using the PSF2
         /// format and does not have an Unicode table.
-        void Console::initFont(this Console &self, const Lib::String &font)
+        void Console::initFont(this Console &self, const Lib::String<> &font)
         {
                 Lib::Log::logger.setContext("console");
 

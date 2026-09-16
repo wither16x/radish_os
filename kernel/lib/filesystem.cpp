@@ -3,7 +3,7 @@
 
 namespace Kiwi::Lib
 {
-        File *open(const String &path)
+        File *open(const String<> &path)
         {
                 return Fs::Vfs::openFile(path);
         }
@@ -13,17 +13,17 @@ namespace Kiwi::Lib
                 return Fs::Vfs::closeFile(f);
         }
 
-        Fs::Vfs::Status mkfile(const String &path)
+        Fs::Vfs::Status mkfile(const String<> &path)
         {
                 return Fs::Vfs::mkfile(path);
         }
 
-        Fs::Vfs::Status mkdir(const String &path)
+        Fs::Vfs::Status mkdir(const String<> &path)
         {
                 return Fs::Vfs::mkdir(path);
         }
 
-        Fs::Vfs::Status rm(const String &path)
+        Fs::Vfs::Status rm(const String<> &path)
         {
                 return Fs::Vfs::remove(path);
         }
@@ -38,17 +38,17 @@ namespace Kiwi::Lib
                 return Fs::Vfs::read(f, buf, n);
         }
 
-        Fs::Vfs::Status getdirent(const String &path, Fs::Vfs::DirEntry *entry, usize n)
+        Fs::Vfs::Status getdirent(const String<> &path, Fs::Vfs::DirEntry *entry, usize n)
         {
                 return Fs::Vfs::readdir(path, entry, n);
         }
 
-        Fs::Vfs::Status getfilesz(const String &path, usize *buf)
+        Fs::Vfs::Status getfilesz(const String<> &path, usize *buf)
         {
                 return Fs::Vfs::getfilesz(path, buf);
         }
 
-        Fs::Vfs::Status getdirentn(const String &path, usize *buf)
+        Fs::Vfs::Status getdirentn(const String<> &path, usize *buf)
         {
                 return Fs::Vfs::getdirentn(path, buf);
         }

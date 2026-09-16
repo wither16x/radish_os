@@ -9,13 +9,13 @@ namespace Kiwi::Fs::Vfs
                 return nullptr;
         }
 
-        Status VNode::mkfile(const Lib::String &name)
+        Status VNode::mkfile(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return Status::NotImplemented;
         }
 
-        Status VNode::mkdir(const Lib::String &name)
+        Status VNode::mkdir(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return Status::NotImplemented;
@@ -45,7 +45,7 @@ namespace Kiwi::Fs::Vfs
                 return Status::NotImplemented;
         }
 
-        VNode *VNode::lookup(const Lib::String &name)
+        VNode *VNode::lookup(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return nullptr;

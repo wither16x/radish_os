@@ -30,15 +30,15 @@ namespace Kiwi::Fs::Devfs
                 class Node : public Vfs::VNode
                 {
                 public:
-                        Lib::String name;
+                        Lib::String<> name;
                         NodeType type;
                         DeviceType devtype;
                         DevfsFile *file_data;
 
-                        Vfs::Status mkfile(const Lib::String &name) override;
+                        Vfs::Status mkfile(const Lib::String<> &name) override;
                         Vfs::Status rm() override;
                         Vfs::Status readdir(Vfs::DirEntry *entry, Lib::usize index) override;
-                        Vfs::VNode *lookup(const Lib::String &name) override;
+                        Vfs::VNode *lookup(const Lib::String<> &name) override;
                         Vfs::Status getdirentn(Lib::usize *buf) override;
                         Vfs::File *open() override;
                 };
@@ -98,7 +98,7 @@ namespace Kiwi::Fs::Devfs
                 return Vfs::Status::Success;
         }
 
-        Vfs::Status Node::mkfile(const Lib::String &name)
+        Vfs::Status Node::mkfile(const Lib::String<> &name)
         {
                 if (this->type != NodeType::Root)
                         return Vfs::Status::IsADirectory;
@@ -147,7 +147,7 @@ namespace Kiwi::Fs::Devfs
                 return Vfs::Status::Success;
         }
 
-        Vfs::VNode *Node::lookup(const Lib::String &name)
+        Vfs::VNode *Node::lookup(const Lib::String<> &name)
         {
                 if (this->type != NodeType::Root)
                         return nullptr; // cannot lookup from a device
@@ -215,10 +215,10 @@ namespace Kiwi::Fs::Devfs
                 return Vfs::Status::Success;
         }
 
-        void registerDevice(DeviceType type, const Lib::String &path)
+        void registerDevice(DeviceType type, const Lib::String<> &path)
         {
                 Vfs::mkfile(path);
-                Lib::String devname = path.sub(3);
+                Lib::String<> devname = path.subString(3);
                 Node *dev = reinterpret_cast<Node *>(root->lookup(devname));
                 if (dev)
                         dev->devtype = type;

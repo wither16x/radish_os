@@ -38,7 +38,7 @@ namespace Kiwi::Drivers::Console
 
                 /// Initialize the font used by the console (see implementation
                 /// for more details.)
-                void initFont(this Console &self, const Lib::String &font);
+                void initFont(this Console &self, const Lib::String<> &font);
                 /// Draw a character at the current cursor position.
                 void drawChar(this Console &self, char ch, Lib::u32 color);
 

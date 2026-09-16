@@ -36,7 +36,7 @@ namespace Kiwi::Fs::Vfs
         class DirEntry
         {
         public:
-                Lib::String name;
+                Lib::String<> name;
                 DirEntryType type;
         };
 
@@ -48,13 +48,13 @@ namespace Kiwi::Fs::Vfs
                 Lib::usize ref_count = 0;
 
                 virtual class File *open();
-                virtual Status mkfile(const Lib::String &name);
-                virtual Status mkdir(const Lib::String &name);
+                virtual Status mkfile(const Lib::String<> &name);
+                virtual Status mkdir(const Lib::String<> &name);
                 virtual Status rm();
                 virtual Status getdirentn(Lib::usize *buf);
                 virtual Status readdir(DirEntry *entry, Lib::usize index);
                 virtual Status getfilesz(Lib::usize *buf);
-                virtual VNode *lookup(const Lib::String &name);
+                virtual VNode *lookup(const Lib::String<> &name);
         };
 
         enum class SeekOrigin
@@ -101,17 +101,17 @@ namespace Kiwi::Fs::Vfs
         Status mount(drive_id drive, FileSystem *fs);
         Status unmount(drive_id drive);
 
-        VNode *lookupNode(const Lib::String &path);
+        VNode *lookupNode(const Lib::String<> &path);
         Status releaseNode(VNode *vnode);
 
-        File *openFile(const Lib::String &path);
+        File *openFile(const Lib::String<> &path);
         Status closeFile(File *file);
-        Status mkfile(const Lib::String &path);
-        Status mkdir(const Lib::String &path);
-        Status remove(const Lib::String &path);
+        Status mkfile(const Lib::String<> &path);
+        Status mkdir(const Lib::String<> &path);
+        Status remove(const Lib::String<> &path);
         Status write(File *file, const void *buf, Lib::usize size);
         Status read(File *file, void *buf, Lib::usize size);
-        Status readdir(const Lib::String &path, DirEntry *entry, Lib::usize index);
-        Status getfilesz(const Lib::String &path, Lib::usize *buf);
-        Status getdirentn(const Lib::String &path, Lib::usize *buf);
+        Status readdir(const Lib::String<> &path, DirEntry *entry, Lib::usize index);
+        Status getfilesz(const Lib::String<> &path, Lib::usize *buf);
+        Status getdirentn(const Lib::String<> &path, Lib::usize *buf);
 } // namespace Kiwi::Fs::Vfs

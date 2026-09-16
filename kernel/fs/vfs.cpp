@@ -23,12 +23,12 @@ namespace Kiwi::Fs::Vfs
 
                 VFSContext ctx;
 
-                constexpr bool canPathHandleDrive(const Lib::String &path)
+                constexpr bool canPathHandleDrive(const Lib::String<> &path)
                 {
                         return path.length() >= 3;
                 }
 
-                VNode *getNodesFromDriveRoot(const Drive &drv, const Lib::Vector<Lib::String> &parts)
+                VNode *getNodesFromDriveRoot(const Drive &drv, const Lib::Vector<Lib::String<>> &parts)
                 {
                         VNode *curr_nd = drv.root;
                         for (Lib::usize i = 0; i < parts.length() - 1; i++) {
@@ -91,17 +91,17 @@ namespace Kiwi::Fs::Vfs
                 return Status::Success;
         }
 
-        VNode *lookupNode(const Lib::String &path)
+        VNode *lookupNode(const Lib::String<> &path)
         {
                 if (not canPathHandleDrive(path))
                         return nullptr;
 
                 drive_id drive = path[0];
-                Lib::String rel = path.sub(2);
+                Lib::String<> rel = path.subString(2);
 
                 Drive &drv = ctx.getDriveById(drive);
 
-                Lib::Vector<Lib::String> parts = parsePath(rel);
+                Lib::Vector<Lib::String<>> parts = parsePath(rel);
 
                 VNode *curr_nd = drv.root;
                 ++curr_nd->ref_count;
@@ -138,7 +138,7 @@ namespace Kiwi::Fs::Vfs
                 return Status::Success;
         }
 
-        File *openFile(const Lib::String &path)
+        File *openFile(const Lib::String<> &path)
         {
                 VNode *vnd = lookupNode(path);
                 if (not vnd)
@@ -178,17 +178,17 @@ namespace Kiwi::Fs::Vfs
                 return Status::Success;
         }
 
-        Status mkfile(const Lib::String &path)
+        Status mkfile(const Lib::String<> &path)
         {
                 if (not canPathHandleDrive(path))
                         return Status::PathTooShort;
 
                 drive_id drive = path[0];
-                Lib::String rel = path.sub(2);
+                Lib::String<> rel = path.subString(2);
                 Drive &drv = ctx.getDriveById(drive);
                 if (not drv.root)
                         return Status::NullRoot;
-                Lib::Vector<Lib::String> parts = parsePath(rel);
+                Lib::Vector<Lib::String<>> parts = parsePath(rel);
                 if (parts.isEmpty())
                         return Status::EmptyPath;
 
@@ -201,17 +201,17 @@ namespace Kiwi::Fs::Vfs
                 return ret;
         }
 
-        Status mkdir(const Lib::String &path)
+        Status mkdir(const Lib::String<> &path)
         {
                 if (not canPathHandleDrive(path))
                         return Status::PathTooShort;
 
                 drive_id drive = path[0];
-                Lib::String rel = path.sub(2);
+                Lib::String<> rel = path.subString(2);
                 Drive &drv = ctx.getDriveById(drive);
                 if (not drv.root)
                         return Status::NullRoot;
-                Lib::Vector<Lib::String> parts = parsePath(rel);
+                Lib::Vector<Lib::String<>> parts = parsePath(rel);
                 if (parts.isEmpty())
                         return Status::EmptyPath;
 
@@ -226,7 +226,7 @@ namespace Kiwi::Fs::Vfs
                 return ret;
         }
 
-        Status remove(const Lib::String &path)
+        Status remove(const Lib::String<> &path)
         {
                 VNode *vnd = lookupNode(path);
                 if (!vnd)
@@ -254,7 +254,7 @@ namespace Kiwi::Fs::Vfs
                 return ret;
         }
 
-        Status readdir(const Lib::String &path, DirEntry *entry, Lib::usize index)
+        Status readdir(const Lib::String<> &path, DirEntry *entry, Lib::usize index)
         {
                 VNode *vnd = lookupNode(path);
                 if (not vnd)
@@ -265,7 +265,7 @@ namespace Kiwi::Fs::Vfs
                 return ret;
         }
 
-        Status getfilesz(const Lib::String &path, Lib::usize *buf)
+        Status getfilesz(const Lib::String<> &path, Lib::usize *buf)
         {
                 VNode *vnd = lookupNode(path);
                 if (not vnd)
@@ -276,7 +276,7 @@ namespace Kiwi::Fs::Vfs
                 return ret;
         }
 
-        Status getdirentn(const Lib::String &path, Lib::usize *buf)
+        Status getdirentn(const Lib::String<> &path, Lib::usize *buf)
         {
                 VNode *vnd = lookupNode(path);
                 if (not vnd)

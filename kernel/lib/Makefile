@@ -12,7 +12,6 @@ CXX_FILES               = $(SOURCE_DIR)/alloc.cpp \
 			$(SOURCE_DIR)/logging.cpp \
 			$(SOURCE_DIR)/memory.cpp \
 			$(SOURCE_DIR)/print.cpp \
-			$(SOURCE_DIR)/string.cpp \
 			$(SOURCE_DIR)/time.cpp
 
 CXX_OBJECTS             = $(patsubst ./%, $(OBJECTS_DIR)/%, $(CXX_FILES:.cpp=.o))

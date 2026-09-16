@@ -15,7 +15,7 @@ namespace Kiwi::Proc
 {
         namespace
         {
-                Process *loadProgramAsProcess(const Lib::String &path)
+                Process *loadProgramAsProcess(const Lib::String<> &path)
                 {
                         // create the process' pml4t
                         Mem::PML4T &kpml4t = kcontext.pml4t();
@@ -37,7 +37,7 @@ namespace Kiwi::Proc
                 }
         } // anonymous namespace
 
-        int spawn(const Lib::String &path)
+        int spawn(const Lib::String<> &path)
         {
                 Cpu::disableInterrupts();
 

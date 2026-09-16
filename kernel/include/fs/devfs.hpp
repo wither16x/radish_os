@@ -22,5 +22,5 @@ namespace Kiwi::Fs::Devfs
                 Input
         };
 
-        void registerDevice(DeviceType type, const Lib::String &path);
+        void registerDevice(DeviceType type, const Lib::String<> &path);
 } // namespace Kiwi::Fs::Devfs

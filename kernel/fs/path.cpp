@@ -5,9 +5,9 @@
 
 namespace Kiwi::Fs
 {
-        Lib::Vector<Lib::String> parsePath(const Lib::String &path)
+        Lib::Vector<Lib::String<>> parsePath(const Lib::String<> &path)
         {
-                Lib::Vector<Lib::String> parts;
+                Lib::Vector<Lib::String<>> parts;
 
                 if (path == "/") {
                         parts.pushBack("/");
@@ -20,7 +20,7 @@ namespace Kiwi::Fs
                                 Lib::String part_buf;
 
                                 while (i < path.length() and path[i] != '/') {
-                                        part_buf += path[i];
+                                        part_buf.appendChar(path[i]);
                                         ++i;
                                 }
 

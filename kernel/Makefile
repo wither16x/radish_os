@@ -45,7 +45,7 @@ nolink:
 	$(MAKE) -C $(MEM_SUBDIR)
 	$(MAKE) -C $(PROC_SUBDIR)
 	$(MAKE) -C $(BASE_SUBDIR)
-ifeq ($(BUILD_MODE),$(BUILD_MODE_TEST))
+ifeq ($(BUILD_MODE),test)
 	$(MAKE) -C $(TEST_DIR)
 endif
 
@@ -58,7 +58,7 @@ clean:
 	$(MAKE) -C $(MEM_SUBDIR) clean
 	$(MAKE) -C $(PROC_SUBDIR) clean
 	$(MAKE) -C $(BASE_SUBDIR) clean
-ifeq ($(BUILD_MODE),$(BUILD_MODE_TEST))
+ifeq ($(BUILD_MODE),test)
 	$(MAKE) -C $(TEST_DIR) clean
 endif
 	rm -rf $(BINARIES_DIR)

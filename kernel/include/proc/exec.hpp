@@ -4,5 +4,5 @@
 
 namespace Kiwi::Proc {
         /// Replace a process by another one.
-        int exec(const Lib::String &path, int argc, char **argv, char **envp);
+        int exec(const Lib::String<> &path, int argc, char **argv, char **envp);
 } // namespace Kiwi::Proc

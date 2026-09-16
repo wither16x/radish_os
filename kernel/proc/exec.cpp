@@ -15,7 +15,7 @@
 
 namespace Kiwi::Proc
 {
-        int exec(const Lib::String &path, int argc, char **argv, char **envp)
+        int exec(const Lib::String<> &path, int argc, char **argv, char **envp)
         {
                 Cpu::disableInterrupts();
 

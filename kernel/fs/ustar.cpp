@@ -76,13 +76,13 @@ namespace Kiwi::Fs::Ustar
                         Node *parent;
 
                         FileHeader *hdr;
-                        Lib::String name;
+                        Lib::String<> name;
 
                         Storage *storage;
                         class UstarDir *dir_data;
 
                         Vfs::Status readdir(Vfs::DirEntry *entry, Lib::usize index) override;
-                        Vfs::VNode *lookup(const Lib::String &name) override;
+                        Vfs::VNode *lookup(const Lib::String<> &name) override;
                         Vfs::Status getfilesz(Lib::usize *buf) override;
                         Vfs::Status getdirentn(Lib::usize *buf) override;
                         Vfs::File *open() override;
@@ -90,7 +90,7 @@ namespace Kiwi::Fs::Ustar
 
                 Node *root = nullptr;
 
-                Node *findDir(Node *parent, const Lib::String &name)
+                Node *findDir(Node *parent, const Lib::String<> &name)
                 {
                         Node *existing = static_cast<Node *>(parent->lookup(name));
                         if (existing and existing->dir_data)
@@ -99,7 +99,7 @@ namespace Kiwi::Fs::Ustar
                         return nullptr;
                 }
 
-                Node *__createDir(Node *parent, const Lib::String &name)
+                Node *__createDir(Node *parent, const Lib::String<> &name)
                 {
                         Node *dir       = new Node;
                         dir->parent     = parent;
@@ -124,9 +124,9 @@ namespace Kiwi::Fs::Ustar
                                         break;
 
                                 Lib::usize bytes = Lib::atoi(hdr->size, 8, sizeof(hdr->size));
-                                Lib::String path = hdr->name;
+                                Lib::String<> path = hdr->name;
 
-                                Lib::Vector<Lib::String> parts = parsePath(path);
+                                Lib::Vector<Lib::String<>> parts = parsePath(path);
 
                                 if (parts.isEmpty()) {
                                         Lib::usize blocks = (bytes + BLOCK_SIZE - 1) / BLOCK_SIZE;
@@ -134,7 +134,7 @@ namespace Kiwi::Fs::Ustar
                                         continue;
                                 }
 
-                                Lib::String name = parts[parts.length() - 1];
+                                Lib::String<> name = parts[parts.length() - 1];
 
                                 Node *parent = root;
                                 for (Lib::usize i = 0; i < parts.length() - 1; i++) {
@@ -208,7 +208,7 @@ namespace Kiwi::Fs::Ustar
                 return Vfs::Status::Success;
         }
 
-        Vfs::VNode *Node::lookup(const Lib::String &name)
+        Vfs::VNode *Node::lookup(const Lib::String<> &name)
         {
                 if (not this->dir_data)
                         return nullptr;

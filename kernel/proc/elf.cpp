@@ -40,7 +40,7 @@ namespace Kiwi::Proc::Elf
                 }
         } // anonymous namespace
 
-        int loadElf(Mem::PML4T *pml4t, const Lib::String &path, ElfInfo *info)
+        int loadElf(Mem::PML4T *pml4t, const Lib::String<> &path, ElfInfo *info)
         {
                 Lib::uptr hhdm = kcontext.hhdm();
 
