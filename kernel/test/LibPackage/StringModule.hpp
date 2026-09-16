@@ -55,6 +55,15 @@ namespace Kiwi::Test
                         TARWI_EXPECT(derived == "pie");
                 }
 
+                TARWI_UNIT(unitStaticAddition)
+                {
+                        Lib::String<20> firstname = "John";
+                        Lib::String<20> lastname = "Doe";
+                        Lib::String<20> fullname = firstname + " " + lastname;
+                
+                        TARWI_EXPECT(fullname == "John Doe");
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -62,6 +71,7 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitStaticCopyConstructor);
                         TARWI_CALL_UNIT(unitStaticMoveConstructor);
                         TARWI_CALL_UNIT(unitStaticSubString);
+                        TARWI_CALL_UNIT(unitStaticAddition);
                 }
         };
 } // namespace Kiwi::Test

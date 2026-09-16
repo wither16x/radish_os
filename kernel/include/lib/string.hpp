@@ -60,7 +60,7 @@ namespace Kiwi::Lib
 
                 usize length(this const _String<N> &self)
                 {
-                        return strlen(self.arr);
+                        return strlen(self.arr.raw());
                 }
 
                 _String<N> subString(this const _String<N> &self, usize start)
@@ -76,14 +76,13 @@ namespace Kiwi::Lib
                         return new_str;
                 }
 
-                _String<N * 2> operator +(this const _String<N> &self, const _String<N> &other)
+                _String<N> operator +(this const _String<N> &self, const _String<N> &other)
                 {
-                        _String<N * 2> new_str;
+                        _String<N> new_str = self;
+                        usize length = new_str.length();
 
-                        for (usize i = 0; i < N; i++)
-                                new_str.buf[i] = self.arr[i];
-                        for (usize i = 0; i < N; i++)
-                                new_str.buf[N + i] = other.arr[i];
+                        for (usize i = 0; i < other.length(); i++)
+                                new_str.arr[length + i] = other.arr[i];
 
                         return new_str;
                 }
