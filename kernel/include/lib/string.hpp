@@ -13,7 +13,10 @@ namespace Kiwi::Lib
                 char buf[N];
 
         public:
-                _String() = default;
+                _String()
+                {
+                        memset(this->buf, 0, sizeof(this->buf));
+                }
 
                 _String(const char *base)
                 {
@@ -22,6 +25,26 @@ namespace Kiwi::Lib
 
                 _String(const _String<N> &other) = default;
                 _String(_String<N> &&other) = default;
+
+                char *begin(this _String<N> &self)
+                {
+                        return self.buf;
+                }
+
+                char *end(this _String<N> &self)
+                {
+                        return self.buf + sizeof(self.buf);
+                }
+
+                const char *begin(this const _String<N> &self)
+                {
+                        return self.buf;
+                }
+
+                const char *end(this const _String<N> &self)
+                {
+                        return self.buf + sizeof(self.buf);
+                }
 
                 const char *raw(this const _String<N> &self)
                 {

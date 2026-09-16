@@ -18,9 +18,23 @@ namespace Kiwi::Test
                         TARWI_EXPECT(Lib::strcmp(s.raw(), "i am a string") == 0);
                 }
 
+                TARWI_UNIT(unitStaticDefaultConstructor)
+                {
+                        Lib::String<5> s;
+
+                        bool is_zeroed = true;
+                        for (auto &c : s) {
+                                if (c != 0)
+                                        is_zeroed = false;
+                        }
+
+                        TARWI_EXPECT(is_zeroed);
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
+                        TARWI_CALL_UNIT(unitStaticDefaultConstructor);
                 }
         };
 } // namespace Kiwi::Test
