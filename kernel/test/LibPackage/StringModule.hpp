@@ -64,6 +64,22 @@ namespace Kiwi::Test
                         TARWI_EXPECT(fullname == "John Doe");
                 }
 
+                TARWI_UNIT(unitStaticCopyAssignment)
+                {
+                        Lib::String<10> s = "Hello";
+                        Lib::String<10> s2 = s;
+
+                        TARWI_EXPECT(s2 == s);
+                }
+
+                TARWI_UNIT(unitStaticMoveAssignment)
+                {
+                        Lib::String<10> s = "Hello";
+                        Lib::String<10> s2 = Lib::move(s);
+
+                        TARWI_EXPECT(s2 == s); 
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -72,6 +88,8 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitStaticMoveConstructor);
                         TARWI_CALL_UNIT(unitStaticSubString);
                         TARWI_CALL_UNIT(unitStaticAddition);
+                        TARWI_CALL_UNIT(unitStaticCopyAssignment);
+                        TARWI_CALL_UNIT(unitStaticMoveAssignment);
                 }
         };
 } // namespace Kiwi::Test
