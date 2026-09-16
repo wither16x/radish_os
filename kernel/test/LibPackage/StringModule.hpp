@@ -13,7 +13,7 @@ namespace Kiwi::Test
 
                 TARWI_UNIT(unitStaticConstructFromBase)
                 {
-                        Lib::String<10> s("i am a string");
+                        Lib::String<15> s("i am a string");
 
                         TARWI_EXPECT(Lib::strcmp(s.raw(), "i am a string") == 0);
                 }
@@ -31,10 +31,19 @@ namespace Kiwi::Test
                         TARWI_EXPECT(is_zeroed);
                 }
 
+                TARWI_UNIT(unitStaticCopyConstructor)
+                {
+                        Lib::String<15> origin("fish and chips");
+                        Lib::String<15> copy(origin);
+
+                        TARWI_EXPECT(copy == origin);
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
                         TARWI_CALL_UNIT(unitStaticDefaultConstructor);
+                        TARWI_CALL_UNIT(unitStaticCopyConstructor);
                 }
         };
 } // namespace Kiwi::Test

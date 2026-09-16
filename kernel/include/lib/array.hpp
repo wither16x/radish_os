@@ -13,7 +13,10 @@ namespace Kiwi::Lib
                 T data[LENGTH];
 
         public:
-                Array() = default;
+                Array()
+                {
+                        memset(this->data, 0, LENGTH);
+                }
 
                 Array(const T (&objects)[LENGTH])
                 {

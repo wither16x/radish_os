@@ -3,6 +3,7 @@
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
 #include <lib/memory.hpp>
+#include <lib/array.hpp>
 #include <panic.hpp>
 
 namespace Kiwi::Lib
@@ -10,50 +11,56 @@ namespace Kiwi::Lib
         template<usize N = max_of<usize>>
         class _String
         {
-                char buf[N];
+                Array<char, N> arr;
 
         public:
                 _String()
                 {
-                        memset(this->buf, 0, sizeof(this->buf));
+                        this->arr.clear();
                 }
 
                 _String(const char *base)
                 {
-                        memcpy(this->buf, base, strlen(base) + 1);
+                        for (usize i = 0; i < strlen(base); i++)
+                                this->arr[i] = base[i];
                 }
 
-                _String(const _String<N> &other) = default;
+                _String(const _String<N> &other)
+                {
+                        for (usize i = 0; i < N; i++)
+                                this->arr[i] = other.arr[i];
+                }
+
                 _String(_String<N> &&other) = default;
 
                 char *begin(this _String<N> &self)
                 {
-                        return self.buf;
+                        return self.arr.begin();
                 }
 
                 char *end(this _String<N> &self)
                 {
-                        return self.buf + sizeof(self.buf);
+                        return self.arr.begin() + strlen(self.arr.raw());
                 }
 
                 const char *begin(this const _String<N> &self)
                 {
-                        return self.buf;
+                        return self.arr.begin();
                 }
 
                 const char *end(this const _String<N> &self)
                 {
-                        return self.buf + sizeof(self.buf);
+                        return self.arr + strlen(self.arr.raw());
                 }
 
                 const char *raw(this const _String<N> &self)
                 {
-                        return self.buf;
+                        return self.arr.raw();
                 }
 
                 usize length(this const _String<N> &self)
                 {
-                        return strlen(self.buf);
+                        return strlen(self.arr);
                 }
 
                 _String<N> subString(this const _String<N> &self, usize start)
@@ -64,7 +71,7 @@ namespace Kiwi::Lib
                         _String<N> new_str;
 
                         for (usize i = start; i < N; i++)
-                                new_str.buf[i] = self.buf[i];
+                                new_str.arr[i] = self.arr[i];
 
                         return new_str;
                 }
@@ -74,9 +81,9 @@ namespace Kiwi::Lib
                         _String<N * 2> new_str;
 
                         for (usize i = 0; i < N; i++)
-                                new_str.buf[i] = self.buf[i];
+                                new_str.buf[i] = self.arr[i];
                         for (usize i = 0; i < N; i++)
-                                new_str.buf[N + i] = other.buf[i];
+                                new_str.buf[N + i] = other.arr[i];
 
                         return new_str;
                 }
@@ -89,7 +96,7 @@ namespace Kiwi::Lib
                         if (index >= N)
                                 panic("index out of range");
 
-                        return self.buf[index];
+                        return self.arr[index];
                 }
 
                 const char &operator [](this const _String<N> &self, usize index)
@@ -97,12 +104,12 @@ namespace Kiwi::Lib
                         if (index >= N)
                                 panic("index out of range");
 
-                        return self.buf[index];     
+                        return self.arr[index];     
                 }
 
                 bool operator ==(this const _String<N> &self, const _String<N> &other)
                 {
-                        return strcmp(self.buf, other.buf) == 0;
+                        return strcmp(self.arr.raw(), other.arr.raw()) == 0;
                 }
         };
 
