@@ -110,6 +110,31 @@ namespace Kiwi::Lib
                 {
                         return strcmp(self.arr.raw(), other.arr.raw()) == 0;
                 }
+
+                bool operator !=(this const _String<N> &self, const _String<N> &other)
+                {
+                        return strcmp(self.arr.raw(), other.arr.raw()) != 0;
+                }
+
+                bool operator <(this const _String<N> &self, const _String<N> &other)
+                {
+                        return strcmp(self.arr.raw(), other.arr.raw()) < 0;
+                }
+
+                bool operator >(this const _String<N> &self, const _String<N> &other)
+                {
+                        return strcmp(self.arr.raw(), other.arr.raw()) > 0;
+                }
+
+                bool operator <=(this const _String<N> &self, const _String<N> &other)
+                {
+                        return strcmp(self.arr.raw(), other.arr.raw()) <= 0;
+                }
+
+                bool operator >=(this const _String<N> &self, const _String<N> &other)
+                {
+                        return strcmp(self.arr.raw(), other.arr.raw()) >= 0;
+                }
         };
 
         template<>
