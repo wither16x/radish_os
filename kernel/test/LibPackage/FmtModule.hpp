@@ -26,9 +26,26 @@ namespace Kiwi::Test
                         );
                 }
 
+                TARWI_UNIT(unitFmtChar)
+                {
+                        char letter5 = 'e';
+                        Lib::String s1 = Lib::formatString("The fifth letter in the alphabet is {}.",
+                                letter5
+                        );
+
+                        char n = '5';
+                        Lib::String s2 = Lib::formatString("3 + 2 = {}.", n);
+
+                        TARWI_EXPECT(
+                                s1 == "The fifth letter in the alphabet is e."
+                                and s2 == "3 + 2 = 5."
+                        );
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitFmtString);
+                        TARWI_CALL_UNIT(unitFmtChar);
                 }
         };
 } // namespace Kiwi::Test

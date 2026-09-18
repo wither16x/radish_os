@@ -7,10 +7,12 @@ namespace Kiwi::Lib
 {
         template<typename T, usize N>
         concept FormattableStatic = is_same_type<remove_const_volatile_ref_t<T>, String<N>>
+                or is_same_type<remove_const_volatile_ref_t<T>, char>
         ;
 
         template<typename T>
         concept FormattableDynamic = is_same_type<remove_const_volatile_ref_t<T>, String<>>
+                or is_same_type<remove_const_volatile_ref_t<T>, char>
         ;
 
         template<FormattableDynamic T, typename... ARGS>
@@ -31,6 +33,10 @@ namespace Kiwi::Lib
                                         is_same_type<remove_const_volatile_ref_t<T>, String<>>
                                 ) {
                                         out += arg;
+                                } else if constexpr (
+                                       is_same_type<remove_const_volatile_ref_t<T>, char>
+                                ) {
+                                        out.appendChar(arg);
                                 }
 
                                 ++i;
@@ -63,6 +69,10 @@ namespace Kiwi::Lib
                                         is_same_type<remove_const_volatile_ref_t<T>, String<N>>
                                 ) {
                                         out += arg;
+                                } else if constexpr (
+                                        is_same_type<remove_const_volatile_ref_t<T>, char>
+                                ) {
+                                        out.appendChar(arg);
                                 }
 
                                 ++i;
