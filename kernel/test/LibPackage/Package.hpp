@@ -15,6 +15,7 @@
 #include <LibPackage/BitmapModule.hpp>
 #include <LibPackage/LinkedListModule.hpp>
 #include <LibPackage/StringModule.hpp>
+#include <LibPackage/FmtModule.hpp>
 
 namespace Kiwi::Test
 {
@@ -34,6 +35,7 @@ namespace Kiwi::Test
                 BitmapModule            bitmap_module;
                 LinkedListModule        linked_list_module;
                 StringModule            string_module;
+                FmtModule               fmt_module;
 
                 TARWI_PACKAGE_MAIN()
                 {
@@ -49,6 +51,7 @@ namespace Kiwi::Test
                         TARWI_RUN_MODULE(bitmap_module);
                         TARWI_RUN_MODULE(linked_list_module);
                         TARWI_RUN_MODULE(string_module);
+                        TARWI_RUN_MODULE(fmt_module);
 
                         TARWI_DISPLAY_RESULTS(
                                 typing_module.successfull_tests +
@@ -62,7 +65,8 @@ namespace Kiwi::Test
                                 vector_module.successfull_tests +
                                 bitmap_module.successfull_tests +
                                 linked_list_module.successfull_tests +
-                                string_module.successfull_tests,
+                                string_module.successfull_tests +
+                                fmt_module.successfull_tests,
 
                                 typing_module.failed_tests +
                                 result_module.failed_tests +
@@ -75,7 +79,8 @@ namespace Kiwi::Test
                                 vector_module.failed_tests +
                                 bitmap_module.failed_tests +
                                 linked_list_module.failed_tests +
-                                string_module.failed_tests,
+                                string_module.failed_tests +
+                                fmt_module.failed_tests,
 
                                 typing_module.skipped_tests +
                                 result_module.skipped_tests +
@@ -88,7 +93,8 @@ namespace Kiwi::Test
                                 vector_module.skipped_tests +
                                 bitmap_module.skipped_tests +
                                 linked_list_module.skipped_tests +
-                                string_module.skipped_tests
+                                string_module.skipped_tests +
+                                fmt_module.skipped_tests
                         );
                 }
         };
