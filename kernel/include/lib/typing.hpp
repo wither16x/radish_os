@@ -131,4 +131,58 @@ namespace Kiwi::Lib
 
         template<typename T>
         constexpr T max_of = getMaxOf<T>();
+
+        template<typename T>
+        struct RemoveReference
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveReference<T &>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveReference<T &&>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<const T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<volatile T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<const volatile T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatileRef
+        {
+                using type = typename RemoveConstVolatile<typename RemoveReference<T>::type>::type;
+        };
+
+        template<typename T>
+        using remove_reference_t = typename RemoveReference<T>::type;
+
+        template<typename T>
+        using remove_const_volatile_ref_t = typename RemoveConstVolatileRef<T>::type;
 } // namespace Kiwi::Lib

@@ -17,32 +17,6 @@ namespace Kiwi::Lib
                 int memcmp(const void *s1, const void *s2, usize n);
         }
 
-        // for copy() and move()
-        //
-        // RemoveReference
-        // -----------------------------------------------------------
-        template<typename T>
-        struct RemoveReference
-        {
-                using type = T;
-        };
-
-        template<typename T>
-        struct RemoveReference<T&>
-        {
-                using type = T;
-        };
-
-        template<typename T>
-        struct RemoveReference<T&&>
-        {
-                using type = T; 
-        };
-
-        template<typename T>
-        using RemoveReferenceType = typename RemoveReference<T>::type;
-        // -----------------------------------------------------------
-
         template<typename T>
         T *copy(const T *first, const T *last, T *dest)
         {
@@ -53,9 +27,9 @@ namespace Kiwi::Lib
         }
 
         template<typename T>
-        constexpr RemoveReferenceType<T>&& move(T&& value) noexcept
+        constexpr remove_reference_t<T>&& move(T&& value) noexcept
         {
-                return static_cast<RemoveReferenceType<T>&&>(value);
+                return static_cast<remove_reference_t<T>&&>(value);
         }
 
         // NOTE: all the functions below assume that the strings
