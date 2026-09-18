@@ -155,8 +155,13 @@ namespace Kiwi::Lib
                         this->vec.pushBack('\0');
                 }
 
-                _String(const _String &other) = default;
-                _String(_String &&other) = default;
+                _String(const _String &other)
+                        : vec(other.vec)
+                {}
+
+                _String(_String &&other) noexcept
+                        : vec(move(other.vec))
+                {}
 
                 const char *raw(this const _String &self)
                 {
