@@ -94,7 +94,7 @@ namespace Kiwi::Test
                         TARWI_EXPECT(s == "I am a string.");
                 }
 
-                TARWI_UNIT(unitCopyConstructor)
+                TARWI_UNIT(unitDynamicCopyConstructor)
                 {
                         Lib::String origin("strawberries");
                         Lib::String copy(origin);
@@ -102,12 +102,20 @@ namespace Kiwi::Test
                         TARWI_EXPECT(copy == origin);
                 }
 
-                TARWI_UNIT(unitMoveConstructor)
+                TARWI_UNIT(unitDynamicMoveConstructor)
                 {
                         Lib::String origin("chicken");
                         Lib::String copy(Lib::move(origin));
 
                         TARWI_EXPECT(copy == "chicken" and origin.isEmpty());
+                }
+
+                TARWI_UNIT(unitDynamicSubString)
+                {
+                        Lib::String base = "Hello, world!";
+                        Lib::String derived = base.subString(7);
+
+                        TARWI_EXPECT(derived == "world!");
                 }
 
                 TARWI_MODULE_MAIN()
@@ -123,8 +131,9 @@ namespace Kiwi::Test
 
                         TARWI_CALL_UNIT(unitDynamicDefaultConstructor);
                         TARWI_CALL_UNIT(unitDynamicConstruct);
-                        TARWI_CALL_UNIT(unitCopyConstructor);
-                        TARWI_CALL_UNIT(unitMoveConstructor);
+                        TARWI_CALL_UNIT(unitDynamicCopyConstructor);
+                        TARWI_CALL_UNIT(unitDynamicMoveConstructor);
+                        TARWI_CALL_UNIT(unitDynamicSubString);
                 }
         };
 } // namespace Kiwi::Test
