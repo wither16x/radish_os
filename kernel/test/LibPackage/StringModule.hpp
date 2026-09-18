@@ -126,6 +126,14 @@ namespace Kiwi::Test
                         TARWI_EXPECT(s == "abcd");
                 }
 
+                TARWI_UNIT(unitDynamicIndex)
+                {
+                        Lib::String s = "strings are amazing";
+                        s[9] = 'd';
+
+                        TARWI_EXPECT(s[0] == 's' and s[8] == 'a' and s[9] == 'd' and s[12] == 'a');
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -143,6 +151,7 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitDynamicMoveConstructor);
                         TARWI_CALL_UNIT(unitDynamicSubString);
                         TARWI_CALL_UNIT(unitDynamicAppendChar);
+                        TARWI_CALL_UNIT(unitDynamicIndex);
                 }
         };
 } // namespace Kiwi::Test
