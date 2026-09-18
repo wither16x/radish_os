@@ -118,6 +118,14 @@ namespace Kiwi::Test
                         TARWI_EXPECT(derived == "world!");
                 }
 
+                TARWI_UNIT(unitDynamicAppendChar)
+                {
+                        Lib::String s = "abc";
+                        s.appendChar('d');
+
+                        TARWI_EXPECT(s == "abcd");
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -134,6 +142,7 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitDynamicCopyConstructor);
                         TARWI_CALL_UNIT(unitDynamicMoveConstructor);
                         TARWI_CALL_UNIT(unitDynamicSubString);
+                        TARWI_CALL_UNIT(unitDynamicAppendChar);
                 }
         };
 } // namespace Kiwi::Test
