@@ -134,6 +134,17 @@ namespace Kiwi::Test
                         TARWI_EXPECT(s[0] == 's' and s[8] == 'a' and s[9] == 'd' and s[12] == 'a');
                 }
 
+                TARWI_UNIT(unitDynamicForeach)
+                {
+                        Lib::String s = "dragons";
+                        Lib::String s2;
+
+                        for (auto &c : s)
+                                s2.appendChar(c);
+
+                        TARWI_EXPECT(s2 == s);
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -152,6 +163,7 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitDynamicSubString);
                         TARWI_CALL_UNIT(unitDynamicAppendChar);
                         TARWI_CALL_UNIT(unitDynamicIndex);
+                        TARWI_CALL_UNIT(unitDynamicForeach);
                 }
         };
 } // namespace Kiwi::Test

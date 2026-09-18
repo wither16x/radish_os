@@ -207,6 +207,26 @@ namespace Kiwi::Lib
                         return self.length() == 0;
                 }
 
+                char *begin(this _String &self)
+                {
+                        return self.vec.begin();
+                }
+
+                char *end(this _String &self)
+                {
+                        return self.vec.end() - 1;
+                }
+
+                const char *begin(this const _String &self)
+                {
+                        return self.vec.begin();
+                }
+
+                const char *end(this const _String &self)
+                {
+                        return self.vec.end() - 1;
+                }
+
                 char &operator [](this _String &self, usize index)
                 {
                         if (index >= self.length())
