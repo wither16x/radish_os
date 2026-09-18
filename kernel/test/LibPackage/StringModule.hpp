@@ -87,6 +87,13 @@ namespace Kiwi::Test
                         TARWI_EXPECT(s.isEmpty());
                 }
 
+                TARWI_UNIT(unitDynamicConstruct)
+                {
+                        Lib::String s("I am a string.");
+
+                        TARWI_EXPECT(s == "I am a string.");
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -99,6 +106,7 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitStaticMoveAssignment);
 
                         TARWI_CALL_UNIT(unitDynamicDefaultConstructor);
+                        TARWI_CALL_UNIT(unitDynamicConstruct);
                 }
         };
 } // namespace Kiwi::Test
