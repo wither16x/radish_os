@@ -248,6 +248,31 @@ namespace Kiwi::Lib
                         return strcmp(self.vec.data(), other.vec.data()) == 0;
                 }
 
+                bool operator !=(this const _String &self, const _String &other)
+                {
+                        return strcmp(self.vec.data(), other.vec.data()) != 0;
+                }
+
+                bool operator <(this const _String &self, const _String &other)
+                {
+                        return strcmp(self.vec.data(), other.vec.data()) < 0;
+                }
+
+                bool operator >(this const _String &self, const _String &other)
+                {
+                        return strcmp(self.vec.data(), other.vec.data()) > 0;
+                }
+
+                bool operator <=(this const _String &self, const _String &other)
+                {
+                        return strcmp(self.vec.data(), other.vec.data()) <= 0;
+                }
+
+                bool operator >=(this const _String &self, const _String &other)
+                {
+                        return strcmp(self.vec.data(), other.vec.data()) >= 0;
+                }
+
                 _String operator +(this const _String &self, const _String &other)
                 {
                         _String new_str = self;
