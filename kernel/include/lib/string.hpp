@@ -253,8 +253,8 @@ namespace Kiwi::Lib
                         _String new_str = self;
 
                         new_str.vec.popBack();
-                        for (usize i = 0; i < other.vec.length(); ++i)
-                                new_str.vec.pushBack(other.vec[i]);
+                        for (auto &c : other)
+                                new_str.vec.pushBack(c);
                         new_str.vec.pushBack('\0');
 
                         return new_str;
