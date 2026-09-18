@@ -197,6 +197,11 @@ namespace Kiwi::Lib
                         self.vec.pushBack('\0');
                 }
 
+                bool isEmpty(this const _String &self)
+                {
+                        return self.length() == 0;
+                }
+
                 char &operator [](this _String &self, usize index)
                 {
                         if (index >= self.length())
@@ -244,34 +249,4 @@ namespace Kiwi::Lib
 
         template<usize N = max_of<usize>>
         using String = _String<N>;
-        
-        // class _String
-        // {
-        //         Vector<char> data;
-
-        // public:
-        //         _String();
-        //         _String(const char *buf);
-        //         _String(const _String &other)     = default;
-        //         _String(_String &&other)          = default;
-
-        //         ~_String()                       = default;
-
-        //         /// Return a null-terminated _String from this _String.
-        //         const char *raw(this const _String &self);
-        //         /// Return the length of the _String.
-        //         usize length(this const _String &self);
-        //         /// Split this _String from `start`.
-        //         _String sub(this const _String &self, usize start);
-
-        //         _String operator +(this const _String &self, const _String &other);
-        //         _String operator +(this const _String &self, char ch);
-        //         _String &operator =(this _String &self, const _String &other)      = default;
-        //         _String &operator =(this _String &self, _String &&other)           = default;
-        //         _String &operator +=(this _String &self, const _String &other);
-        //         _String &operator +=(this _String &self, char ch);
-        //         char operator [](this _String &self, usize index);
-        //         char operator [](this const _String &self, usize index);
-        //         bool operator ==(this const _String &self, const _String &other);
-        // };
 } // namespace Kiwi::Lib

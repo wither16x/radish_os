@@ -80,6 +80,13 @@ namespace Kiwi::Test
                         TARWI_EXPECT(s2 == s); 
                 }
 
+                TARWI_UNIT(unitDynamicDefaultConstructor)
+                {
+                        Lib::String<> s;
+                        
+                        TARWI_EXPECT(s.isEmpty());
+                }
+
                 TARWI_MODULE_MAIN()
                 {
                         TARWI_CALL_UNIT(unitStaticConstructFromBase);
@@ -90,6 +97,8 @@ namespace Kiwi::Test
                         TARWI_CALL_UNIT(unitStaticAddition);
                         TARWI_CALL_UNIT(unitStaticCopyAssignment);
                         TARWI_CALL_UNIT(unitStaticMoveAssignment);
+
+                        TARWI_CALL_UNIT(unitDynamicDefaultConstructor);
                 }
         };
 } // namespace Kiwi::Test
