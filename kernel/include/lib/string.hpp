@@ -76,6 +76,16 @@ namespace Kiwi::Lib
                         return new_str;
                 }
 
+                void appendChar(this _String<N> &self, char ch)
+                {
+                        usize length = self.length();
+                        if (length + 1 >= N)
+                                panic("string overflow");
+
+                        self.arr[length] = ch;
+                        self.arr[length + 1] = '\0';
+                }
+
                 _String<N> operator +(this const _String<N> &self, const _String<N> &other)
                 {
                         _String<N> new_str = self;
@@ -89,6 +99,12 @@ namespace Kiwi::Lib
 
                 _String<N> &operator =(this _String<N> &self, const _String<N> &other) = default;
                 _String<N> &operator =(this _String<N> &self, _String<N> &&other) = default;
+
+                _String<N> &operator +=(this _String<N> &self, const _String<N> &other)
+                {
+                        self = self + other;
+                        return self;
+                }
 
                 char &operator [](this _String<N> &self, usize index)
                 {

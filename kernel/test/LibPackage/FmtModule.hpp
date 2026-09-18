@@ -17,7 +17,13 @@ namespace Kiwi::Test
                         Lib::String name = "Joe";
                         Lib::String s = Lib::formatString("Hello, my name is {}!", name);
                 
-                        TARWI_EXPECT(s == "Hello, my name is Joe!");
+                        Lib::String<30> name2 = "Henry";
+                        Lib::String<30> s2 = Lib::formatString<30>("And mine is {}!", name2);
+
+                        TARWI_EXPECT(
+                                s == "Hello, my name is Joe!"
+                                and s2 == "And mine is Henry!"
+                        );
                 }
 
                 TARWI_MODULE_MAIN()
