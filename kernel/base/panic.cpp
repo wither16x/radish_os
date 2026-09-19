@@ -69,7 +69,7 @@ namespace Kiwi
                                 break;
 
                         const char *name = lookupSymbol(reinterpret_cast<Lib::uptr>(addr));
-                        Lib::println("[trace frame 0x{}] 0x{}: {}", Lib::hex(i), reinterpret_cast<Lib::uptr>(addr), name);
+                        Lib::println("[trace frame 0x{}] 0x{}: {}", Lib::hex(i), Lib::hex(reinterpret_cast<Lib::uptr>(addr)), name);
                 }
         }
 

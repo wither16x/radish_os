@@ -18,7 +18,7 @@ namespace Kiwi::Lib
                         : arr{}
                 {}
 
-                _String(const char *base)
+                constexpr _String(const char *base)
                 {
                         for (usize i = 0; i < strlen(base); i++)
                                 this->arr[i] = base[i];

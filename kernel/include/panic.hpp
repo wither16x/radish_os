@@ -8,7 +8,7 @@
 
 namespace Kiwi
 {
-        constexpr Lib::usize PANIC_MESSAGE_SIZE = 255;
+        constexpr Lib::usize PANIC_MESSAGE_SIZE = 2048;
 
         void *getReturnAddress(int i);
         const char *lookupSymbol(Lib::uptr addr);

@@ -27,7 +27,7 @@ namespace Kiwi::Lib
         }
 
         template<typename T>
-        constexpr remove_reference_t<T>&& move(T&& value) noexcept
+        constexpr remove_reference_t<T>&& move(T&& value)
         {
                 return static_cast<remove_reference_t<T>&&>(value);
         }
@@ -39,8 +39,16 @@ namespace Kiwi::Lib
         int strcmp(const char *s1, const char *s2);
         /// Compare `length` characters from two strings.
         int strncmp(const char *s1, const char *s2, usize length);
+        
         /// Return the length of a string.
-        usize strlen(const char *s);
+        constexpr usize strlen(const char *s)
+        {
+                usize i;
+                for (i = 0; *s; s++)
+                        i++;
+                return i;
+        }
+
         /// Copy a string to another.
         void strcpy(const char *src, char *dest);
         /// Check if a string starts with another string.

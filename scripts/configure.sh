@@ -42,7 +42,7 @@ if [[ $component == "k" ]]; then
         echo "LINKER = $opt_linker" >> $config_file
         echo "TEST_DIR = test" >> $config_file
         echo "INCLUDE_DIR = include" >> $config_file
-        echo "COMMON_FLAGS = -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pic -fno-pie -mno-red-zone -Wall -Wextra -nostdlib -nostdinc -mcmodel=kernel" >> $config_file
+        echo "COMMON_FLAGS = -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pic -fno-pie -mno-red-zone -Wall -Wextra -nostdlib -nostdinc -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx -mno-80387 -mno-red-zone" >> $config_file
         echo "ifeq (\$(BUILD_MODE),dev)" >> $config_file
         echo "COMMON_FLAGS += -g" >> $config_file
         echo "endif" >> $config_file

@@ -40,7 +40,12 @@ clean-userspace:
 run:
 	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G
 
+# debug
 debug:
+	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G -d int -no-reboot
+
+# debug using gdb
+gdb:
 	qemu-system-x86_64 -cdrom images/radish_os.iso -m 2G -d int -no-reboot -s -S
 
 # test

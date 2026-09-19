@@ -82,14 +82,6 @@ namespace Kiwi::Lib
                         return (*(unsigned char *)s1 - *(unsigned char *)s2);
         }
 
-        usize strlen(const char *s)
-        {
-                usize i;
-                for (i = 0; *s; s++)
-                        i++;
-                return i;
-        }
-
         void strcpy(const char *src, char *dest)
         {
                 int i;

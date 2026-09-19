@@ -1,7 +1,7 @@
 #include <kernel.hpp>
 #include <panic.hpp>
 #include <boot/bootinfo.hpp>
-#include <boot/limine.hpp>
+#include <boot/bootloaders/limine.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/cpu.hpp>
@@ -103,7 +103,10 @@ namespace Kiwi
         {
                 kcontext.init();
 
-                if (not Boot::Limine::getBaseRevision().isSupported())
+                Boot::Bootloaders::Limine limine_bootloader;
+                limine_bootloader.init("Limine", "undefined");
+
+                if (not limine_bootloader.isBaseRevisionSupported())
                         panic("limine base revsion not supported"); // you wont see the message
 
                 if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
