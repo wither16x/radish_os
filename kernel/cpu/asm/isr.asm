@@ -9,8 +9,8 @@ __isr_stub%1:
 %macro isr_no_error_stub 1
 global __isr_stub%1
 __isr_stub%1:
-        push %1
         push 0 ; fake error code
+        push %1
         jmp isr_common
 %endmacro
 
@@ -20,6 +20,7 @@ section .text
 extern exception_handler
 
 isr_no_error_stub       3               ; breakpoint
+isr_no_error_stub       6               ; invalid opcode
 isr_error_stub          10              ; invalid tss
 isr_error_stub          13              ; general protection fault
 isr_error_stub          14              ; page fault

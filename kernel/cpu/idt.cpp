@@ -15,6 +15,7 @@ namespace Kiwi::Cpu
 
                 // ISR stubs
                 ISR(3);
+                ISR(6);
                 ISR(10);
                 ISR(13);
                 ISR(14);
@@ -36,6 +37,7 @@ namespace Kiwi::Cpu
 
                 // isr
                 self.setGate(3, __isr_stub3, 0x8e);
+                self.setGate(6, __isr_stub6, 0x8e);
                 self.setGate(10, __isr_stub10, 0x8e);
                 self.setGate(13, __isr_stub13, 0x8e);
                 self.setGate(14, __isr_stub14, 0x8e);

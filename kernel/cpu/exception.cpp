@@ -43,24 +43,24 @@ namespace Kiwi::Cpu
         extern "C" void exception_handler(CpuFrame *f)
         {
                 panic(
-                        "CPU exception #%u with error code %u\r\n"
-                        "RAX=0x%x RBX=0x%x RCX=0x%x RDX=0x%x\r\n"
-                        "RDI=0x%x RSI=0x%x\r\n"
-                        "RBP=0x%x RSP=0x%x\r\n"
-                        "R8=0x%x R9=0x%x R10=0x%x R11=0x%x R12=0x%x R13=0x%x R14=0x%x R15=0x%x\r\n"
-                        "CR2=0x%x CR3=0x%x\r\n"
-                        "CS=0x%x SS=0x%x\r\n"
-                        "RIP=0x%x\r\n"
-                        "FLAGS=0x%x\r\n",
+                        "CPU exception #{} with error code {}\r\n"
+                        "RAX=0x{} RBX=0x{} RCX=0x{} RDX=0x{}\r\n"
+                        "RDI=0x{} RSI=0x{}\r\n"
+                        "RBP=0x{} RSP=0x{}\r\n"
+                        "R8=0x{} R9=0x{} R10=0x{} R11=0x{} R12=0x{} R13=0x{} R14=0x{} R15=0x{}\r\n"
+                        "CR2=0x{} CR3=0x{}\r\n"
+                        "CS=0x{} SS=0x{}\r\n"
+                        "RIP=0x{}\r\n"
+                        "FLAGS=0x{}\r\n",
                         f->err_type, f->err_code,
-                        f->rax, f->rbx, f->rcx, f->rdx,
-                        f->rdi, f->rsi,
-                        f->rbp, f->rsp,
-                        f->r8, f->r9, f->r10, f->r11, f->r12, f->r13, f->r14, f->r15,
-                        f->cr2, f->cr3,
-                        f->cs, f->ss,
-                        f->rip,
-                        f->flags
+                        Lib::hex(f->rax), Lib::hex(f->rbx), Lib::hex(f->rcx), Lib::hex(f->rdx),
+                        Lib::hex(f->rdi), Lib::hex(f->rsi),
+                        Lib::hex(f->rbp), Lib::hex(f->rsp),
+                        Lib::hex(f->r8), Lib::hex(f->r9), Lib::hex(f->r10), Lib::hex(f->r11), Lib::hex(f->r12), Lib::hex(f->r13), Lib::hex(f->r14), Lib::hex(f->r15),
+                        Lib::hex(f->cr2), Lib::hex(f->cr3),
+                        Lib::hex(f->cs), Lib::hex(f->ss),
+                        Lib::hex(f->rip),
+                        Lib::hex(f->flags)
                 );
         }
 } // namespace Kiwi::Cpu
