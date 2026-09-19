@@ -88,6 +88,18 @@ namespace Kiwi::Lib
         template<typename T>
         concept Integer = SignedInteger<T> or UnsignedInteger<T>;
 
+        template<typename T>
+        concept Enum = __is_enum(T);
+
+        template<Enum T>
+        using underlying_type_t = __underlying_type(T);
+
+        template<Enum E>
+        constexpr underlying_type_t<E> toUnderlying(E e)
+        {
+                return static_cast<underlying_type_t<E>>(e);
+        }
+
         template<Integer T>
         constexpr T getMinOf()
         {
@@ -181,8 +193,16 @@ namespace Kiwi::Lib
         };
 
         template<typename T>
+        struct TypeIdentity {
+                using type = T;
+        };
+
+        template<typename T>
         using remove_reference_t = typename RemoveReference<T>::type;
 
         template<typename T>
         using remove_const_volatile_ref_t = typename RemoveConstVolatileRef<T>::type;
+
+        template<typename T>
+        using type_identity_t = typename TypeIdentity<T>::type;
 } // namespace Kiwi::Lib

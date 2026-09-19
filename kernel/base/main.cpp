@@ -42,7 +42,7 @@ namespace Kiwi
         {
                 for (Lib::u64 i = 0; &__init_array[i] != __init_array_end; i++) {
                         __init_array[i]();
-                        Lib::Log::logger.ok("initialized global constructor %u", i);
+                        Lib::Log::logger.ok("initialized global constructor {}", i);
                 }
 
                 Lib::Log::logger.ok("called global constructors");

@@ -123,7 +123,7 @@ namespace Kiwi::Fs::Ustar
                                 if (hdr->name[0] == '\0')
                                         break;
 
-                                Lib::usize bytes = Lib::atoi(hdr->size, 8, sizeof(hdr->size));
+                                Lib::usize bytes = Lib::stringToInt<Lib::usize>(hdr->size, Lib::Base::Octal);
                                 Lib::String<> path = hdr->name;
 
                                 Lib::Vector<Lib::String<>> parts = parsePath(path);

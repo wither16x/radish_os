@@ -3,7 +3,7 @@
 #include <lib/typing.hpp>
 #include <lib/forward.hpp>
 #include <lib/alloc.hpp>
-#include <panic.hpp>
+#include <panic_simple.hpp>
 
 namespace Kiwi::Lib
 {
@@ -22,7 +22,7 @@ namespace Kiwi::Lib
                 {
                         for (usize i = 0; i < LENGTH; i++) {
                                 if (not this->construct(i, objects[i]))
-                                        panic("failed to construct object at %u", i);
+                                        panic_simple("failed to construct object");
                         }
                 }
 
@@ -35,7 +35,7 @@ namespace Kiwi::Lib
                                 this->construct(i, other.data[i]);
                 }
 
-                Array(Array<T, LENGTH> &&other) noexcept
+                Array(Array<T, LENGTH> &&other)
                 {
                         for (usize i = 0; i < LENGTH; ++i) {
                                 memcpy(&this->data[i], &other.data[i], sizeof(T));
@@ -55,7 +55,7 @@ namespace Kiwi::Lib
                 {
                         for (usize i = 0; i < LENGTH; i++) {
                                 if (not self.destroy(i))
-                                        panic("failed to destroy object at %u", i);
+                                        panic_simple("failed to destroy object");
                         }
                 }
 
@@ -134,7 +134,7 @@ namespace Kiwi::Lib
                 T &operator [](this Array<T, LENGTH> &self, usize index)
                 {
                         if (index >= LENGTH)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.data[index];
                 }
@@ -142,7 +142,7 @@ namespace Kiwi::Lib
                 const T &operator [](this const Array<T, LENGTH> &self, usize index)
                 {
                         if (index >= LENGTH)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.data[index]; 
                 }

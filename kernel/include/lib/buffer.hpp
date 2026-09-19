@@ -4,7 +4,7 @@
 #include <lib/forward.hpp>
 #include <lib/alloc.hpp>
 #include <lib/result.hpp>
-#include <panic.hpp>
+#include <panic_simple.hpp>
 
 namespace Kiwi::Lib
 {
@@ -204,7 +204,7 @@ namespace Kiwi::Lib
                 T &operator [](this Buffer<T> &self, usize index)
                 {
                         if (index >= self.__size)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.data[index];
                 }
@@ -212,7 +212,7 @@ namespace Kiwi::Lib
                 const T &operator [](this const Buffer<T> &self, usize index)
                 {
                         if (index >= self.__size)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.data[index];
                 }

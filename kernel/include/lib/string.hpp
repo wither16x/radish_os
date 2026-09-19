@@ -4,7 +4,7 @@
 #include <lib/vector.hpp>
 #include <lib/memory.hpp>
 #include <lib/array.hpp>
-#include <panic.hpp>
+#include <panic_simple.hpp>
 
 namespace Kiwi::Lib
 {
@@ -14,10 +14,9 @@ namespace Kiwi::Lib
                 Array<char, N> arr;
 
         public:
-                _String()
-                {
-                        this->arr.clear();
-                }
+                constexpr _String()
+                        : arr{}
+                {}
 
                 _String(const char *base)
                 {
@@ -50,7 +49,7 @@ namespace Kiwi::Lib
 
                 const char *end(this const _String<N> &self)
                 {
-                        return self.arr + strlen(self.arr.raw());
+                        return self.arr.begin() + strlen(self.arr.raw());
                 }
 
                 const char *raw(this const _String<N> &self)
@@ -66,7 +65,7 @@ namespace Kiwi::Lib
                 _String<N> subString(this const _String<N> &self, usize start)
                 {
                         if (start >= N)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         _String<N> new_str;
 
@@ -80,10 +79,30 @@ namespace Kiwi::Lib
                 {
                         usize length = self.length();
                         if (length + 1 >= N)
-                                panic("string overflow");
+                                panic_simple("string overflow");
 
                         self.arr[length] = ch;
                         self.arr[length + 1] = '\0';
+                }
+
+                _String<N> reverse(this const _String<N> &self)
+                {
+                        _String<N> new_str = self;
+
+                        usize l = 0;
+                        usize r = new_str.length() - 1;
+                        char t;
+
+                        while (l < r) {
+                                t = new_str[l];
+                                new_str[l] = new_str[r];
+                                new_str[r] = t;
+
+                                ++l;
+                                --r;
+                        }
+
+                        return new_str;
                 }
 
                 _String<N> operator +(this const _String<N> &self, const _String<N> &other)
@@ -109,7 +128,7 @@ namespace Kiwi::Lib
                 char &operator [](this _String<N> &self, usize index)
                 {
                         if (index >= N)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.arr[index];
                 }
@@ -117,7 +136,7 @@ namespace Kiwi::Lib
                 const char &operator [](this const _String<N> &self, usize index)
                 {
                         if (index >= N)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.arr[index];     
                 }
@@ -175,7 +194,7 @@ namespace Kiwi::Lib
                         : vec(other.vec)
                 {}
 
-                _String(_String &&other) noexcept
+                _String(_String &&other)
                         : vec(move(other.vec))
                 {}
 
@@ -201,7 +220,7 @@ namespace Kiwi::Lib
                         usize len = self.vec.length();
 
                         if (start >= len)
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         for (usize i = start; i < len; ++i)
                                 new_str.vec.pushBack(self.vec[i]);
@@ -243,10 +262,30 @@ namespace Kiwi::Lib
                         return self.vec.end() - 1;
                 }
 
+                _String reverse(this const _String &self)
+                {
+                        _String new_str = self;
+
+                        usize l = 0;
+                        usize r = new_str.length() - 1;
+                        char t;
+
+                        while (l < r) {
+                                t = new_str[l];
+                                new_str[l] = new_str[r];
+                                new_str[r] = t;
+
+                                ++l;
+                                --r;
+                        }
+
+                        return new_str;
+                }
+
                 char &operator [](this _String &self, usize index)
                 {
                         if (index >= self.length())
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.vec[index];
                 }
@@ -254,7 +293,7 @@ namespace Kiwi::Lib
                 const char &operator [](this const _String &self, usize index)
                 {
                         if (index >= self.length())
-                                panic("index out of range");
+                                panic_simple("index out of range");
 
                         return self.vec[index];
                 }

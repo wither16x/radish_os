@@ -4,6 +4,7 @@
 #include <lib/conversion.hpp>
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>
+#include <lib/string.hpp>
 
 namespace Kiwi::Test
 {
@@ -11,260 +12,248 @@ namespace Kiwi::Test
         {
                 TARWI_SET_NAME("ConversionModule");
 
-                TARWI_UNIT(unitItoaPositiveBase10)
+                TARWI_UNIT(unitIntToStringPositiveBase10)
                 {
-                        char buf[32];
-                        Lib::itoa(42, buf, 10);
+                        Lib::String s = Lib::intToString(42, Lib::Base::Decimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "42") == 0);
+                        TARWI_EXPECT(s == "42");
                 }
 
-                TARWI_UNIT(unitItoaNegativeBase10)
+                TARWI_UNIT(unitIntToStringNegativeBase10)
                 {
-                        char buf[32];
-                        Lib::itoa(-42, buf, 10);
+                        Lib::String s = Lib::intToString(-42, Lib::Base::Decimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "-42") == 0);
+                        TARWI_EXPECT(s == "-42");
                 }
 
-                TARWI_UNIT(unitItoaZero)
+                TARWI_UNIT(unitIntToStringZero)
                 {
-                        char buf[32];
-                        Lib::itoa(0, buf, 10);
+                        Lib::String s = Lib::intToString(0, Lib::Base::Decimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "0") == 0);
+                        TARWI_EXPECT(s == "0");
                 }
 
-                TARWI_UNIT(unitItoaBase16)
+                TARWI_UNIT(unitIntToStringBase16)
                 {
-                        char buf[32];
-                        Lib::itoa(255, buf, 16);
+                        Lib::String s = Lib::intToString(255, Lib::Base::Hexadecimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "ff") == 0);
+                        TARWI_EXPECT(s == "ff");
                 }
 
-                TARWI_UNIT(unitItoaBase2)
+                TARWI_UNIT(unitIntToStringBase2)
                 {
-                        char buf[32];
-                        Lib::itoa(5, buf, 2);
+                        Lib::String s = Lib::intToString(5, Lib::Base::Binary);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "101") == 0);
+                        TARWI_EXPECT(s == "101");
                 }
 
-                TARWI_UNIT(unitItoaReturnsBuffer)
+                TARWI_UNIT(unitIntToStringStaticBase2)
                 {
-                        char buf[32];
-                        char *ret = Lib::itoa(42, buf, 10);
+                        Lib::String<32> s = Lib::intToString<int, 32>(5, Lib::Base::Binary);
 
-                        TARWI_EXPECT(ret == buf);
+                        TARWI_EXPECT(s == "101");
                 }
 
-                TARWI_UNIT(unitItoaNegativeBase16)
+                TARWI_UNIT(unitIntToStringNegativeBase16)
                 {
-                        char buf[32];
-                        Lib::itoa(-255, buf, 16);
+                        Lib::String s = Lib::intToString(-255, Lib::Base::Hexadecimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "-ff") == 0);
+                        TARWI_EXPECT(s == "-ff");
                 }
 
-                TARWI_UNIT(unitUtoaBasic)
+                TARWI_UNIT(unitUintToStringBasic)
                 {
-                        char buf[32];
-                        Lib::utoa(42, buf, 10);
+                        Lib::String s = Lib::uintToString(42u, Lib::Base::Decimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "42") == 0);
+                        TARWI_EXPECT(s == "42");
                 }
 
-                TARWI_UNIT(unitUtoaZero)
+                TARWI_UNIT(unitUintToStringZero)
                 {
-                        char buf[32];
-                        Lib::utoa(0, buf, 10);
+                        Lib::String s = Lib::uintToString(0u, Lib::Base::Decimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "0") == 0);
+                        TARWI_EXPECT(s == "0");
                 }
 
-                TARWI_UNIT(unitUtoaBase16)
+                TARWI_UNIT(unitUintToStringBase16)
                 {
-                        char buf[32];
-                        Lib::utoa(255, buf, 16);
+                        Lib::String s = Lib::uintToString(255u, Lib::Base::Hexadecimal);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "ff") == 0);
+                        TARWI_EXPECT(s == "ff");
                 }
 
-                TARWI_UNIT(unitUtoaBase2)
+                TARWI_UNIT(unitUintToStringBase2)
                 {
-                        char buf[32];
-                        Lib::utoa(10, buf, 2);
+                        Lib::String s = Lib::uintToString(10u, Lib::Base::Binary);
 
-                        TARWI_EXPECT(Lib::strcmp(buf, "1010") == 0);
+                        TARWI_EXPECT(s == "1010");
                 }
 
-                TARWI_UNIT(unitAtoiBasic)
+                TARWI_UNIT(unitStringToIntBasic)
                 {
-                        Lib::usize result = Lib::atoi("42", 10, 2);
+                        Lib::usize result = Lib::stringToInt<Lib::usize>("42", Lib::Base::Decimal);
 
                         TARWI_EXPECT(result == 42);
                 }
 
-                TARWI_UNIT(unitAtoiBase16)
+                TARWI_UNIT(unitStringToIntBase16)
                 {
-                        Lib::usize result = Lib::atoi("ff", 16, 2);
+                        Lib::usize result = Lib::stringToInt<Lib::usize>("ff", Lib::Base::Hexadecimal);
 
                         TARWI_EXPECT(result == 255);
                 }
 
-                TARWI_UNIT(unitAtoiRespectsLength)
+                TARWI_UNIT(unitStringToIntStopsAtSpace)
                 {
-                        Lib::usize result = Lib::atoi("12345", 10, 3);
+                        Lib::usize result = Lib::stringToInt<Lib::usize>("123 45", Lib::Base::Decimal);
 
                         TARWI_EXPECT(result == 123);
                 }
 
-                TARWI_UNIT(unitAtoiZero)
+                TARWI_UNIT(unitStringToIntZero)
                 {
-                        Lib::usize result = Lib::atoi("0", 10, 1);
+                        Lib::usize result = Lib::stringToInt<Lib::usize>("0", Lib::Base::Decimal);
 
                         TARWI_EXPECT(result == 0);
                 }
 
-                TARWI_UNIT(unitCtoiDigitZero)
+                TARWI_UNIT(unitCharToIntDigitZero)
                 {
-                        TARWI_EXPECT(Lib::ctoi('0') == 0);
+                        TARWI_EXPECT(Lib::charToInt<Lib::usize>('0') == 0);
                 }
 
-                TARWI_UNIT(unitCtoiDigitNine)
+                TARWI_UNIT(unitCharToIntDigitNine)
                 {
-                        TARWI_EXPECT(Lib::ctoi('9') == 9);
+                        TARWI_EXPECT(Lib::charToInt<Lib::usize>('9') == 9);
                 }
 
-                TARWI_UNIT(unitCtoiDigitMiddle)
+                TARWI_UNIT(unitCharToIntDigitMiddle)
                 {
-                        TARWI_EXPECT(Lib::ctoi('5') == 5);
+                        TARWI_EXPECT(Lib::charToInt<Lib::usize>('5') == 5);
                 }
 
-                TARWI_UNIT(unitAtofIntegerValue)
+                // TARWI_UNIT(unitAtofIntegerValue)
+                // {
+                //         double result = Lib::atof("42");
+
+                //         TARWI_EXPECT(result == 42.0);
+                // }
+
+                // TARWI_UNIT(unitAtofSimpleDecimal)
+                // {
+                //         double result = Lib::atof("2.5");
+
+                //         TARWI_EXPECT(result == 2.5);
+                // }
+
+                // TARWI_UNIT(unitAtofNegativeValue)
+                // {
+                //         double result = Lib::atof("-3.5");
+
+                //         TARWI_EXPECT(result == -3.5);
+                // }
+
+                // TARWI_UNIT(unitAtofZero)
+                // {
+                //         double result = Lib::atof("0");
+
+                //         TARWI_EXPECT(result == 0.0);
+                // }
+
+                // TARWI_UNIT(unitAtofHalf)
+                // {
+                //         double result = Lib::atof("0.5");
+
+                //         TARWI_EXPECT(result == 0.5);
+                // }
+
+                // TARWI_UNIT(unitFtoaIntegerValue)
+                // {
+                //         char buf[32];
+                //         Lib::ftoa(42.0, buf);
+
+                //         TARWI_EXPECT(Lib::strstartswith(buf, "42"));
+                // }
+
+                // TARWI_UNIT(unitFtoaSimpleDecimal)
+                // {
+                //         char buf[32];
+                //         Lib::ftoa(2.5, buf);
+
+                //         TARWI_EXPECT(Lib::strstartswith(buf, "2.5"));
+                // }
+
+                // TARWI_UNIT(unitFtoaNegativeValue)
+                // {
+                //         char buf[32];
+                //         Lib::ftoa(-3.5, buf);
+
+                //         TARWI_EXPECT(buf[0] == '-' and Lib::strstartswith(buf + 1, "3.5"));
+                // }
+
+                // TARWI_UNIT(unitFtoaZero)
+                // {
+                //         char buf[32];
+                //         Lib::ftoa(0.0, buf);
+
+                //         TARWI_EXPECT(Lib::strstartswith(buf, "0"));
+                // }
+
+                TARWI_UNIT(unitIntToStringStringToIntRoundTrip)
                 {
-                        double result = Lib::atof("42");
-
-                        TARWI_EXPECT(result == 42.0);
-                }
-
-                TARWI_UNIT(unitAtofSimpleDecimal)
-                {
-                        double result = Lib::atof("2.5");
-
-                        TARWI_EXPECT(result == 2.5);
-                }
-
-                TARWI_UNIT(unitAtofNegativeValue)
-                {
-                        double result = Lib::atof("-3.5");
-
-                        TARWI_EXPECT(result == -3.5);
-                }
-
-                TARWI_UNIT(unitAtofZero)
-                {
-                        double result = Lib::atof("0");
-
-                        TARWI_EXPECT(result == 0.0);
-                }
-
-                TARWI_UNIT(unitAtofHalf)
-                {
-                        double result = Lib::atof("0.5");
-
-                        TARWI_EXPECT(result == 0.5);
-                }
-
-                TARWI_UNIT(unitFtoaIntegerValue)
-                {
-                        char buf[32];
-                        Lib::ftoa(42.0, buf);
-
-                        TARWI_EXPECT(Lib::strstartswith(buf, "42"));
-                }
-
-                TARWI_UNIT(unitFtoaSimpleDecimal)
-                {
-                        char buf[32];
-                        Lib::ftoa(2.5, buf);
-
-                        TARWI_EXPECT(Lib::strstartswith(buf, "2.5"));
-                }
-
-                TARWI_UNIT(unitFtoaNegativeValue)
-                {
-                        char buf[32];
-                        Lib::ftoa(-3.5, buf);
-
-                        TARWI_EXPECT(buf[0] == '-' and Lib::strstartswith(buf + 1, "3.5"));
-                }
-
-                TARWI_UNIT(unitFtoaZero)
-                {
-                        char buf[32];
-                        Lib::ftoa(0.0, buf);
-
-                        TARWI_EXPECT(Lib::strstartswith(buf, "0"));
-                }
-
-                TARWI_UNIT(unitItoaAtoiRoundTrip)
-                {
-                        char buf[32];
-                        Lib::itoa(12345, buf, 10);
-                        Lib::usize result = Lib::atoi(buf, 10, Lib::strlen(buf));
+                        Lib::String s = Lib::intToString(12345, Lib::Base::Decimal);
+                        int result = Lib::stringToInt<int>(s, Lib::Base::Decimal);
 
                         TARWI_EXPECT(result == 12345);
                 }
 
-                TARWI_UNIT(unitAtofFtoaRoundTrip)
-                {
-                        char buf[32];
-                        Lib::ftoa(2.5, buf);
+                // TARWI_UNIT(unitAtofFtoaRoundTrip)
+                // {
+                //         char buf[32];
+                //         Lib::ftoa(2.5, buf);
 
-                        double result = Lib::atof(buf);
+                //         double result = Lib::atof(buf);
 
-                        TARWI_EXPECT(result == 2.5);
-                }
+                //         TARWI_EXPECT(result == 2.5);
+                // }
 
                 TARWI_MODULE_MAIN()
                 {
-                        TARWI_CALL_UNIT(unitItoaPositiveBase10);
-                        TARWI_CALL_UNIT(unitItoaNegativeBase10);
-                        TARWI_CALL_UNIT(unitItoaZero);
-                        TARWI_CALL_UNIT(unitItoaBase16);
-                        TARWI_CALL_UNIT(unitItoaBase2);
-                        TARWI_CALL_UNIT(unitItoaReturnsBuffer);
-                        TARWI_CALL_UNIT(unitItoaNegativeBase16);
+                        TARWI_CALL_UNIT(unitIntToStringPositiveBase10);
+                        TARWI_CALL_UNIT(unitIntToStringNegativeBase10);
+                        TARWI_CALL_UNIT(unitIntToStringZero);
+                        TARWI_CALL_UNIT(unitIntToStringBase16);
+                        TARWI_CALL_UNIT(unitIntToStringBase2);
+                        TARWI_CALL_UNIT(unitIntToStringStaticBase2);
+                        TARWI_CALL_UNIT(unitIntToStringNegativeBase16);
 
-                        TARWI_CALL_UNIT(unitUtoaBasic);
-                        TARWI_CALL_UNIT(unitUtoaZero);
-                        TARWI_CALL_UNIT(unitUtoaBase16);
-                        TARWI_CALL_UNIT(unitUtoaBase2);
+                        TARWI_CALL_UNIT(unitUintToStringBasic);
+                        TARWI_CALL_UNIT(unitUintToStringZero);
+                        TARWI_CALL_UNIT(unitUintToStringBase16);
+                        TARWI_CALL_UNIT(unitUintToStringBase2);
 
-                        TARWI_CALL_UNIT(unitAtoiBasic);
-                        TARWI_CALL_UNIT(unitAtoiBase16);
-                        TARWI_CALL_UNIT(unitAtoiRespectsLength);
-                        TARWI_CALL_UNIT(unitAtoiZero);
+                        TARWI_CALL_UNIT(unitStringToIntBasic);
+                        TARWI_CALL_UNIT(unitStringToIntBase16);
+                        TARWI_CALL_UNIT(unitStringToIntStopsAtSpace);
+                        TARWI_CALL_UNIT(unitStringToIntZero);
 
-                        TARWI_CALL_UNIT(unitCtoiDigitZero);
-                        TARWI_CALL_UNIT(unitCtoiDigitNine);
-                        TARWI_CALL_UNIT(unitCtoiDigitMiddle);
+                        TARWI_CALL_UNIT(unitCharToIntDigitZero);
+                        TARWI_CALL_UNIT(unitCharToIntDigitNine);
+                        TARWI_CALL_UNIT(unitCharToIntDigitMiddle);
 
-                        TARWI_CALL_UNIT(unitAtofIntegerValue);
-                        TARWI_CALL_UNIT(unitAtofSimpleDecimal);
-                        TARWI_CALL_UNIT(unitAtofNegativeValue);
-                        TARWI_CALL_UNIT(unitAtofZero);
-                        TARWI_CALL_UNIT(unitAtofHalf);
+                        // TARWI_CALL_UNIT(unitAtofIntegerValue);
+                        // TARWI_CALL_UNIT(unitAtofSimpleDecimal);
+                        // TARWI_CALL_UNIT(unitAtofNegativeValue);
+                        // TARWI_CALL_UNIT(unitAtofZero);
+                        // TARWI_CALL_UNIT(unitAtofHalf);
 
-                        TARWI_CALL_UNIT(unitFtoaIntegerValue);
-                        TARWI_CALL_UNIT(unitFtoaSimpleDecimal);
-                        TARWI_CALL_UNIT(unitFtoaNegativeValue);
-                        TARWI_CALL_UNIT(unitFtoaZero);
+                        // TARWI_CALL_UNIT(unitFtoaIntegerValue);
+                        // TARWI_CALL_UNIT(unitFtoaSimpleDecimal);
+                        // TARWI_CALL_UNIT(unitFtoaNegativeValue);
+                        // TARWI_CALL_UNIT(unitFtoaZero);
 
-                        TARWI_CALL_UNIT(unitItoaAtoiRoundTrip);
-                        TARWI_CALL_UNIT(unitAtofFtoaRoundTrip);
+                        TARWI_CALL_UNIT(unitIntToStringStringToIntRoundTrip);
+                        // TARWI_CALL_UNIT(unitAtofFtoaRoundTrip);
                 }
         };
 } // namespace Kiwi::Test

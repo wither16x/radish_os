@@ -2,7 +2,7 @@
 
 #include <lib/memory.hpp>
 #include <lib/alloc.hpp>
-#include <panic.hpp>
+#include <panic_simple.hpp>
 
 namespace Kiwi::Lib
 {
@@ -62,14 +62,14 @@ namespace Kiwi::Lib
                 const T &value(this const Result<T, E> &self)
                 {
                         if (not self.has_value)
-                                panic("Result::value() on error");
+                                panic_simple("Result::value() on error");
                         return self._value;
                 }
 
                 const E &error(this const Result<T, E> &self)
                 {
                         if (self.has_value)
-                                panic("Result::error() on success");
+                                panic_simple("Result::error() on success");
 
                         return self._error;
                 }
@@ -151,7 +151,7 @@ namespace Kiwi::Lib
                 T &value(this const Result<T&, E> &self)
                 {
                         if (not self.has_value)
-                                panic("Result::value() on error");
+                                panic_simple("Result::value() on error");
 
                         return *self._value_ptr;
                 }
@@ -159,7 +159,7 @@ namespace Kiwi::Lib
                 const E &error(this const Result<T&, E> &self)
                 {
                         if (self.has_value)
-                                panic("Result::error() on success");
+                                panic_simple("Result::error() on success");
 
                         return self._error;
                 }
