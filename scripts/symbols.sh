@@ -6,7 +6,7 @@ SYM_HDR="kernel/include/kernel_sym_entries.h"
 mkdir -p .symbols_data
 echo "Created directory: .symbols_data"
 
-nm -n kernel/bin/kernel.elf > .symbols_data/kernel.map
+nm -n kernel/bin/kernel > .symbols_data/kernel.map
 echo "Generated .symbols_data/kernel.map"
 cat $KERNEL_MAP | awk '{ printf("    { 0x%s, \"%s\" },\n", $1, $3); }' > ".symbols_data/kernel_sym_entries.txt"
 echo "Generated .symbols_data/kernel_sym_entries.txt"
