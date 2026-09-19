@@ -5,6 +5,7 @@
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 #include <proc/scheduler.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Drivers::Pit
 {
@@ -24,7 +25,7 @@ namespace Kiwi::Drivers::Pit
 
                 void handleIrq(Cpu::IrqFrame &frame)
                 {
-                        (void)frame;
+                        static_cast<void>(frame);
 
                         // increase time and consider that the interrupt is
                         // finished
@@ -49,7 +50,7 @@ namespace Kiwi::Drivers::Pit
 
                 Cpu::registerIrq(Drivers::Pic::IrqType::IRQ_TIMER, handleIrq);
 
-                Lib::Log::logger.ok("initialized pit driver");
+                kcontext.logger.ok("initialized pit driver");
         }
 
         void tick()

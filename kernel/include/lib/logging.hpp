@@ -4,7 +4,7 @@
 #include <lib/string.hpp>
 #include <lib/print.hpp>
 
-namespace Kiwi::Lib::Log
+namespace Kiwi::Lib
 {
         /// A logger is used to output informations at different
         /// levels of importance.
@@ -91,6 +91,4 @@ namespace Kiwi::Lib::Log
                         self.log(LogLevel::Crit, fmt, (args)...);
                 }
         };
-
-        inline Logger logger;
-} // namespace Kiwi::Lib::Log
+} // namespace Kiwi::Lib

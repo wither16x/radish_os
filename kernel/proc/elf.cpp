@@ -57,7 +57,7 @@ namespace Kiwi::Proc::Elf
                 const Elf64Ehdr *hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());
                 int is_file_valid = elf_check(const_cast<Elf64Ehdr *>(hdr));
                 if (is_file_valid != 0) {
-                        Lib::Log::logger.err("elf is not valid");
+                        kcontext.logger.err("elf is not valid");
                         return -1;
                 }
 

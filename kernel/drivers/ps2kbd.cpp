@@ -2,6 +2,7 @@
 #include <drivers/ps2kbd.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Drivers::Ps2Kbd
 {
@@ -165,7 +166,7 @@ namespace Kiwi::Drivers::Ps2Kbd
 
                 int controller_self_test_res = controllerPerformSelfTest();
                 if (controller_self_test_res < 0) {
-                        Lib::Log::logger.err("ps/2 controller self test failed with value 0x%x", controller_self_test_res);
+                        kcontext.logger.err("ps/2 controller self test failed with value 0x%x", controller_self_test_res);
                         return;
                 }
 
@@ -177,29 +178,29 @@ namespace Kiwi::Drivers::Ps2Kbd
                 sendCommand(ControllerCommand::CMD_TEST_PORT_1);
                 Lib::u8 port1_test_res = read();
                 if (port1_test_res != 0) {
-                        Lib::Log::logger.err("ps/2 port 1 test failed with value 0x%x", port1_test_res);
+                        kcontext.logger.err("ps/2 port 1 test failed with value 0x%x", port1_test_res);
                         return;
                 }
 
                 Lib::u8 kbd_self_test_res = keyboardPerformSelfTest();
                 if (kbd_self_test_res != KeyboardResponse::KBD_RSP_SELF_TEST_PASSED) {
-                        Lib::Log::logger.err("ps/2 keyboard self test failed with value 0x%x", kbd_self_test_res);
+                        kcontext.logger.err("ps/2 keyboard self test failed with value 0x%x", kbd_self_test_res);
                         return;
                 }
 
                 Lib::u8 set_scancode_set_res = setScancodeSet(2);
                 if (set_scancode_set_res != KeyboardResponse::KBD_RSP_ACK) {
-                        Lib::Log::logger.err("ps/2 keyboard scancode set failed with value 0x%x", set_scancode_set_res);
+                        kcontext.logger.err("ps/2 keyboard scancode set failed with value 0x%x", set_scancode_set_res);
                         return;
                 }
 
                 Lib::u8 enable_scan_res = enableScanning();
                 if (enable_scan_res != KeyboardResponse::KBD_RSP_ACK) {
-                        Lib::Log::logger.err("ps/2 keyboard enable scanning failed with value 0x%x", enable_scan_res);
+                        kcontext.logger.err("ps/2 keyboard enable scanning failed with value 0x%x", enable_scan_res);
                         return;
                 }
 
-                Lib::Log::logger.ok("initialized ps/2 controller and keyboard");
+                kcontext.logger.ok("initialized ps/2 controller and keyboard");
         }
         // --------------------------------------------------
 

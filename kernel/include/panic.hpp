@@ -23,7 +23,7 @@ namespace Kiwi
                 Cpu::disableInterrupts();
                 Proc::Scheduler::lock();
 
-                Lib::Log::logger.setContext("panic handler");
+                kcontext.logger.setContext("panic handler");
 
                 Lib::println("\r\n==================== KERNEL PANIC ====================");
                 Lib::String<PANIC_MESSAGE_SIZE> msg = formatString<PANIC_MESSAGE_SIZE>(fmt, static_cast<ARGS &&>(args)...);
@@ -34,7 +34,7 @@ namespace Kiwi
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
                 if (not curr_proc) {
-                        Lib::Log::logger.info("idling");
+                        kcontext.logger.info("idling");
                         while (true) {
                                 Cpu::disableInterrupts();
                                 Cpu::idle();
@@ -42,7 +42,7 @@ namespace Kiwi
                 }
 
                 curr_proc->die();
-                Lib::Log::logger.ok("process with ID {} aborted", curr_proc->getId());
+                kcontext.logger.ok("process with ID {} aborted", curr_proc->getId());
 
                 Proc::Scheduler::unlock();
                 Cpu::enableInterrupts();
@@ -54,7 +54,7 @@ namespace Kiwi
                 Cpu::disableInterrupts();
                 Proc::Scheduler::lock();
 
-                Lib::Log::logger.setContext("panic handler");
+                kcontext.logger.setContext("panic handler");
 
                 Lib::println("\r\n==================== KERNEL PANIC ====================");
                 println<PANIC_MESSAGE_SIZE>("{}", fmt);
@@ -64,7 +64,7 @@ namespace Kiwi
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
                 if (not curr_proc) {
-                        Lib::Log::logger.info("idling");
+                        kcontext.logger.info("idling");
                         while (true) {
                                 Cpu::disableInterrupts();
                                 Cpu::idle();
@@ -72,7 +72,7 @@ namespace Kiwi
                 }
 
                 curr_proc->die();
-                Lib::Log::logger.ok("process with ID {} aborted", curr_proc->getId());
+                kcontext.logger.ok("process with ID {} aborted", curr_proc->getId());
 
                 Proc::Scheduler::unlock();
                 Cpu::enableInterrupts();

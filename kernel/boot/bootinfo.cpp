@@ -2,6 +2,7 @@
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 #include <limine.h>
+#include <kernel.hpp>
 
 namespace Kiwi::Boot
 {
@@ -121,6 +122,6 @@ namespace Kiwi::Boot
                 this->framebuffer.blue_mask_size        = l_fb->blue_mask_size;
                 this->framebuffer.blue_mask_shift       = l_fb->blue_mask_shift;
 
-                Lib::Log::logger.ok("recovered boot info");
+                kcontext.logger.ok("recovered boot info");
         }
 } // namespace Kiwi::Boot

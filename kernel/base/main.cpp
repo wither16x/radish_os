@@ -42,10 +42,10 @@ namespace Kiwi
         {
                 for (Lib::u64 i = 0; &__init_array[i] != __init_array_end; i++) {
                         __init_array[i]();
-                        Lib::Log::logger.ok("initialized global constructor {}", i);
+                        kcontext.logger.ok("initialized global constructor {}", i);
                 }
 
-                Lib::Log::logger.ok("called global constructors");
+                kcontext.logger.ok("called global constructors");
         }
 
         /// Mount the initrd.
@@ -58,26 +58,26 @@ namespace Kiwi
                                 idx = i;
                 }
                 if (idx == Boot::BootInfo::ModuleInfo::MAX_MODULES + 1)
-                        Lib::Log::logger.err("initrd not found");
+                        kcontext.logger.err("initrd not found");
                 else
-                        Lib::Log::logger.ok("found initrd");
+                        kcontext.logger.ok("found initrd");
 
                 Fs::Vfs::mount('I', new Fs::Ustar::USTAR(info.modules[idx].address));
 
-                Lib::Log::logger.ok("mounted initrd as I");
+                kcontext.logger.ok("mounted initrd as I");
         }
 
         void mountDevices()
         {
                 Fs::Vfs::mount('D', new Fs::Devfs::Devfs());
-                Lib::Log::logger.ok("mounted devfs as D");
+                kcontext.logger.ok("mounted devfs as D");
         }
 
         /// Unmount the initrd (do it at the end).
         void unmountInitrd()
         {
                 Fs::Vfs::unmount('I');
-                Lib::Log::logger.ok("unmounted initrd");
+                kcontext.logger.ok("unmounted initrd");
         }
 
         /// Set up the kernel console.
@@ -88,8 +88,8 @@ namespace Kiwi
                 Drivers::Console::Console &console = Drivers::Console::getConsole();
                 console.initFont("I:/fonts/zap-light20.psf");
 
-                Lib::Log::logger.ok("initialized console");
-                Lib::Log::logger.info("framebuffer should now be used for display");
+                kcontext.logger.ok("initialized console");
+                kcontext.logger.info("framebuffer should now be used for display");
         }
 
         /// Idle.
@@ -109,7 +109,7 @@ namespace Kiwi
                 if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
                         panic("no display device"); // so the message cannot be printed lol
 
-                Lib::Log::logger.setContext("kernel");
+                kcontext.logger.setContext("kernel");
 
                 Cpu::Gdt gdt;
                 kcontext.setGdt(gdt);
@@ -135,9 +135,9 @@ namespace Kiwi
                 Mem::Heap::init();
 
                 Drivers::Pic::remap();
-                Lib::Log::logger.ok("remapped 8259 pic");
+                kcontext.logger.ok("remapped 8259 pic");
                 Drivers::Pic::irqMaskAll();
-                Lib::Log::logger.ok("masked all irq");
+                kcontext.logger.ok("masked all irq");
 
                 Drivers::Pit::init();
 
@@ -159,11 +159,11 @@ namespace Kiwi
                         bootinfo.framebuffer.height,
                         bootinfo.framebuffer.pitch
                 );
-                Lib::Log::logger.ok("initialized framebuffer");
+                kcontext.logger.ok("initialized framebuffer");
 
                 Proc::Scheduler::init();
                 Cpu::enableSse2();
-                Lib::Log::logger.ok("enabled sse2");
+                kcontext.logger.ok("enabled sse2");
 
                 #ifdef KIWI_BUILD_MODE_TEST
                         Test::testLib();

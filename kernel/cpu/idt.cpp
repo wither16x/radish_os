@@ -1,6 +1,7 @@
 #include <cpu/idt.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
+#include <kernel.hpp>
 
 #define ISR(n)                  extern "C" void __isr_stub##n()
 #define IRQ(n)                  extern "C" void __irq_stub##n()
@@ -44,14 +45,14 @@ namespace Kiwi::Cpu
                 // syscall
                 self.setGate(128, syscall_common, 0xef);
 
-                Lib::Log::logger.ok("initialized idt");
+                kcontext.logger.ok("initialized idt");
         }
 
         void Idt::load(this Idt &self)
         {
                 __idt_flush(reinterpret_cast<Lib::u64 *>(&self.idtptr));
 
-                Lib::Log::logger.ok("loaded idt");
+                kcontext.logger.ok("loaded idt");
         }
 
         void Idt::setGate(this Idt &self, int vector, void (*isr)(), Lib::u8 flags)

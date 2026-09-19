@@ -36,7 +36,7 @@ namespace Kiwi::Proc
                 Elf::elf_entry_t proc_entry = reinterpret_cast<Elf::elf_entry_t>(elf_info.address);
 
                 if (proc->initArguments(argc, argv, envp) != 0)
-                        Lib::Log::logger.err("failed to initialize process arguments");
+                        kcontext.logger.err("failed to initialize process arguments");
 
                 // Update the process
                 // should add a dedicated method

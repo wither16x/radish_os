@@ -5,6 +5,7 @@
 #include <mem/pml4t.hpp>
 #include <mem/page.hpp>
 #include <lib/typing.hpp>
+#include <lib/logging.hpp>
 
 namespace Kiwi
 {
@@ -21,6 +22,7 @@ namespace Kiwi
                 static constexpr Lib::uptr STACK_BOTTOM = STACK_TOP - STACK_SIZE;
 
                 bool heap_available;
+                Lib::Logger logger;
 
                 void init(this KernelContext &self);
                 void setPml4t(this KernelContext &self, const Mem::PML4T &pml4t);

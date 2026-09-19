@@ -3,7 +3,7 @@
 #include <lib/logging.hpp>
 #include <lib/print.hpp>
 
-namespace Kiwi::Lib::Log
+namespace Kiwi::Lib
 {
         void Logger::setContext(this Logger &self, const String<Logger::MAX_CONTEXT_BYTES> &ctx)
         {
@@ -12,4 +12,4 @@ namespace Kiwi::Lib::Log
                         self.context[i] = ctx.raw()[i];
                 self.context[i] = '\0';
         }
-} // namespace Kiwi::Lib::Log
+} // namespace Kiwi::Lib

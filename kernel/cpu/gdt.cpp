@@ -31,14 +31,14 @@ namespace Kiwi::Cpu
                 Lib::memset(&self.descriptors[6], 0, sizeof(GdtDescriptor));
                 *reinterpret_cast<Lib::u32 *>(&self.descriptors[6]) = (reinterpret_cast<Lib::u64>(&self.tss.getData()) >> 32) & 0xffffffff;
 
-                Lib::Log::logger.ok("initialized gdt");
+                kcontext.logger.ok("initialized gdt");
         }
 
         void Gdt::load(this Gdt &self)
         {
                 __gdt_flush(reinterpret_cast<Lib::u64>(&self.gdtptr));
 
-                Lib::Log::logger.ok("loaded gdt");
+                kcontext.logger.ok("loaded gdt");
         }
 
         void Gdt::setDescriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags)

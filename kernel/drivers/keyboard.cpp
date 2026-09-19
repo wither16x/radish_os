@@ -8,6 +8,7 @@
 #include <lib/logging.hpp>
 #include <lib/queue.hpp>
 #include <lib/print.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Drivers::Keyboard
 {
@@ -113,7 +114,7 @@ namespace Kiwi::Drivers::Keyboard
                 Cpu::registerIrq(Drivers::Pic::IrqType::IRQ_KEYBOARD, handle_irq);
                 Fs::Devfs::registerDevice(Fs::Devfs::DeviceType::Input, "D:/input");
 
-                Lib::Log::logger.ok("initialized generic keyboard driver");
+                kcontext.logger.ok("initialized generic keyboard driver");
         }
 
         char scancodeToKey(Lib::u8 scancode)

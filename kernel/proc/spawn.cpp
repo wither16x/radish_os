@@ -43,7 +43,7 @@ namespace Kiwi::Proc
 
                 Process *proc = loadProgramAsProcess(path);
                 if (not proc) {
-                        Lib::Log::logger.err("failed to spawn process: failed to load %s", path.raw());
+                        kcontext.logger.err("failed to spawn process: failed to load %s", path.raw());
                         return -1;
                 }
 

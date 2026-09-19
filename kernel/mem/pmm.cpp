@@ -27,7 +27,7 @@ namespace Kiwi::Mem::Pmm
                         }
                 }
 
-                Lib::Log::logger.ok("initialized pmm");
+                kcontext.logger.ok("initialized pmm");
         }
 
         Lib::uptr allocateFrame()

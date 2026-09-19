@@ -1,4 +1,4 @@
-#include "cpu/cpu.hpp"
+#include <cpu/cpu.hpp>
 #include <mem/pmm.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/assembly.hpp>
@@ -8,6 +8,7 @@
 #include <lib/filesystem.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Proc::Scheduler
 {
@@ -63,7 +64,7 @@ namespace Kiwi::Proc::Scheduler
                 ctx.current_process = nullptr;
                 ctx.status = Status::Unlocked;
 
-                Lib::Log::logger.ok("initialized scheduler");
+                kcontext.logger.ok("initialized scheduler");
         }
 
         void addProcess(Process *p)
@@ -168,7 +169,7 @@ namespace Kiwi::Proc::Scheduler
         void undertaker(Process *p)
         {
                 if (not p) {
-                        Lib::Log::logger.err("undertaker: process does not exist");
+                        kcontext.logger.err("undertaker: process does not exist");
                         return;
                 }
 
@@ -184,7 +185,7 @@ namespace Kiwi::Proc::Scheduler
         {
                 Process *old_proc = ctx.current_process;
                 if (not old_proc) {
-                        Lib::Log::logger.debug("old process is null");
+                        kcontext.logger.debug("old process is null");
                         return;
                 }
 

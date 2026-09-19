@@ -6,6 +6,7 @@
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Drivers::Console
 {
@@ -58,7 +59,7 @@ namespace Kiwi::Drivers::Console
         /// format and does not have an Unicode table.
         void Console::initFont(this Console &self, const Lib::String<> &font)
         {
-                Lib::Log::logger.setContext("console");
+                kcontext.logger.setContext("console");
 
                 Lib::usize filesz = 0;
                 getfilesz(font, &filesz);
@@ -71,8 +72,8 @@ namespace Kiwi::Drivers::Console
                 const Psf2Header *hdr = reinterpret_cast<const Psf2Header *>(self.font_data.data());
 
                 if (hdr->magic != PSF2_MAGIC) {
-                        Lib::Log::logger.err("invalid PSF2 magic dword: 0x%x", hdr->magic);
-                        Lib::Log::logger.setContext("kernel");
+                        kcontext.logger.err("invalid PSF2 magic dword: 0x%x", hdr->magic);
+                        kcontext.logger.setContext("kernel");
                         return;
                 }
 
@@ -83,7 +84,7 @@ namespace Kiwi::Drivers::Console
                 // the console is active only if a valid font has been loaded
                 self.active             = true;
 
-                Lib::Log::logger.setContext("kernel");
+                kcontext.logger.setContext("kernel");
         }
 
         void Console::drawChar(this Console &self, char ch, Lib::u32 color)
