@@ -15,6 +15,7 @@ if [[ $component == "k" ]]; then
         opt_nasm=${opt_nasm:-"nasm"}
         opt_linker=${opt_linker:-"x86_64-radishos-clang++"}
         opt_build_mode=${opt_build_mode:-"release"}
+        opt_bootloader=${opt_bootloader:-"LIMINE"}
         config_file="kernel/config.mk"
 
         echo "-------------------- Kernel configuration --------------------"
@@ -30,6 +31,8 @@ if [[ $component == "k" ]]; then
         opt_linker=${input:-$opt_linker}
         read -p "Build mode (dev/test/release) [$opt_build_mode]: " input
         opt_build_mode=${input:-$opt_build_mode}
+        read -p "Bootloader (LIMINE) [LIMINE]: " input
+        opt_bootloader=${input:-$opt_bootloader}
 
         echo "-> Generating configuration..."
         echo "BUILD_MODE = $opt_build_mode" > $config_file
@@ -42,7 +45,7 @@ if [[ $component == "k" ]]; then
         echo "LINKER = $opt_linker" >> $config_file
         echo "TEST_DIR = test" >> $config_file
         echo "INCLUDE_DIR = include" >> $config_file
-        echo "COMMON_FLAGS = -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pic -fno-pie -mno-red-zone -Wall -Wextra -nostdlib -nostdinc -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx -mno-80387 -mno-red-zone" >> $config_file
+        echo "COMMON_FLAGS = -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pic -fno-pie -mno-red-zone -Wall -Wextra -nostdlib -nostdinc -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx -mno-80387 -mno-red-zone -DRADISH_BOOTLOADER_$opt_bootloader" >> $config_file
         echo "ifeq (\$(BUILD_MODE),dev)" >> $config_file
         echo "COMMON_FLAGS += -g" >> $config_file
         echo "endif" >> $config_file

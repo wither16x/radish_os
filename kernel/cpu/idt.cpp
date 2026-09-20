@@ -47,14 +47,14 @@ namespace Kiwi::Cpu
                 // syscall
                 self.setGate(128, syscall_common, 0xef);
 
-                kcontext.logger.ok("initialized idt");
+                kcontext().logger.ok("initialized idt");
         }
 
         void Idt::load(this Idt &self)
         {
                 __idt_flush(reinterpret_cast<Lib::u64 *>(&self.idtptr));
 
-                kcontext.logger.ok("loaded idt");
+                kcontext().logger.ok("loaded idt");
         }
 
         void Idt::setGate(this Idt &self, int vector, void (*isr)(), Lib::u8 flags)

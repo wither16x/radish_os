@@ -18,7 +18,7 @@ namespace Kiwi::Proc
                 Process *loadProgramAsProcess(const Lib::String<> &path)
                 {
                         // create the process' pml4t
-                        Mem::PML4T &kpml4t = kcontext.pml4t();
+                        Mem::PML4T &kpml4t = kcontext().pml4t();
                         Mem::PML4T proc_pml4t;
                         proc_pml4t.init(kpml4t);
 
@@ -43,7 +43,7 @@ namespace Kiwi::Proc
 
                 Process *proc = loadProgramAsProcess(path);
                 if (not proc) {
-                        kcontext.logger.err("failed to spawn process: failed to load %s", path.raw());
+                        kcontext().logger.err("failed to spawn process: failed to load %s", path.raw());
                         return -1;
                 }
 

@@ -42,10 +42,10 @@ namespace Kiwi
         {
                 for (Lib::u64 i = 0; &__init_array[i] != __init_array_end; i++) {
                         __init_array[i]();
-                        kcontext.logger.ok("initialized global constructor {}", i);
+                        kcontext().logger.ok("initialized global constructor {}", i);
                 }
 
-                kcontext.logger.ok("called global constructors");
+                kcontext().logger.ok("called global constructors");
         }
 
         /// Mount the initrd.
@@ -57,27 +57,29 @@ namespace Kiwi
                         if (info.modules[i].path == "/initrd.tar")
                                 idx = i;
                 }
-                if (idx == Boot::ModuleRequest::MAX_MODULES + 1)
-                        kcontext.logger.err("initrd not found");
-                else
-                        kcontext.logger.ok("found initrd");
+                if (idx == Boot::ModuleRequest::MAX_MODULES + 1) {
+                        kcontext().logger.err("initrd not found");
+                        return;
+                } else {
+                        kcontext().logger.ok("found initrd");
+                }
 
                 Fs::Vfs::mount('I', new Fs::Ustar::USTAR(info.modules[idx].address));
 
-                kcontext.logger.ok("mounted initrd as I");
+                kcontext().logger.ok("mounted initrd as I");
         }
 
         void mountDevices()
         {
                 Fs::Vfs::mount('D', new Fs::Devfs::Devfs());
-                kcontext.logger.ok("mounted devfs as D");
+                kcontext().logger.ok("mounted devfs as D");
         }
 
         /// Unmount the initrd (do it at the end).
         void unmountInitrd()
         {
                 Fs::Vfs::unmount('I');
-                kcontext.logger.ok("unmounted initrd");
+                kcontext().logger.ok("unmounted initrd");
         }
 
         /// Set up the kernel console.
@@ -88,8 +90,8 @@ namespace Kiwi
                 Drivers::Console::Console &console = Drivers::Console::getConsole();
                 console.initFont("I:/fonts/zap-light20.psf");
 
-                kcontext.logger.ok("initialized console");
-                kcontext.logger.info("framebuffer should now be used for display");
+                kcontext().logger.ok("initialized console");
+                kcontext().logger.info("framebuffer should now be used for display");
         }
 
         /// Idle.
@@ -101,49 +103,46 @@ namespace Kiwi
         /// Kernel entry point.
         extern "C" void kernel_main()
         {
-                kcontext.init();
-
-                Boot::Bootloaders::Limine limine_bootloader;
-                limine_bootloader.init();
+                kcontext().init();
 
                 if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
                         panic_simple("no display device"); // so the message cannot be printed lol
 
-                kcontext.logger.setContext("kernel");
+                kcontext().logger.setContext("kernel");
 
                 Cpu::Gdt gdt;
-                kcontext.setGdt(gdt);
-                kcontext.gdt().init();
-                kcontext.gdt().load();
+                kcontext().setGdt(gdt);
+                kcontext().gdt().init();
+                kcontext().gdt().load();
 
                 Cpu::Idt idt;
-                kcontext.setIdt(idt);
-                kcontext.idt().init();
-                kcontext.idt().load();
+                kcontext().setIdt(idt);
+                kcontext().idt().init();
+                kcontext().idt().load();
 
-                kcontext.gdt().getTss().flush();
+                kcontext().gdt().getTss().flush();
 
-                const Boot::Request &req_hhdm = limine_bootloader.request(Boot::RequestType::Hhdm);
-                kcontext.setHhdm(static_cast<const Boot::HhdmRequest &>(req_hhdm).offset);
+                const Boot::Request &req_hhdm = kcontext().bootloader.request(Boot::RequestType::Hhdm);
+                kcontext().setHhdm(static_cast<const Boot::HhdmRequest &>(req_hhdm).offset);
 
-                const Boot::Request &req_memmap = limine_bootloader.request(Boot::RequestType::Memmap);
+                const Boot::Request &req_memmap = kcontext().bootloader.request(Boot::RequestType::Memmap);
                 Mem::Pmm::init(static_cast<const Boot::MemmapRequest &>(req_memmap));
 
-                const Boot::Request &req_executable_address = limine_bootloader.request(Boot::RequestType::ExecutableAddress);
+                const Boot::Request &req_executable_address = kcontext().bootloader.request(Boot::RequestType::ExecutableAddress);
                 Mem::PML4T kpml4t = Mem::Vmm::init(
                         static_cast<const Boot::HhdmRequest &>(req_hhdm).offset,
                         static_cast<const Boot::ExecutableAddressRequest &>(req_executable_address),
                         static_cast<const Boot::MemmapRequest &>(req_memmap)
                 );
                 kpml4t.load();
-                kcontext.setPml4t(kpml4t);
+                kcontext().setPml4t(kpml4t);
 
                 Mem::Heap::init();
 
                 Drivers::Pic::remap();
-                kcontext.logger.ok("remapped 8259 pic");
+                kcontext().logger.ok("remapped 8259 pic");
                 Drivers::Pic::irqMaskAll();
-                kcontext.logger.ok("masked all irq");
+                kcontext().logger.ok("masked all irq");
 
                 Drivers::Pit::init();
 
@@ -157,21 +156,21 @@ namespace Kiwi
 
                 Drivers::Keyboard::init();
 
-                const Boot::Request &req_module = limine_bootloader.request(Boot::RequestType::Module);
+                const Boot::Request &req_module = kcontext().bootloader.request(Boot::RequestType::Module);
                 mountInitrd(static_cast<const Boot::ModuleRequest &>(req_module));
 
-                const Boot::Request &req_framebuffer = limine_bootloader.request(Boot::RequestType::Framebuffer);
+                const Boot::Request &req_framebuffer = kcontext().bootloader.request(Boot::RequestType::Framebuffer);
                 Drivers::Framebuffer::init(
                         static_cast<const Boot::FramebufferRequest &>(req_framebuffer).address,
                         static_cast<const Boot::FramebufferRequest &>(req_framebuffer).width,
                         static_cast<const Boot::FramebufferRequest &>(req_framebuffer).height,
                         static_cast<const Boot::FramebufferRequest &>(req_framebuffer).pitch
                 );
-                kcontext.logger.ok("initialized framebuffer");
+                kcontext().logger.ok("initialized framebuffer");
 
                 Proc::Scheduler::init();
                 Cpu::enableSse2();
-                kcontext.logger.ok("enabled sse2");
+                kcontext().logger.ok("enabled sse2");
 
                 #ifdef KIWI_BUILD_MODE_TEST
                         Test::testLib();

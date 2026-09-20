@@ -64,7 +64,7 @@ namespace Kiwi::Proc::Scheduler
                 ctx.current_process = nullptr;
                 ctx.status = Status::Unlocked;
 
-                kcontext.logger.ok("initialized scheduler");
+                kcontext().logger.ok("initialized scheduler");
         }
 
         void addProcess(Process *p)
@@ -169,7 +169,7 @@ namespace Kiwi::Proc::Scheduler
         void undertaker(Process *p)
         {
                 if (not p) {
-                        kcontext.logger.err("undertaker: process does not exist");
+                        kcontext().logger.err("undertaker: process does not exist");
                         return;
                 }
 
@@ -185,7 +185,7 @@ namespace Kiwi::Proc::Scheduler
         {
                 Process *old_proc = ctx.current_process;
                 if (not old_proc) {
-                        kcontext.logger.debug("old process is null");
+                        kcontext().logger.debug("old process is null");
                         return;
                 }
 

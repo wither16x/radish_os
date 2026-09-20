@@ -66,7 +66,7 @@ namespace Kiwi::Lib
 
                                 for (usize j = 0; j < len; j++) {
                                         uptr uaddr = reinterpret_cast<uptr>(self.pointer) + j;
-                                        uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext.hhdm();
+                                        uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext().hhdm();
                                         *reinterpret_cast<char *>(kaddr) = s[i][j];
                                 }
 
@@ -80,7 +80,7 @@ namespace Kiwi::Lib
                 {
                         self.grow(sizeof(value));
                         uptr uaddr = reinterpret_cast<uptr>(self.pointer);
-                        uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext.hhdm();
+                        uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext().hhdm();
                         *reinterpret_cast<u64 *>(kaddr) = value;
                 }
 

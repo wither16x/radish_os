@@ -13,12 +13,12 @@ namespace Kiwi::Lib
                 T data[LENGTH];
 
         public:
-                Array()
+                constexpr Array()
                 {
                         memset(this->data, 0, LENGTH);
                 }
 
-                Array(const T (&objects)[LENGTH])
+                constexpr Array(const T (&objects)[LENGTH])
                 {
                         for (usize i = 0; i < LENGTH; i++) {
                                 if (not this->construct(i, objects[i]))

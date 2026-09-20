@@ -18,7 +18,7 @@ namespace Kiwi::Lib
 
 void *operator new(size_t size)
 {
-        if (not Kiwi::kcontext.heap_available)
+        if (not Kiwi::kcontext().heap_available)
                 Kiwi::panic("no heap available");
 
         void *p = Kiwi::Lib::malloc(size);
@@ -33,7 +33,7 @@ void operator delete(void *ptr) noexcept
 
 void *operator new[](size_t size)
 {
-        if (not Kiwi::kcontext.heap_available)
+        if (not Kiwi::kcontext().heap_available)
                 Kiwi::panic("no heap available");
 
         return Kiwi::Lib::malloc(size);

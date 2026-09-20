@@ -50,7 +50,7 @@ namespace Kiwi::Drivers::Pit
 
                 Cpu::registerIrq(Drivers::Pic::IrqType::IRQ_TIMER, handleIrq);
 
-                kcontext.logger.ok("initialized pit driver");
+                kcontext().logger.ok("initialized pit driver");
         }
 
         void tick()

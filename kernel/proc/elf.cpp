@@ -42,7 +42,7 @@ namespace Kiwi::Proc::Elf
 
         int loadElf(Mem::PML4T *pml4t, const Lib::String<> &path, ElfInfo *info)
         {
-                Lib::uptr hhdm = kcontext.hhdm();
+                Lib::uptr hhdm = kcontext().hhdm();
 
                 // read the file
                 Lib::Vector<Lib::u8> buf;
@@ -57,7 +57,7 @@ namespace Kiwi::Proc::Elf
                 const Elf64Ehdr *hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());
                 int is_file_valid = elf_check(const_cast<Elf64Ehdr *>(hdr));
                 if (is_file_valid != 0) {
-                        kcontext.logger.err("elf is not valid");
+                        kcontext().logger.err("elf is not valid");
                         return -1;
                 }
 

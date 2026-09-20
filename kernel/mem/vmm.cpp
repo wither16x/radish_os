@@ -87,7 +87,7 @@ namespace Kiwi::Mem::Vmm
                 map_kernel(&pml4t);
                 map_hhdm(&pml4t);
 
-                kcontext.logger.ok("initialized vmm");
+                kcontext().logger.ok("initialized vmm");
 
                 return pml4t;
         }

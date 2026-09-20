@@ -28,13 +28,13 @@ namespace Kiwi::Cpu
         extern "C" void irqHandler(IrqFrame &f)
         {
                 if (f.irqno >= MAX_IRQ_HANDLERS) {
-                        kcontext.logger.err("received unexpected irq: {}", f.irqno);
+                        kcontext().logger.err("received unexpected irq: {}", f.irqno);
                         return;
                 }
 
                 void (*handler)(IrqFrame &) = handlers[f.irqno];
                 if (not handler) {
-                        kcontext.logger.err("no handler available for irq {}", f.irqno);
+                        kcontext().logger.err("no handler available for irq {}", f.irqno);
                         return;
                 }
                 

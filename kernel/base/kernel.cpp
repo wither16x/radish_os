@@ -9,6 +9,7 @@ namespace Kiwi
         void KernelContext::init(this KernelContext &self)
         {
                 self.heap_available = false;
+                self.bootloader.init();
         }
 
         void KernelContext::setPml4t(this KernelContext &self, const Mem::PML4T &pml4t)

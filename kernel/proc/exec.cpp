@@ -23,7 +23,7 @@ namespace Kiwi::Proc
                 Process *proc = Scheduler::getCurrentProcess();
 
                 // Load the program located at `path`
-                Mem::PML4T &kpml4t = kcontext.pml4t();
+                Mem::PML4T &kpml4t = kcontext().pml4t();
                 Mem::PML4T proc_pml4t;
                 proc_pml4t.init(kpml4t);
                 Elf::ElfInfo elf_info;
@@ -36,7 +36,7 @@ namespace Kiwi::Proc
                 Elf::elf_entry_t proc_entry = reinterpret_cast<Elf::elf_entry_t>(elf_info.address);
 
                 if (proc->initArguments(argc, argv, envp) != 0)
-                        kcontext.logger.err("failed to initialize process arguments");
+                        kcontext().logger.err("failed to initialize process arguments");
 
                 // Update the process
                 // should add a dedicated method

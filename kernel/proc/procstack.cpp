@@ -8,7 +8,7 @@ namespace Kiwi::Proc
 {
         ProcessKernelStack::ProcessKernelStack()
         {
-                Lib::uptr hhdm_offset = kcontext.hhdm();
+                Lib::uptr hhdm_offset = kcontext().hhdm();
 
                 this->frame = Mem::Pmm::allocateFrame();
                 this->top = this->frame + hhdm_offset + Mem::PAGE_SIZE;

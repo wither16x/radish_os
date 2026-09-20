@@ -114,7 +114,7 @@ namespace Kiwi::Drivers::Keyboard
                 Cpu::registerIrq(Drivers::Pic::IrqType::IRQ_KEYBOARD, handle_irq);
                 Fs::Devfs::registerDevice(Fs::Devfs::DeviceType::Input, "D:/input");
 
-                kcontext.logger.ok("initialized generic keyboard driver");
+                kcontext().logger.ok("initialized generic keyboard driver");
         }
 
         char scancodeToKey(Lib::u8 scancode)

@@ -7,6 +7,13 @@
 #include <lib/typing.hpp>
 #include <lib/logging.hpp>
 
+#ifdef RADISH_BOOTLOADER_LIMINE
+#include <boot/bootloaders/limine.hpp>
+#define __RADISH_BOOTLOADER_NAME Kiwi::Boot::Bootloaders::Limine
+#else
+#error "No valid bootloader specified"
+#endif
+
 namespace Kiwi
 {
         class KernelContext
@@ -21,8 +28,11 @@ namespace Kiwi
                 static constexpr Lib::uptr STACK_SIZE = 64 * Mem::PAGE_SIZE;
                 static constexpr Lib::uptr STACK_BOTTOM = STACK_TOP - STACK_SIZE;
 
+                constexpr KernelContext() = default;
+
                 bool heap_available;
                 Lib::Logger logger;
+                __RADISH_BOOTLOADER_NAME bootloader;
 
                 void init(this KernelContext &self);
                 void setPml4t(this KernelContext &self, const Mem::PML4T &pml4t);
@@ -36,5 +46,8 @@ namespace Kiwi
                 Cpu::Gdt &gdt(this KernelContext &self);
         };
 
-        inline KernelContext kcontext;
+        inline KernelContext &kcontext() {
+                static KernelContext kcontext;
+                return kcontext;
+        }
 } // namespace Kiwi

@@ -14,8 +14,8 @@ namespace Kiwi::Mem::Heap
         void init()
         {
                 allocator.init(HEAP_START, 16);
-                kcontext.heap_available = true;
-                kcontext.logger.ok("initialized heap");
+                kcontext().heap_available = true;
+                kcontext().logger.ok("initialized heap");
         }
 
         void *allocate(Lib::usize n)
