@@ -1,4 +1,4 @@
-#include <boot/bootinfo.hpp>
+#include <boot/requests.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
 #include <mem/allocators/static_bitmap.hpp>
@@ -15,13 +15,13 @@ namespace Kiwi::Mem::Pmm
                 Allocators::StaticBitmapAllocator<Lib::uptr, MAX_FRAMES> allocator;
         } // anonymous namespace
 
-        void init(Boot::BootInfo::MemmapInfo &memmap)
+        void init(const Boot::MemmapRequest &memmap)
         {
                 allocator.getBitmap().setAll();
 
                 for (Lib::usize i = 0; i < memmap.entry_count; i++) {
                         if (memmap.entries[i].type == Boot::MemmapEntryType::Usable) {
-                                Boot::MemmapEntry &e = memmap.entries[i];
+                                const Boot::MemmapEntry &e = memmap.entries[i];
                                 for (Lib::uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
                                         allocator.getBitmap().clear(addr / FRAME_BYTES);
                         }

@@ -1,7 +1,7 @@
 #include <kernel.hpp>
 #include <panic.hpp>
-#include <boot/bootinfo.hpp>
 #include <boot/bootloaders/limine.hpp>
+#include <boot/requests.hpp>
 #include <cpu/assembly.hpp>
 #include <cpu/gdt.hpp>
 #include <cpu/cpu.hpp>
@@ -49,15 +49,15 @@ namespace Kiwi
         }
 
         /// Mount the initrd.
-        void mountInitrd(Boot::BootInfo::ModuleInfo &info)
+        void mountInitrd(const Boot::ModuleRequest &info)
         {
                 // 'I' for initrd
-                Lib::u64 idx = Boot::BootInfo::ModuleInfo::MAX_MODULES + 1;
-                for (Lib::u64 i = 0; i < info.count; i++) {
-                        if (Kiwi::Lib::strcmp(info.modules[i].path, "/initrd.tar") == 0)
+                Lib::u64 idx = Boot::ModuleRequest::MAX_MODULES + 1;
+                for (Lib::u64 i = 0; i < info.module_count; i++) {
+                        if (info.modules[i].path == "/initrd.tar")
                                 idx = i;
                 }
-                if (idx == Boot::BootInfo::ModuleInfo::MAX_MODULES + 1)
+                if (idx == Boot::ModuleRequest::MAX_MODULES + 1)
                         kcontext.logger.err("initrd not found");
                 else
                         kcontext.logger.ok("found initrd");
@@ -95,7 +95,7 @@ namespace Kiwi
         /// Idle.
         void kernelHang()
         {
-                panic("nothing to do");
+                panic_simple("nothing to do");
         }
 
         /// Kernel entry point.
@@ -106,11 +106,8 @@ namespace Kiwi
                 Boot::Bootloaders::Limine limine_bootloader;
                 limine_bootloader.init();
 
-                if (not limine_bootloader.isBaseRevisionSupported())
-                        panic("limine base revsion not supported"); // you wont see the message
-
                 if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
-                        panic("no display device"); // so the message cannot be printed lol
+                        panic_simple("no display device"); // so the message cannot be printed lol
 
                 kcontext.logger.setContext("kernel");
 
@@ -126,12 +123,18 @@ namespace Kiwi
 
                 kcontext.gdt().getTss().flush();
 
-                Boot::BootInfo bootinfo;
-                kcontext.setHhdm(bootinfo.hhdm.offset);
+                const Boot::Request &req_hhdm = limine_bootloader.request(Boot::RequestType::Hhdm);
+                kcontext.setHhdm(static_cast<const Boot::HhdmRequest &>(req_hhdm).offset);
 
-                Mem::Pmm::init(bootinfo.memmap);
+                const Boot::Request &req_memmap = limine_bootloader.request(Boot::RequestType::Memmap);
+                Mem::Pmm::init(static_cast<const Boot::MemmapRequest &>(req_memmap));
 
-                Mem::PML4T kpml4t = Mem::Vmm::init(bootinfo.hhdm.offset, bootinfo.executable, bootinfo.memmap);
+                const Boot::Request &req_executable_address = limine_bootloader.request(Boot::RequestType::ExecutableAddress);
+                Mem::PML4T kpml4t = Mem::Vmm::init(
+                        static_cast<const Boot::HhdmRequest &>(req_hhdm).offset,
+                        static_cast<const Boot::ExecutableAddressRequest &>(req_executable_address),
+                        static_cast<const Boot::MemmapRequest &>(req_memmap)
+                );
                 kpml4t.load();
                 kcontext.setPml4t(kpml4t);
 
@@ -154,13 +157,15 @@ namespace Kiwi
 
                 Drivers::Keyboard::init();
 
-                mountInitrd(bootinfo.modules);
+                const Boot::Request &req_module = limine_bootloader.request(Boot::RequestType::Module);
+                mountInitrd(static_cast<const Boot::ModuleRequest &>(req_module));
 
+                const Boot::Request &req_framebuffer = limine_bootloader.request(Boot::RequestType::Framebuffer);
                 Drivers::Framebuffer::init(
-                        bootinfo.framebuffer.address,
-                        bootinfo.framebuffer.width,
-                        bootinfo.framebuffer.height,
-                        bootinfo.framebuffer.pitch
+                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).address,
+                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).width,
+                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).height,
+                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).pitch
                 );
                 kcontext.logger.ok("initialized framebuffer");
 

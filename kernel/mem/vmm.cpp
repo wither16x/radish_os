@@ -1,5 +1,5 @@
 #include <kernel.hpp>
-#include <boot/bootinfo.hpp>
+#include <boot/requests.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/logging.hpp>
 #include <mem/pmm.hpp>
@@ -18,7 +18,7 @@ namespace Kiwi::Mem::Vmm
                 Lib::u64 hhdm = 0;
                 Lib::u64 executable_phys = 0;
                 Lib::u64 executable_virt = 0;
-                Boot::BootInfo::MemmapInfo memmap_info;
+                Boot::MemmapRequest memmap_info;
 
                 /// Map the kernel in memory.
                 void map_kernel(PML4T *pml4t)
@@ -72,13 +72,13 @@ namespace Kiwi::Mem::Vmm
         } // anonymous namespace
 
         PML4T init(Lib::u64 hhdm_base,
-                Boot::BootInfo::ExecutableInfo &exec_info,
-                Boot::BootInfo::MemmapInfo &_memmap_info
+                const Boot::ExecutableAddressRequest &exec_info,
+                const Boot::MemmapRequest &_memmap_info
         )
         {
                 hhdm = hhdm_base;
-                executable_phys = exec_info.physical_base;
-                executable_virt = exec_info.virtual_base;
+                executable_phys = exec_info.phys_base;
+                executable_virt = exec_info.virt_base;
                 memmap_info = _memmap_info;
 
                 PML4T pml4t;

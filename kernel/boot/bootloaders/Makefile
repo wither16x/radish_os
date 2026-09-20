@@ -16,7 +16,7 @@ all: $(CXX_OBJECTS)
 
 $(OBJECTS_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXX_FLAGS) -c $< -o $@
+	$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJECTS_DIR)
