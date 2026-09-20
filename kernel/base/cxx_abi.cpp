@@ -1,4 +1,4 @@
-#include <panic.hpp>
+#include <panic_simple.hpp>
 
 using namespace Kiwi;
 
@@ -14,7 +14,7 @@ extern "C"
 
         void __cxa_pure_virtual()
         {
-                panic("call to pure virtual method");
+                panic_simple("call to pure virtual method");
         }
 
         int atexit()
