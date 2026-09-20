@@ -1,4 +1,5 @@
 #include <boot/bootloaders/limine.hpp>
+#include <lib/memory.hpp>
 #include <limine.h>
 
 namespace Kiwi::Boot::Bootloaders
@@ -51,33 +52,42 @@ namespace Kiwi::Boot::Bootloaders
                 volatile LimineSpecific::RequestsEndMarker limine_requests_end_marker = requestsEndMarker();
         } // anonymous namespace
 
-        void Limine::init(const Lib::String<NAME_SIZE> &name, const Lib::String<VERSION_SIZE> &version)
+        void Limine::init(this Limine &self)
         {
-                this->name = name;
-                this->version = version;
+                self.base_revision.magic0 = limine_base_revision.magic0;
+                self.base_revision.magic1 = limine_base_revision.magic1;
+                self.base_revision.rev = limine_base_revision.rev;
+
+                self.requests_start.magic0 = limine_requests_start_marker.magic0;
+                self.requests_start.magic1 = limine_requests_start_marker.magic1;
+                self.requests_start.magic2 = limine_requests_start_marker.magic2;
+                self.requests_start.magic3 = limine_requests_start_marker.magic3;
+
+                self.requests_end.magic0 = limine_requests_end_marker.magic0;
+                self.requests_end.magic1 = limine_requests_end_marker.magic1;
         }
 
-        const volatile LimineSpecific::RequestsStartMarker &Limine::requestsStart()
+        const LimineSpecific::RequestsStartMarker &Limine::requestsStart(this const Limine &self)
         {
-                return limine_requests_start_marker;
+                return self.requests_start;
         }
 
-        const volatile LimineSpecific::RequestsEndMarker &Limine::requestsEnd()
+        const LimineSpecific::RequestsEndMarker &Limine::requestsEnd(this const Limine &self)
         {
-                return limine_requests_end_marker;
+                return self.requests_end;
         }
 
-        const volatile LimineSpecific::Revision &Limine::getVersionInfo()
+        const LimineSpecific::Revision &Limine::getVersionInfo(this const Limine &self)
         {
-                return limine_base_revision;
+                return self.base_revision;
         }
 
-        bool Limine::isBaseRevisionSupported() const
+        bool Limine::isBaseRevisionSupported(this const Limine &self)
         {
                 Lib::u64 _rev[] = {
-                        limine_base_revision.magic0,
-                        limine_base_revision.magic1,
-                        limine_base_revision.rev
+                        self.base_revision.magic0,
+                        self.base_revision.magic1,
+                        self.base_revision.rev
                 };
                 
                 return LIMINE_BASE_REVISION_SUPPORTED(_rev);

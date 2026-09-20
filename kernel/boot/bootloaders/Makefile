@@ -6,8 +6,7 @@ CXX_FLAGS += -I../../$(INCLUDE_DIR)
 SOURCE_DIR              = .
 OBJECTS_DIR             = ../../build/boot/bootloaders
 
-CXX_FILES               = $(SOURCE_DIR)/bootloader.cpp \
-			$(SOURCE_DIR)/limine.cpp
+CXX_FILES               = $(SOURCE_DIR)/limine.cpp
 
 CXX_OBJECTS             = $(patsubst ./%, $(OBJECTS_DIR)/%, $(CXX_FILES:.cpp=.o))
 

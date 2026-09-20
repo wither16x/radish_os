@@ -104,7 +104,7 @@ namespace Kiwi
                 kcontext.init();
 
                 Boot::Bootloaders::Limine limine_bootloader;
-                limine_bootloader.init("Limine", "undefined");
+                limine_bootloader.init();
 
                 if (not limine_bootloader.isBaseRevisionSupported())
                         panic("limine base revsion not supported"); // you wont see the message

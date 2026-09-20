@@ -8,7 +8,7 @@
 
 namespace Kiwi
 {
-        constexpr Lib::usize PANIC_MESSAGE_SIZE = 2048;
+        constexpr Lib::usize PANIC_MESSAGE_SIZE = 512;
 
         void *getReturnAddress(int i);
         const char *lookupSymbol(Lib::uptr addr);
@@ -25,11 +25,11 @@ namespace Kiwi
 
                 kcontext.logger.setContext("panic handler");
 
-                Lib::println("\r\n==================== KERNEL PANIC ====================");
+                Lib::println<50>("\r\n==================== KERNEL PANIC ====================");
                 Lib::String<PANIC_MESSAGE_SIZE> msg = formatString<PANIC_MESSAGE_SIZE>(fmt, static_cast<ARGS &&>(args)...);
                 println<PANIC_MESSAGE_SIZE>("{}", msg);
 
-                Lib::println("Stack trace:");
+                Lib::println<50>("Stack trace:");
                 dumpStackTrace(15);
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
@@ -56,10 +56,10 @@ namespace Kiwi
 
                 kcontext.logger.setContext("panic handler");
 
-                Lib::println("\r\n==================== KERNEL PANIC ====================");
+                Lib::println<50>("\r\n==================== KERNEL PANIC ====================");
                 println<PANIC_MESSAGE_SIZE>("{}", fmt);
 
-                Lib::println("Stack trace:");
+                Lib::println<50>("Stack trace:");
                 dumpStackTrace(15);
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
