@@ -167,7 +167,7 @@ namespace Kiwi::Boot::Bootloaders
                 self.req_framebuffer.blue_mask_shift = l_fb->blue_mask_shift;
         }
 
-        const Request &Limine::request(this const Limine &self, RequestType type)
+        const Request &Limine::requestRaw(this const Limine &self, RequestType type)
         {
                 switch (type) {
                 case RequestType::BootloaderInfo:

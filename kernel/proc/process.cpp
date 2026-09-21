@@ -128,7 +128,7 @@ namespace Kiwi::Proc
                 heap(parent.heap.getStart(), parent.heap.getLastPage(), parent.heap.getLimit(), this->pml4t),
                 user_stack(parent.user_stack, this->pml4t)
         {
-                Lib::uptr hhdm_offset = kcontext().hhdm();
+                Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
                 
                 this->id                = id;
                 this->cr3               = reinterpret_cast<Lib::u64>(this->pml4t.raw()) - hhdm_offset;
@@ -212,7 +212,7 @@ namespace Kiwi::Proc
 
         void Process::switchPml4t(this Process &self, const Mem::PML4T &pml4t)
         {
-                Lib::uptr hhdm_offset = kcontext().hhdm();
+                Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
 
                 self.pml4t.destroy();
                 self.pml4t = pml4t;

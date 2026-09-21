@@ -3,6 +3,7 @@
 #include <lib/typing.hpp>
 #include <mem/allocators/static_bitmap.hpp>
 #include <mem/pmm.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Mem::Pmm
 {
@@ -15,13 +16,15 @@ namespace Kiwi::Mem::Pmm
                 Allocators::StaticBitmapAllocator<Lib::uptr, MAX_FRAMES> allocator;
         } // anonymous namespace
 
-        void init(const Boot::MemmapRequest &memmap)
+        void init()
         {
+                const Boot::MemmapRequest &req_memmap = kcontext().bootloader.request<Boot::MemmapRequest>();
+
                 allocator.getBitmap().setAll();
 
-                for (Lib::usize i = 0; i < memmap.entry_count; i++) {
-                        if (memmap.entries[i].type == Boot::MemmapEntryType::Usable) {
-                                const Boot::MemmapEntry &e = memmap.entries[i];
+                for (Lib::usize i = 0; i < req_memmap.entry_count; i++) {
+                        if (req_memmap.entries[i].type == Boot::MemmapEntryType::Usable) {
+                                const Boot::MemmapEntry &e = req_memmap.entries[i];
                                 for (Lib::uptr addr = e.base; addr < e.base + e.length; addr += FRAME_BYTES)
                                         allocator.getBitmap().clear(addr / FRAME_BYTES);
                         }

@@ -17,11 +17,6 @@ namespace Kiwi
                 self._pml4t = pml4t;
         }
 
-        void KernelContext::setHhdm(this KernelContext &self, Lib::u64 hhdm)
-        {
-                self._hhdm = hhdm;
-        }
-
         void KernelContext::setIdt(this KernelContext &self, const Cpu::Idt &idt)
         {
                 self._idt = idt;
@@ -35,11 +30,6 @@ namespace Kiwi
         Mem::PML4T &KernelContext::pml4t(this KernelContext &self)
         {
                 return self._pml4t;
-        }
-
-        Lib::u64 KernelContext::hhdm(this const KernelContext &self)
-        {
-                return self._hhdm;
         }
 
         Cpu::Idt &KernelContext::idt(this KernelContext &self)

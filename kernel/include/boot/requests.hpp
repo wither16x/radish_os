@@ -22,6 +22,8 @@ namespace Kiwi::Boot
 
         struct BootloaderInfoRequest : Request
         {
+                static constexpr RequestType kind = RequestType::BootloaderInfo;
+
                 static constexpr Lib::usize NAME_SIZE = 25;
                 static constexpr Lib::usize VERSION_SIZE = 25;
 
@@ -39,6 +41,8 @@ namespace Kiwi::Boot
 
         struct FirmwareTypeRequest : Request
         {
+                static constexpr RequestType kind = RequestType::FirmwareType;
+
                 FirmwareType type;
         };
 
@@ -64,6 +68,8 @@ namespace Kiwi::Boot
 
         struct MemmapRequest : Request
         {
+                static constexpr RequestType kind = RequestType::Memmap;
+
                 static constexpr Lib::usize MAX_ENTRIES = 64;
 
                 Lib::usize entry_count;
@@ -72,11 +78,15 @@ namespace Kiwi::Boot
 
         struct HhdmRequest : Request
         {
+                static constexpr RequestType kind = RequestType::Hhdm;
+
                 Lib::uptr offset;
         };
 
         struct ExecutableAddressRequest : Request
         {
+                static constexpr RequestType kind = RequestType::ExecutableAddress;
+
                 Lib::uptr phys_base;
                 Lib::uptr virt_base;
         };
@@ -92,6 +102,8 @@ namespace Kiwi::Boot
 
         struct ModuleRequest : Request
         {
+                static constexpr RequestType kind = RequestType::Module;
+
                 static constexpr Lib::usize MAX_MODULES = 25;
 
                 Lib::usize module_count;
@@ -100,6 +112,8 @@ namespace Kiwi::Boot
 
         struct FramebufferRequest : Request
         {
+                static constexpr RequestType kind = RequestType::Framebuffer;
+
                 void *address;
                 Lib::u64 pitch;
                 Lib::u64 width;

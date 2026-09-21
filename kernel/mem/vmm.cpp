@@ -71,15 +71,15 @@ namespace Kiwi::Mem::Vmm
                 }
         } // anonymous namespace
 
-        PML4T init(Lib::u64 hhdm_base,
-                const Boot::ExecutableAddressRequest &exec_info,
-                const Boot::MemmapRequest &_memmap_info
-        )
+        PML4T init()
         {
-                hhdm = hhdm_base;
-                executable_phys = exec_info.phys_base;
-                executable_virt = exec_info.virt_base;
-                memmap_info = _memmap_info;
+                hhdm = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
+
+                const Boot::ExecutableAddressRequest &req_executable_address = kcontext().bootloader.request<Boot::ExecutableAddressRequest>();
+                executable_phys = req_executable_address.phys_base;
+                executable_virt = req_executable_address.virt_base;
+
+                memmap_info = kcontext().bootloader.request<Boot::MemmapRequest>();
 
                 PML4T pml4t;
                 pml4t.init();

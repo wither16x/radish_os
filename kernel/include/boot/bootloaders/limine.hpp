@@ -46,7 +46,13 @@ namespace Kiwi::Boot::Bootloaders
         public:
                 void init(this Limine &self);
 
-                const Request &request(this const Limine &self, RequestType type);
+                const Request &requestRaw(this const Limine &self, RequestType type);
+
+                template<typename T>
+                const T &request(this const Limine &self)
+                {
+                        return static_cast<const T &>(self.requestRaw(T::kind));
+                }
 
                 const LimineSpecific::RequestsStartMarker &requestsStart(this const Limine &self);
                 const LimineSpecific::RequestsEndMarker &requestsEnd(this const Limine &self);

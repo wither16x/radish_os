@@ -5,7 +5,7 @@
 namespace Kiwi::Drivers::Framebuffer
 {
         /// Initialize the framebuffer informations.
-        void init(void *address, Lib::u64 width, Lib::u64 height, Lib::u64 pitch);
+        void init();
         /// Draw a pixel at a given position in the framebuffer.
         void drawPixel(Lib::u64 x, Lib::u64 y, Lib::u32 color);
         /// Scroll `height` rows up.

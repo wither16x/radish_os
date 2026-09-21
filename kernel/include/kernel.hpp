@@ -19,7 +19,6 @@ namespace Kiwi
         class KernelContext
         {
                 Mem::PML4T _pml4t;
-                Lib::u64 _hhdm;
                 Cpu::Idt _idt;
                 Cpu::Gdt _gdt;
 
@@ -36,12 +35,10 @@ namespace Kiwi
 
                 void init(this KernelContext &self);
                 void setPml4t(this KernelContext &self, const Mem::PML4T &pml4t);
-                void setHhdm(this KernelContext &self, Lib::u64 hhdm);
                 void setIdt(this KernelContext &self, const Cpu::Idt &idt);
                 void setGdt(this KernelContext &self, const Cpu::Gdt &gdt);
 
                 Mem::PML4T &pml4t(this KernelContext &self);
-                Lib::u64 hhdm(this const KernelContext &self);
                 Cpu::Idt &idt(this KernelContext &self);
                 Cpu::Gdt &gdt(this KernelContext &self);
         };

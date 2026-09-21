@@ -1,6 +1,8 @@
 #include <drivers/framebuffer.hpp>
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>
+#include <boot/requests.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Drivers::Framebuffer
 {
@@ -12,12 +14,14 @@ namespace Kiwi::Drivers::Framebuffer
                 Lib::u64 fb_pitch  = 0;
         } // anonymous namespace
 
-        void init(void *address, Lib::u64 width, Lib::u64 height, Lib::u64 pitch)
+        void init()
         {
-                fb_ptr = static_cast<Lib::u32 *>(address);
-                fb_width = width;
-                fb_height = height;
-                fb_pitch = pitch;
+                const Boot::FramebufferRequest &req_framebuffer = kcontext().bootloader.request<Boot::FramebufferRequest>();
+
+                fb_ptr = static_cast<Lib::u32 *>(req_framebuffer.address);
+                fb_width = req_framebuffer.width;
+                fb_height = req_framebuffer.height;
+                fb_pitch = req_framebuffer.pitch;
         }
 
         void drawPixel(Lib::u64 x, Lib::u64 y, Lib::u32 color)

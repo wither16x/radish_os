@@ -122,18 +122,9 @@ namespace Kiwi
 
                 kcontext().gdt().getTss().flush();
 
-                const Boot::Request &req_hhdm = kcontext().bootloader.request(Boot::RequestType::Hhdm);
-                kcontext().setHhdm(static_cast<const Boot::HhdmRequest &>(req_hhdm).offset);
+                Mem::Pmm::init();
 
-                const Boot::Request &req_memmap = kcontext().bootloader.request(Boot::RequestType::Memmap);
-                Mem::Pmm::init(static_cast<const Boot::MemmapRequest &>(req_memmap));
-
-                const Boot::Request &req_executable_address = kcontext().bootloader.request(Boot::RequestType::ExecutableAddress);
-                Mem::PML4T kpml4t = Mem::Vmm::init(
-                        static_cast<const Boot::HhdmRequest &>(req_hhdm).offset,
-                        static_cast<const Boot::ExecutableAddressRequest &>(req_executable_address),
-                        static_cast<const Boot::MemmapRequest &>(req_memmap)
-                );
+                Mem::PML4T kpml4t = Mem::Vmm::init();
                 kpml4t.load();
                 kcontext().setPml4t(kpml4t);
 
@@ -156,16 +147,10 @@ namespace Kiwi
 
                 Drivers::Keyboard::init();
 
-                const Boot::Request &req_module = kcontext().bootloader.request(Boot::RequestType::Module);
-                mountInitrd(static_cast<const Boot::ModuleRequest &>(req_module));
+                const Boot::ModuleRequest &req_module = kcontext().bootloader.request<Boot::ModuleRequest>();
+                mountInitrd(req_module);
 
-                const Boot::Request &req_framebuffer = kcontext().bootloader.request(Boot::RequestType::Framebuffer);
-                Drivers::Framebuffer::init(
-                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).address,
-                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).width,
-                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).height,
-                        static_cast<const Boot::FramebufferRequest &>(req_framebuffer).pitch
-                );
+                Drivers::Framebuffer::init();
                 kcontext().logger.ok("initialized framebuffer");
 
                 Proc::Scheduler::init();
