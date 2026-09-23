@@ -2,6 +2,7 @@
 
 #include <lib/vector.hpp>
 #include <lib/typing.hpp>
+#include <lib/array.hpp>
 
 namespace Kiwi::Lib
 {
@@ -10,9 +11,9 @@ namespace Kiwi::Lib
         class StaticBitmap
         {
                 static constexpr usize BITS_PER_WORD      = sizeof(u64) * 8;
-                static constexpr usize Words            = (N + BITS_PER_WORD - 1) / BITS_PER_WORD;
+                static constexpr usize WORDS              = (N + BITS_PER_WORD - 1) / BITS_PER_WORD;
 
-                u64 data[Words]{};
+                u64 data[WORDS]{};
 
                 /// Get the word of a bit in the bitmap.
                 static constexpr usize getIndex(usize bit)
