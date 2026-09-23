@@ -11,6 +11,7 @@ namespace Kiwi::Lib
         class Logger
         {
                 static constexpr int MAX_CONTEXT_BYTES = 50;
+                static constexpr Lib::usize LOG_MESSAGE_SIZE = 255;
 
                 char context[MAX_CONTEXT_BYTES];
 
@@ -43,7 +44,7 @@ namespace Kiwi::Lib
 
                 void setContext(this Logger &self, const String<Logger::MAX_CONTEXT_BYTES> &ctx);
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void log(this Logger &self, LogLevel lv, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         String<N> msg = formatString<N>(fmt, static_cast<ARGS &&>(args)...);
@@ -55,37 +56,37 @@ namespace Kiwi::Lib
                         );
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void debug(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Debug, fmt, (args)...);
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void info(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Info, fmt, (args)...);
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void ok(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Ok, fmt, (args)...);
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void warn(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Warn, fmt, (args)...);
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void err(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Err, fmt, (args)...);
                 }
 
-                template<usize N = 255, typename... ARGS>
+                template<usize N = LOG_MESSAGE_SIZE, typename... ARGS>
                 void crit(this Logger &self, const type_identity_t<String<N>> &fmt, ARGS &&...args)
                 {
                         self.log(LogLevel::Crit, fmt, (args)...);
