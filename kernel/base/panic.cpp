@@ -1,5 +1,4 @@
 #include <cpu/cpu.hpp>
-#include <lib/args.hpp>
 #include <lib/logging.hpp>
 #include <lib/print.hpp>
 #include <lib/typing.hpp>
