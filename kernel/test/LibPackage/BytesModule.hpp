@@ -59,7 +59,7 @@ namespace Kiwi::Test
                 TARWI_UNIT(unitAlignUpOverflowWraps)
                 {
                         Lib::usize near_max = static_cast<Lib::usize>(-1) - 2;
-                        Lib::usize result = Lib::alignUp(near_max, 16);
+                        Lib::usize result = Lib::alignUp<Lib::usize>(near_max, 16);
 
                         TARWI_EXPECT(result < near_max);
                 }
