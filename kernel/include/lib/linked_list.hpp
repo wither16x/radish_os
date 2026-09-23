@@ -24,8 +24,8 @@ namespace Kiwi::Lib
                 LinkedList() = default;
 
                 LinkedList(uptr base)
+                        : hdr(reinterpret_cast<HDR *>(base))
                 {
-                        this->hdr = reinterpret_cast<HDR *>(base);
                         this->hdr->next = nullptr;
                         this->hdr->prev = nullptr;
                 }
