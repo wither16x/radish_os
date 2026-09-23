@@ -8,7 +8,6 @@ OBJECTS_DIR             = ../build/lib
 
 CXX_FILES               = $(SOURCE_DIR)/alloc.cpp \
                         $(SOURCE_DIR)/conversion.cpp \
-			$(SOURCE_DIR)/filesystem.cpp \
 			$(SOURCE_DIR)/logging.cpp \
 			$(SOURCE_DIR)/memory.cpp \
 			$(SOURCE_DIR)/print.cpp \

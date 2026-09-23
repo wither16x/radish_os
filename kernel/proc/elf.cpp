@@ -1,5 +1,4 @@
 #include <kernel.hpp>
-#include <lib/filesystem.hpp>
 #include <lib/math.hpp>
 #include <lib/memory.hpp>
 #include <lib/vector.hpp>
@@ -9,13 +8,15 @@
 #include <mem/pml4t.hpp>
 #include <mem/page.hpp>
 #include <proc/elf.hpp>
+#include <fs/vfs.hpp>
 
 namespace Kiwi::Proc::Elf
 {
         namespace
         {
                 /// Supported program header types.
-                enum PhdrType : elf64_word {
+                enum PhdrType : elf64_word
+                {
                         PhdrTypeLoad            = 1
                 };
 
@@ -47,11 +48,11 @@ namespace Kiwi::Proc::Elf
                 // read the file
                 Lib::Vector<Lib::u8> buf;
                 Lib::usize size = 0;
-                getfilesz(path, &size);
+                Fs::Vfs::getfilesz(path, &size);
                 buf.resize(size);
-                Lib::File *elf_file = Lib::open(path);
+                Fs::Vfs::File *elf_file = Fs::Vfs::openFile(path);
                 read(elf_file, const_cast<unsigned char *>(buf.data()), size);
-                Lib::close(elf_file);
+                Fs::Vfs::closeFile(elf_file);
 
                 // parse the file
                 const Elf64Ehdr *hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());

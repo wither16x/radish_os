@@ -17,7 +17,6 @@
 #include <fs/devfs.hpp>
 #include <fs/ustar.hpp>
 #include <fs/vfs.hpp>
-#include <lib/filesystem.hpp>
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>

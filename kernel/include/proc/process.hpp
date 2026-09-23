@@ -6,7 +6,6 @@
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
-#include <lib/filesystem.hpp>
 #include <lib/stack.hpp>
 #include <mem/pml4t.hpp>
 #include <proc/pid.hpp>
@@ -14,6 +13,7 @@
 #include <proc/procheap.hpp>
 #include <proc/procstack.hpp>
 #include <fpu.hpp>
+#include <fs/vfs.hpp>
 
 namespace Kiwi::Proc
 {
@@ -42,7 +42,7 @@ namespace Kiwi::Proc
                 ProcessHeap             heap;
                 ProcessKernelStack      kernel_stack;
                 Lib::Stack<Lib::u8>     user_stack;
-                Lib::Vector<Lib::File *> file_descriptors;
+                Lib::Vector<Fs::Vfs::File *> file_descriptors;
                 Fpu::FpuContext fpu_context;
                 int argc;
                 int envc;
@@ -78,8 +78,8 @@ namespace Kiwi::Proc
                 void consumeTime(this Process &self, int ms);
                 void switchWith(this Process &self, const Process *other);
                 void useKernelStack(this const Process &self);
-                void addFileDescriptor(this Process &self, Lib::File *file);
-                void removeFileDescriptor(this Process &self, Lib::File *file);
+                void addFileDescriptor(this Process &self, Fs::Vfs::File *file);
+                void removeFileDescriptor(this Process &self, Fs::Vfs::File *file);
                 Lib::u64 getTime(this const Process &self);
                 const Lib::Vector<Process *> &getChildren(this const Process &self);
                 ProcessStatus getStatus(this const Process &self);
@@ -88,9 +88,9 @@ namespace Kiwi::Proc
                 const Mem::PML4T &getPml4t(this const Process &self);
                 const ProcessStackFrame *getStackFrame(this const Process &self);
                 const Lib::uptr *kernelStackPointerAddress(this const Process &self);
-                const Lib::Vector<Lib::File *> getFileDescriptors(this const Process &self);
-                const Lib::File *findFile(this const Process &self, Lib::usize id);
-                Lib::usize findFd(this const Process &self, Lib::File *file);
+                const Lib::Vector<Fs::Vfs::File *> getFileDescriptors(this const Process &self);
+                const Fs::Vfs::File *findFile(this const Process &self, Lib::usize id);
+                Lib::usize findFd(this const Process &self, Fs::Vfs::File *file);
                 ProcessHeap &getHeap(this Process &self);
                 ProcessKernelStack &getKernelStack(this Process &self);
 

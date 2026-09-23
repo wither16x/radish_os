@@ -9,7 +9,6 @@
 #include <lib/typing.hpp>
 #include <lib/memory.hpp>
 #include <lib/vector.hpp>
-#include <lib/filesystem.hpp>
 #include <mem/pmm.hpp>
 #include <mem/vmm.hpp>
 #include <mem/page.hpp>
@@ -17,6 +16,7 @@
 #include <proc/scheduler.hpp>
 #include <proc/procstack.hpp>
 #include <proc/procheap.hpp>
+#include <fs/vfs.hpp>
 
 namespace Kiwi::Proc
 {
@@ -345,7 +345,7 @@ namespace Kiwi::Proc
                 kcontext().gdt().getTss().resetStack(self.kernel_stack.get());
         }
 
-        void Process::addFileDescriptor(this Process &self, Lib::File *file)
+        void Process::addFileDescriptor(this Process &self, Fs::Vfs::File *file)
         {
                 for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (not self.file_descriptors[i]) {
@@ -357,7 +357,7 @@ namespace Kiwi::Proc
                 self.file_descriptors.pushBack(file);
         }
 
-        void Process::removeFileDescriptor(this Process &self, Lib::File *file)
+        void Process::removeFileDescriptor(this Process &self, Fs::Vfs::File *file)
         {
                 for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (self.file_descriptors[i] == file) {
@@ -407,19 +407,19 @@ namespace Kiwi::Proc
                 return self.kernel_stack.address();
         }
 
-        const Lib::Vector<Lib::File *> Process::getFileDescriptors(this const Process &self)
+        const Lib::Vector<Fs::Vfs::File *> Process::getFileDescriptors(this const Process &self)
         {
                 return self.file_descriptors;
         }
 
-        const Lib::File *Process::findFile(this const Process &self, Lib::usize id)
+        const Fs::Vfs::File *Process::findFile(this const Process &self, Lib::usize id)
         {
                 if (id >= self.file_descriptors.length())
                         return nullptr;
                 return self.file_descriptors[id];
         }
 
-        Lib::usize Process::findFd(this const Process &self, Lib::File *file)
+        Lib::usize Process::findFd(this const Process &self, Fs::Vfs::File *file)
         {
                 for (Lib::usize i = 0; i < self.file_descriptors.length(); i++) {
                         if (self.file_descriptors[i] == file)

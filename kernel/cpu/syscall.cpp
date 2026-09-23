@@ -1,5 +1,4 @@
 #include <cpu/syscall.hpp>
-#include <lib/filesystem.hpp>
 #include <lib/typing.hpp>
 #include <proc/exec.hpp>
 #include <proc/fork.hpp>
@@ -7,8 +6,7 @@
 #include <proc/kill.hpp>
 #include <proc/process.hpp>
 #include <proc/wait.hpp>
-
-#include <lib/logging.hpp>
+#include <fs/vfs.hpp>
 
 namespace Kiwi::Cpu
 {
@@ -47,11 +45,11 @@ namespace Kiwi::Cpu
                                 return;
                         }
 
-                        const Lib::File *file = curr_proc->findFile(fd);
+                        const Fs::Vfs::File *file = curr_proc->findFile(fd);
                         const void *buf = reinterpret_cast<const void *>(frame.rcx);
                         Lib::usize n = frame.rdx;
 
-                        Fs::Vfs::Status res = Lib::write(const_cast<Lib::File *>(file), buf, n);
+                        Fs::Vfs::Status res = Fs::Vfs::write(const_cast<Fs::Vfs::File *>(file), buf, n);
                         frame.rax = static_cast<Lib::u64>(res);
                 }
 
@@ -68,11 +66,11 @@ namespace Kiwi::Cpu
                                 return;
                         }
 
-                        const Lib::File *file = curr_proc->findFile(fd);
+                        const Fs::Vfs::File *file = curr_proc->findFile(fd);
                         void *buf = reinterpret_cast<void *>(frame.rcx);
                         Lib::usize n = frame.rdx;
 
-                        Fs::Vfs::Status res = Lib::read(const_cast<Lib::File* >(file), buf, n);
+                        Fs::Vfs::Status res = Fs::Vfs::read(const_cast<Fs::Vfs::File* >(file), buf, n);
                         frame.rax = static_cast<Lib::u64>(res);
                 }
 
@@ -122,7 +120,7 @@ namespace Kiwi::Cpu
                 void syscallOpen(SyscallFrame &frame)
                 {
                         const char *path = reinterpret_cast<const char *>(frame.rbx);
-                        Lib::File *f = Lib::open(path);
+                        Fs::Vfs::File *f = Fs::Vfs::openFile(path);
                         if (not f) {
                                 frame.rax = static_cast<Lib::u64>(-1);
                                 return;
@@ -145,8 +143,8 @@ namespace Kiwi::Cpu
                                 return;
                         }
 
-                        const Lib::File *file = curr_proc->findFile(fd);
-                        Fs::Vfs::Status res = Lib::close(const_cast<Lib::File *>(file));
+                        const Fs::Vfs::File *file = curr_proc->findFile(fd);
+                        Fs::Vfs::Status res = Fs::Vfs::closeFile(const_cast<Fs::Vfs::File *>(file));
                         frame.rax = static_cast<Lib::u64>(res);
                 }
 
@@ -207,7 +205,7 @@ namespace Kiwi::Cpu
                                 return;
                         }
 
-                        Fs::Vfs::Status res = Lib::rm(f);
+                        Fs::Vfs::Status res = Fs::Vfs::remove(f);
                         frame.rax = static_cast<Lib::u64>(res);
                 }
 
@@ -222,7 +220,7 @@ namespace Kiwi::Cpu
                                 return;
                         }
 
-                        Lib::File *file = const_cast<Lib::File *>(curr_proc->findFile(frame.rbx));
+                        Fs::Vfs::File *file = const_cast<Fs::Vfs::File *>(curr_proc->findFile(frame.rbx));
                         Lib::usize position = frame.rcx;
                         Fs::Vfs::SeekOrigin whence = static_cast<Fs::Vfs::SeekOrigin>(frame.rdx);
 

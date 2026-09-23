@@ -1,7 +1,7 @@
 #include <drivers/console.hpp>
 #include <drivers/framebuffer.hpp>
 #include <fs/devfs.hpp>
-#include <lib/filesystem.hpp>
+#include <fs/vfs.hpp>
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 #include <lib/typing.hpp>
@@ -62,12 +62,12 @@ namespace Kiwi::Drivers::Console
                 kcontext().logger.setContext("console");
 
                 Lib::usize filesz = 0;
-                getfilesz(font, &filesz);
+                Fs::Vfs::getfilesz(font, &filesz);
                 self.font_data.resize(filesz);
 
-                Lib::File *font_file = open(font);
-                Lib::read(font_file, const_cast<unsigned char *>(self.font_data.data()), filesz);
-                Lib::close(font_file);
+                Fs::Vfs::File *font_file = Fs::Vfs::openFile(font);
+                Fs::Vfs::read(font_file, const_cast<unsigned char *>(self.font_data.data()), filesz);
+                Fs::Vfs::closeFile(font_file);
 
                 const Psf2Header *hdr = reinterpret_cast<const Psf2Header *>(self.font_data.data());
 

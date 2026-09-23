@@ -5,10 +5,10 @@
 #include <lib/logging.hpp>
 #include <lib/memory.hpp>
 #include <lib/typing.hpp>
-#include <lib/filesystem.hpp>
 #include <proc/scheduler.hpp>
 #include <proc/process.hpp>
 #include <kernel.hpp>
+#include <fs/vfs.hpp>
 
 namespace Kiwi::Proc::Scheduler
 {
@@ -34,7 +34,7 @@ namespace Kiwi::Proc::Scheduler
                         ctx.pending_zombie = nullptr;
 
                         for (auto &fd : zombie  ->getFileDescriptors())
-                                Lib::close(fd);
+                                Fs::Vfs::closeFile(fd);
 
                         Mem::Pmm::freeFrame(zombie->getKernelStack().getFrame());
                         removeProcess(zombie);
@@ -174,7 +174,7 @@ namespace Kiwi::Proc::Scheduler
                 }
 
                 for (auto &fd : p->getFileDescriptors())
-                        Lib::close(fd);
+                        Fs::Vfs::closeFile(fd);
 
                 Mem::Pmm::freeFrame(p->getKernelStack().getFrame());
                 removeProcess(p);
