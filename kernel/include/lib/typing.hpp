@@ -205,4 +205,7 @@ namespace Kiwi::Lib
 
         template<typename T>
         using type_identity_t = typename TypeIdentity<T>::type;
+
+        template<typename B, typename D>
+        concept isBaseOf = __is_base_of(B, D);
 } // namespace Kiwi::Lib

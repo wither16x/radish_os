@@ -15,7 +15,7 @@ namespace Kiwi::Lib
 
         /// A list of blocks linked together.
         template<typename HDR>
-                requires __is_base_of(LinkedListHeader, HDR)
+                requires isBaseOf<LinkedListHeader, HDR>
         class LinkedList
         {
                 HDR *hdr;
