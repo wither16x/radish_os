@@ -1,0 +1,3 @@
+#pragma once
+
+// Apparently the compiler should provide it...
