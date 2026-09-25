@@ -11,11 +11,18 @@ build-kernel:
 	./scripts/symbols.sh
 
 build-userspace:
+	$(MAKE) -C userspace/libraries/libc
+	$(MAKE) -C userspace/libraries/libc install
+
+	$(MAKE) -C userspace/libraries/melon
+	$(MAKE) -C userspace/libraries/melon install-local
+
 	$(MAKE) -C userspace/hello
 	$(MAKE) -C userspace/init
 	$(MAKE) -C userspace/alloc
 	$(MAKE) -C userspace/cxx-test
 	$(MAKE) -C userspace/echo
+	$(MAKE) -C userspace/cash
 
 build-initrd:
 	./scripts/mkinitrd.sh
@@ -30,11 +37,14 @@ clean-kernel:
 	$(MAKE) -C kernel clean
 
 clean-userspace:
+	$(MAKE) -C userspace/libraries/libc clean
+	$(MAKE) -C userspace/libraries/melon clean
 	$(MAKE) -C userspace/hello clean
 	$(MAKE) -C userspace/init clean
 	$(MAKE) -C userspace/alloc clean
 	$(MAKE) -C userspace/cxx-test clean
 	$(MAKE) -C userspace/echo clean
+	$(MAKE) -C userspace/cash clean
 
 # run
 run:
