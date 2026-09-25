@@ -10,7 +10,7 @@ cp -v userspace/init/bin/init initrd/bin/init
 cp -v userspace/alloc/bin/alloc initrd/bin/alloc
 cp -v userspace/cxx-test/bin/cxx_test initrd/bin/cxx_test
 cp -v userspace/echo/bin/echo initrd/bin/echo
-cp -v cash initrd/bin/cash
+cp -v userspace/cash/bin/cash initrd/bin/cash
 
 mkdir -p initrd/bin/tinyexpr
 cp -v ports/origins/tinyexpr/repl initrd/bin/tinyexpr/repl
