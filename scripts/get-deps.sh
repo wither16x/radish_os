@@ -24,10 +24,6 @@ clone_repo https://github.com/wither16x/tarwi \
         "$DEPENDENCIES_DIR/tarwi" \
         master
 
-clone_repo https://github.com/wither16x/cash \
-        "$DEPENDENCIES_DIR"/cash \
-        master
-
 # build stuff
 make -C "$DEPENDENCIES_DIR/Limine"
 
