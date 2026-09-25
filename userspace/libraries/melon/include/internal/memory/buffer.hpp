@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../../typing.hpp"
+#include "../../forward.hpp"
 #include "../exceptions/buffer_overflow.hpp"
 #include "../exceptions/out_of_range.hpp"
+#include "../memory/new.hpp"
 
 #include <string.h>
-#include <utility>
-#include <new>
 
 namespace Melon::Memory 
 {
@@ -76,7 +76,7 @@ namespace Melon::Memory
                         if (index >= self.__size)
                                 throw Exceptions::OutOfRange(index, self.__size);
 
-                        new (&self.data[index]) T(std::forward<ARGS>(args)...);
+                        new (&self.data[index]) T(Forward::forward<ARGS>(args)...);
                 }
 
                 void destroy(this Buffer<T> &self, Typing::USize index)

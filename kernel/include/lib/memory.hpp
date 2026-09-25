@@ -27,9 +27,9 @@ namespace Kiwi::Lib
         }
 
         template<typename T>
-        constexpr remove_reference_t<T>&& move(T&& value)
+        constexpr remove_reference_t<T> &&move(T &&value)
         {
-                return static_cast<remove_reference_t<T>&&>(value);
+                return static_cast<remove_reference_t<T> &&>(value);
         }
 
         // NOTE: all the functions below assume that the strings

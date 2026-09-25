@@ -81,4 +81,67 @@ namespace Melon::Typing
                         return self.fn(args...);
                 }
         };
+
+        template<typename T>
+        struct RemoveReference
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveReference<T &>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveReference<T &&>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<const T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<volatile T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatile<const volatile T>
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        struct RemoveConstVolatileRef
+        {
+                using type = typename RemoveConstVolatile<typename RemoveReference<T>::type>::type;
+        };
+
+        template<typename T>
+        struct TypeIdentity
+        {
+                using type = T;
+        };
+
+        template<typename T>
+        using remove_reference_t = typename RemoveReference<T>::type;
+
+        template<typename T>
+        using remove_const_volatile_ref_t = typename RemoveConstVolatileRef<T>::type;
+
+        template<typename T>
+        using type_identity_t = typename TypeIdentity<T>::type;
 } // namespace Melon::Typing

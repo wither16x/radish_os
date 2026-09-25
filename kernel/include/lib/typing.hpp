@@ -193,7 +193,8 @@ namespace Kiwi::Lib
         };
 
         template<typename T>
-        struct TypeIdentity {
+        struct TypeIdentity
+        {
                 using type = T;
         };
 

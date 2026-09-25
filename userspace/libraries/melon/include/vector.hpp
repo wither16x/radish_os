@@ -2,6 +2,7 @@
 
 #include "internal/exceptions/out_of_range.hpp"
 #include "internal/memory/buffer.hpp"
+#include "internal/memory/move.hpp"
 #include "typing.hpp"
 
 /// @brief Contains dynamic vector manipulation features.
@@ -21,12 +22,12 @@ namespace Melon::Vector
                         Memory::Buffer<T> new_buf(new_capacity);
 
                         for (Typing::USize i = 0; i < self.obj_count; ++i) {
-                                new_buf.construct(i, std::move(self.buf[i]));
+                                new_buf.construct(i, Memory::move(self.buf[i]));
                                 self.buf.destroy(i);
                         }
 
                         self.__capacity = new_capacity;
-                        self.buf = std::move(new_buf);
+                        self.buf = Memory::move(new_buf);
                 }
 
         public:
@@ -61,7 +62,7 @@ namespace Melon::Vector
                 /// @brief Move constructor.
                 /// @param other vector to move
                 Vector(Vector<T> &&other)
-                        : buf(std::move(other.buf)), obj_count(other.obj_count), __capacity(other.__capacity)
+                        : buf(Memory::move(other.buf)), obj_count(other.obj_count), __capacity(other.__capacity)
                 {
                         other.__capacity = 0;
                         other.obj_count = 0;
@@ -125,7 +126,7 @@ namespace Melon::Vector
                         if (self.obj_count >= self.__capacity)
                                 self.extend();
 
-                        self.buf.construct(self.obj_count, std::forward<ARGS>(args)...);
+                        self.buf.construct(self.obj_count, Forward::forward<ARGS>(args)...);
                         ++self.obj_count;
                 }
 
@@ -138,7 +139,7 @@ namespace Melon::Vector
                 {
                         if (self.obj_count > 0) {
                                 --self.obj_count;
-                                T obj = std::move(self.buf[self.obj_count]);
+                                T obj = Memory::move(self.buf[self.obj_count]);
                                 self.buf.destroy(self.obj_count);
                                 return obj;
                         } else {
@@ -154,7 +155,7 @@ namespace Melon::Vector
                                 throw Exceptions::OutOfRange(index, self.obj_count);
 
                         for (Typing::USize i = index; i < self.obj_count - 1; i++)
-                                self.buf[i] = std::move(self.buf[i + 1]);
+                                self.buf[i] = Memory::move(self.buf[i + 1]);
 
                         --self.obj_count;
                         self.buf.destroy(self.obj_count);
@@ -281,7 +282,7 @@ namespace Melon::Vector
                 {
                         if (&self != &other) {
                                 self.clear();
-                                self.buf = std::move(other.buf);
+                                self.buf = Memory::move(other.buf);
                                 self.__capacity = other.__capacity;
                                 self.obj_count = other.obj_count;
 
