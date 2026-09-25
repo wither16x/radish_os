@@ -7,6 +7,7 @@
 namespace Melon::Exceptions
 {}
 
+#include "internal/exceptions/exception.hpp"
 #include "internal/exceptions/buffer_overflow.hpp"
 #include "internal/exceptions/out_of_range.hpp"
 #include "internal/exceptions/file_not_found.hpp"

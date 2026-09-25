@@ -5,6 +5,8 @@
 #include "../exceptions/out_of_range.hpp"
 
 #include <string.h>
+#include <utility>
+#include <new>
 
 namespace Melon::Memory 
 {

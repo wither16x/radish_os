@@ -1,13 +1,12 @@
 #pragma once
 
 #include "../../typing.hpp"
-
-#include <exception>
+#include "exception.hpp"
 
 namespace Melon::Exceptions
 {
         /// @brief Thrown when an index is out of range.
-        class OutOfRange : public std::exception
+        class OutOfRange : public Exception
         {
                 Typing::USize index;
                 Typing::USize highest_index;

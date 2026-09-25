@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../string.hpp"
-
-#include <exception>
+#include "exception.hpp"
 
 /// @brief Contains custom exceptions.
 ///
@@ -11,7 +10,7 @@
 namespace Melon::Exceptions
 {
         /// @brief Thrown when a file was not found.
-        class FileNotFound: public std::exception
+        class FileNotFound: public Exception
         {
                 char *path;
 

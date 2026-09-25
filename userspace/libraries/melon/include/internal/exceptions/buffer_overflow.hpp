@@ -1,13 +1,12 @@
 #pragma once
 
 #include "../../typing.hpp"
-
-#include <exception>
+#include "exception.hpp"
 
 namespace Melon::Exceptions
 {
         /// @brief Thrown when a buffer overflows.
-        class BufferOverflow : public std::exception
+        class BufferOverflow : public Exception
         {
                 Typing::USize requested_size;
                 Typing::USize buffer_size;
