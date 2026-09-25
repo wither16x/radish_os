@@ -4,48 +4,48 @@
 
 namespace Kiwi::Fs::Vfs
 {
-        File *VNode::open()
+        File *Node::open()
         {
                 return nullptr;
         }
 
-        Status VNode::mkfile(const Lib::String<> &name)
+        Status Node::mkfile(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return Status::NotImplemented;
         }
 
-        Status VNode::mkdir(const Lib::String<> &name)
+        Status Node::mkdir(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return Status::NotImplemented;
         }
 
-        Status VNode::rm()
+        Status Node::rm()
         {
                 return Status::NotImplemented;
         }
 
-        Status VNode::getdirentn(Lib::usize *buf)
+        Status Node::getdirentn(Lib::usize *buf)
         {
                 static_cast<void>(buf);
                 return Status::NotImplemented;
         }
 
-        Status VNode::readdir(DirEntry *entry, Lib::usize index)
+        Status Node::readdir(DirEntry *entry, Lib::usize index)
         {
                 static_cast<void>(entry);
                 static_cast<void>(index);
                 return Status::NotImplemented;
         }
 
-        Status VNode::getfilesz(Lib::usize *buf)
+        Status Node::getfilesz(Lib::usize *buf)
         {
                 static_cast<void>(buf);
                 return Status::NotImplemented;
         }
 
-        VNode *VNode::lookup(const Lib::String<> &name)
+        Node *Node::lookup(const Lib::String<> &name)
         {
                 static_cast<void>(name);
                 return nullptr;
