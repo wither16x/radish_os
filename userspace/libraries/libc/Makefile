@@ -1,9 +1,8 @@
-# change both macros below if needed
-PREFIX := x86_64-radishos
+PREFIX := \$(HOME)/.local/radish-toolchain/bin/
 LIBC_PREFIX := \$(HOME)/.local
 
 NASM := nasm
-CC := $(PREFIX)-clang
+CC := $(PREFIX)clang
 
 CFLAGS := -ffreestanding \
 	-fno-stack-protector \

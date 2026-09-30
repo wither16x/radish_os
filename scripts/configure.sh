@@ -10,10 +10,10 @@ echo "q - Quit"
 read -p "> " component
 
 if [[ $component == "k" ]]; then
-        opt_cc=${opt_cc:-"x86_64-radishos-clang"}
-        opt_cxx=${opt_cxx:-"x86_64-radishos-clang++"}
+        opt_cc=${opt_cc:-"$HOME/.local/radish-toolchain/bin/clang"}
+        opt_cxx=${opt_cxx:-"$HOME/.local/radish-toolchain/bin/clang++"}
         opt_nasm=${opt_nasm:-"nasm"}
-        opt_linker=${opt_linker:-"x86_64-radishos-clang++"}
+        opt_linker=${opt_linker:-"$HOME/.local/radish-toolchain/bin/clang++"}
         opt_build_mode=${opt_build_mode:-"release"}
         opt_bootloader=${opt_bootloader:-"LIMINE"}
         config_file="kernel/config.mk"

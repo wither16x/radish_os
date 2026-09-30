@@ -1,9 +1,9 @@
-include ../../../prefixes.mk
-
 INSTALL_DIR := $(HOME)/.local
+PREFIX := \$(HOME)/.local/radish-toolchain/bin/
+LIBC_PREFIX := \$(HOME)/.local
 
 NASM := nasm
-CXX := x86_64-radishos-clang++
+CXX := $(PREFIX)clang++
 
 CFLAGS := -fno-lto \
 	-fno-pic \

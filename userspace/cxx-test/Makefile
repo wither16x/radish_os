@@ -1,4 +1,5 @@
-include ../../prefixes.mk
+TOOL_PREFIX := \$(HOME)/.local/radish-toolchain/bin/
+LIBC_PREFIX := \$(HOME)/.local
 
 BUILD := ./build
 BIN := ./bin
@@ -7,8 +8,8 @@ SRC := ./cxx_test.cpp
 OBJ := $(BUILD)/cxx_test.o
 EXEC = $(BIN)/cxx_test
 
-CC := $(TOOL_PREFIX)-clang++
-LD := $(TOOL_PREFIX)-clang++
+CC := $(TOOL_PREFIX)clang++
+LD := $(TOOL_PREFIX)clang++
 
 CFLAGS := -fno-lto \
 	-fno-pic \

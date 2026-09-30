@@ -1,11 +1,12 @@
-include ../../prefixes.mk
+TOOL_PREFIX := \$(HOME)/.local/radish-toolchain/bin/
+LIBC_PREFIX := \$(HOME)/.local
 
 BUILD := build
 BIN := bin
 SRC := cash
 INC := include
 
-CXX := x86_64-radishos-clang++
+CXX := $(TOOL_PREFIX)clang++
 CXXFLAGS := -fno-lto \
 		-fno-pic \
 		-fno-pie \
@@ -15,7 +16,7 @@ CXXFLAGS := -fno-lto \
 		-I$(INC) \
 		-MMD \
 		-MP
-LD := x86_64-radishos-clang++
+LD := $(TOOL_PREFIX)clang++
 LDFLAGS := -static -nostdlib -z max-page-size=0x1000 \
 	-fuse-ld=lld \
 	-L$(LIBC_PREFIX) \
