@@ -1,4 +1,5 @@
 include ../config.mk
+include ../lib.mk
 
 C_FLAGS += -I../$(INCLUDE_DIR)
 CXX_FLAGS += -I../$(INCLUDE_DIR)
@@ -19,18 +20,20 @@ CXX_OBJECTS             = $(patsubst ./%, $(OBJECTS_DIR)/%, $(CXX_FILES:.cpp=.o)
 all: subdirs
 
 subdirs: $(CXX_OBJECTS)
-	$(MAKE) -C $(VFS_DIR)
-	$(MAKE) -C $(USTAR_DIR)
-	$(MAKE) -C $(TMPFS_DIR)
-	$(MAKE) -C $(DEVFS_DIR)
+	@$(MAKE) -C $(VFS_DIR)
+	@$(MAKE) -C $(USTAR_DIR)
+	@$(MAKE) -C $(TMPFS_DIR)
+	@$(MAKE) -C $(DEVFS_DIR)
 
 $(OBJECTS_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(call log_info,Compiling fs/$< to $@...)
+	@$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(OK)
 
 clean:
-	$(MAKE) -C $(VFS_DIR) clean
-	$(MAKE) -C $(USTAR_DIR) clean
-	$(MAKE) -C $(TMPFS_DIR) clean
-	$(MAKE) -C $(DEVFS_DIR) clean
-	rm -rf $(OBJECTS_DIR)
+	@$(MAKE) -C $(VFS_DIR) clean
+	@$(MAKE) -C $(USTAR_DIR) clean
+	@$(MAKE) -C $(TMPFS_DIR) clean
+	@$(MAKE) -C $(DEVFS_DIR) clean
+	@rm -rf $(OBJECTS_DIR)

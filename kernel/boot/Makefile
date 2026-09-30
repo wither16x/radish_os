@@ -12,11 +12,11 @@ BOOTLOADERS_DIR		= $(SOURCE_DIR)/bootloaders
 all: bootloaders
 
 bootloaders: current
-	$(MAKE) -C $(BOOTLOADERS_DIR)
+	@$(MAKE) -C $(BOOTLOADERS_DIR)
 
 current:
 	@mkdir -p $(OBJECTS_DIR)
 
 clean:
-	$(MAKE) -C $(BOOTLOADERS_DIR) clean
-	rm -rf $(OBJECTS_DIR)
+	@$(MAKE) -C $(BOOTLOADERS_DIR) clean
+	@rm -rf $(OBJECTS_DIR)

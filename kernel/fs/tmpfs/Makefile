@@ -1,4 +1,5 @@
 include ../../config.mk
+include ../../lib.mk
 
 C_FLAGS += -I../../$(INCLUDE_DIR)
 CXX_FLAGS += -I../../$(INCLUDE_DIR)
@@ -18,7 +19,9 @@ all: $(CXX_OBJECTS)
 
 $(OBJECTS_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(call log_info,Compiling fs/tmpfs/$< to $@...)
+	@$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(OK)
 
 clean:
-	rm -rf $(OBJECTS_DIR)
+	@rm -rf $(OBJECTS_DIR)

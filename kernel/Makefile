@@ -1,4 +1,7 @@
 include config.mk
+include lib.mk
+
+MAKEFLAGS += --no-print-directory
 
 # Configuration
 SOURCE_DIR			= .
@@ -34,31 +37,44 @@ all: $(TARGET)
 
 $(TARGET): nolink
 	@mkdir -p $(BINARIES_DIR)
-	$(LINKER) $(LINKER_FLAGS) -o $@ $(OBJECTS)
+	$(call log_info,Linking $(OBJECTS) to $@...)
+	@$(LINKER) $(LINKER_FLAGS) -o $@ $(OBJECTS)
+	$(OK)
 
 nolink:
-	$(MAKE) -C $(BOOT_SUBDIR)
-	$(MAKE) -C $(CPU_SUBDIR)
-	$(MAKE) -C $(DRIVERS_SUBDIR)
-	$(MAKE) -C $(FS_SUBDIR)
-	$(MAKE) -C $(LIB_SUBDIR)
-	$(MAKE) -C $(MEM_SUBDIR)
-	$(MAKE) -C $(PROC_SUBDIR)
-	$(MAKE) -C $(BASE_SUBDIR)
+	$(call log_note,Build mode: $(BUILD_MODE))
+	$(call log_note,Toolchain:)
+	$(call log_note,* C compiler: $(C_COMPILER))
+	$(call log_note,* C++ compiler: $(CXX_COMPILER))
+	$(call log_note,* Linker: $(LINKER))
+	$(call log_note,* NASM: $(NASM))
+
+	@$(MAKE) -C $(BOOT_SUBDIR)
+	@$(MAKE) -C $(CPU_SUBDIR)
+	@$(MAKE) -C $(DRIVERS_SUBDIR)
+	@$(MAKE) -C $(FS_SUBDIR)
+	@$(MAKE) -C $(LIB_SUBDIR)
+	@$(MAKE) -C $(MEM_SUBDIR)
+	@$(MAKE) -C $(PROC_SUBDIR)
+	@$(MAKE) -C $(BASE_SUBDIR)
 ifeq ($(BUILD_MODE),test)
-	$(MAKE) -C $(TEST_DIR)
+	@$(MAKE) -C $(TEST_DIR)
 endif
 
 clean:
-	$(MAKE) -C $(BOOT_SUBDIR) clean
-	$(MAKE) -C $(CPU_SUBDIR) clean
-	$(MAKE) -C $(DRIVERS_SUBDIR) clean
-	$(MAKE) -C $(FS_SUBDIR) clean
-	$(MAKE) -C $(LIB_SUBDIR) clean
-	$(MAKE) -C $(MEM_SUBDIR) clean
-	$(MAKE) -C $(PROC_SUBDIR) clean
-	$(MAKE) -C $(BASE_SUBDIR) clean
+	$(call log_info,Cleaning build...)
+
+	@$(MAKE) -C $(BOOT_SUBDIR) clean
+	@$(MAKE) -C $(CPU_SUBDIR) clean
+	@$(MAKE) -C $(DRIVERS_SUBDIR) clean
+	@$(MAKE) -C $(FS_SUBDIR) clean
+	@$(MAKE) -C $(LIB_SUBDIR) clean
+	@$(MAKE) -C $(MEM_SUBDIR) clean
+	@$(MAKE) -C $(PROC_SUBDIR) clean
+	@$(MAKE) -C $(BASE_SUBDIR) clean
 ifeq ($(BUILD_MODE),test)
-	$(MAKE) -C $(TEST_DIR) clean
+	@$(MAKE) -C $(TEST_DIR) clean
 endif
-	rm -rf $(BINARIES_DIR)
+	@rm -rf $(BINARIES_DIR)
+
+	$(OK)

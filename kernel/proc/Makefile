@@ -26,12 +26,14 @@ CXX_OBJECTS             = $(patsubst ./%, $(OBJECTS_DIR)/%, $(CXX_FILES:.cpp=.o)
 all: asm
 
 asm: $(CXX_OBJECTS)
-	$(MAKE) -C $(ASM_DIR)
+	@$(MAKE) -C $(ASM_DIR)
 
 $(OBJECTS_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(call log_info,Compiling proc/$< to $@...)
+	@$(CXX_COMPILER) $(CXX_FLAGS) -c $< -o $@
+	$(OK)
 
 clean:
-	$(MAKE) -C $(ASM_DIR) clean
-	rm -rf $(OBJECTS_DIR)
+	@$(MAKE) -C $(ASM_DIR) clean
+	@rm -rf $(OBJECTS_DIR)

@@ -17,7 +17,9 @@ all: $(ASM_OBJECTS)
 
 $(OBJECTS_DIR)/%.o: %.asm
 	@mkdir -p $(dir $@)
-	$(NASM) $(NASM_FLAGS) $< -o $@
+	$(call log_info,Assembling proc/asm/$< to $@...)
+	@$(NASM) $(NASM_FLAGS) $< -o $@
+	$(OK)
 
 clean:
-	rm -rf $(OBJECTS_DIR)
+	@rm -rf $(OBJECTS_DIR)
