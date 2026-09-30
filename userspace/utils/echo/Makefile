@@ -4,26 +4,26 @@ LIBC_PREFIX := \$(HOME)/.local
 BUILD := ./build
 BIN := ./bin
 
-SRC := ./main.c
-OBJ := $(BUILD)/alloc.o
-EXEC = $(BIN)/alloc
+SRC := ./main.cpp
+OBJ := $(BUILD)/echo.o
+EXEC = $(BIN)/echo
 
-CC := $(TOOL_PREFIX)clang
-LD := $(TOOL_PREFIX)clang
+CC := $(TOOL_PREFIX)clang++
+LD := $(TOOL_PREFIX)clang++
 
 CFLAGS := --target=x86_64-unknown-radish -fno-lto \
 	-fno-pic \
 	-fno-pie \
 	-Wall \
 	-Wextra \
-	-std=c99
+	-std=c++23
 
 LDFLAGS := -static \
 	-nostdlib \
-	-Wl,-Ttext=0x400000 \
 	-z max-page-size=0x1000 \
 	-fuse-ld=lld \
-	-L$(LIBC_PREFIX)
+	-L$(LIBC_PREFIX) \
+	-T ../../linker.lds
 
 .PHONY: all clean
 
@@ -31,7 +31,10 @@ all: $(EXEC)
 
 $(EXEC): $(OBJ)
 	@mkdir -p $(BIN)
-	$(LD) $(LDFLAGS) $(OBJ) -lc -o $(EXEC)
+	$(LD) $(LDFLAGS) $(OBJ) \
+		-Wl,--start-group -lc++ -lc++abi -lunwind -lc -Wl,--end-group \
+		-lclang_rt.builtins-x86_64 -lmelon \
+		-o $(EXEC)
 
 $(OBJ): $(SRC)
 	@mkdir -p $(BUILD)
