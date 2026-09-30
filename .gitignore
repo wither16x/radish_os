@@ -34,3 +34,6 @@
 
 # symlinks
 /cash
+
+/build-clang/
+/build/
