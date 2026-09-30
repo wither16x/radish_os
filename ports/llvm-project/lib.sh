@@ -4,7 +4,7 @@ set -e
 
 ninja -C build clean
 
-cmake -G Ninja -S ports/origins/llvm-project/runtimes -B build \
+cmake -G Ninja -S ports/origins/llvm-project/runtimes -B .llvm-build-libs \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_SYSTEM_NAME=Generic \
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \

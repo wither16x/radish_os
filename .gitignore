@@ -35,5 +35,5 @@
 # symlinks
 /cash
 
-/build-clang/
-/build/
+# build llvm components
+/llvm-build*/

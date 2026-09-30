@@ -2,7 +2,7 @@
 
 set -e
 
-cmake -G Ninja -S ports/origins/llvm-project/llvm -B build-clang \
+cmake -G Ninja -S ports/origins/llvm-project/llvm -B .llvm-build-clang \
         -DCMAKE_BUILD_TYPE=Release \
         -DLLVM_ENABLE_PROJECTS="clang;lld" \
         -DLLVM_TARGETS_TO_BUILD=X86 \
