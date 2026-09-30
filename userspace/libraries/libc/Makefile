@@ -4,7 +4,7 @@ LIBC_PREFIX := \$(HOME)/.local
 NASM := nasm
 CC := $(PREFIX)clang
 
-CFLAGS := -ffreestanding \
+CFLAGS := --target=x86_64-unknown-radish -ffreestanding \
 	-fno-stack-protector \
 	-fno-stack-check \
 	-fno-lto \

@@ -11,7 +11,7 @@ EXEC = $(BIN)/hello
 CC := $(TOOL_PREFIX)clang
 LD := $(TOOL_PREFIX)clang
 
-CFLAGS := -fno-lto \
+CFLAGS := --target=x86_64-unknown-radish -fno-lto \
 	-fno-pic \
 	-fno-pie \
 	-Wall \

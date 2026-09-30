@@ -5,7 +5,7 @@ LIBC_PREFIX := \$(HOME)/.local
 NASM := nasm
 CXX := $(PREFIX)clang++
 
-CFLAGS := -fno-lto \
+CFLAGS := --target=x86_64-unknown-radish -fno-lto \
 	-fno-pic \
 	-fno-pie \
 	-Wall \

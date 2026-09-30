@@ -7,7 +7,7 @@ SRC := cash
 INC := include
 
 CXX := $(TOOL_PREFIX)clang++
-CXXFLAGS := -fno-lto \
+CXXFLAGS := --target=x86_64-unknown-radish  -fno-lto \
 		-fno-pic \
 		-fno-pie \
 		-std=c++23 \
