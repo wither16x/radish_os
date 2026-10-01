@@ -14,7 +14,7 @@ namespace Kiwi::Lib
         };
 
         template<typename T, typename E>
-        class Result
+        class [[nodiscard("Handle the results!")]] Result
         {
                 union
                 {
@@ -108,7 +108,7 @@ namespace Kiwi::Lib
         };
 
         template<typename T, typename E>
-        class Result<T&, E>
+        class [[nodiscard("Handle the results!")]] Result<T&, E>
         {
                 T *_value_ptr;
                 E _error;
