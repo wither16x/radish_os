@@ -9,7 +9,7 @@
 #include <mem/vmm.hpp>
 #include <mem/pml4t.hpp>
 #include <mem/page.hpp>
-#include <panic.hpp>
+#include <panic/panic.hpp>
 
 namespace Kiwi::Mem::Allocators
 {
@@ -109,7 +109,7 @@ namespace Kiwi::Mem::Allocators
 
                                 self.curr_block->next = new_block;
                                 if (not self.curr_block->next)
-                                        panic("new block is null");
+                                        Panic::panic("new block is null");
                                 self.curr_block->bytes = base_size;
                         }
                 }
@@ -178,7 +178,7 @@ namespace Kiwi::Mem::Allocators
                                 if (!block)
                                         return nullptr; // out of memory
                         }
-                                
+
                         this->curr_block = block;
                         this->splitBlock(n);
                         block->free = false;
@@ -191,7 +191,7 @@ namespace Kiwi::Mem::Allocators
                         BlockHeader *hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<Lib::u8 *>(n) - sizeof(BlockHeader));
 
                         if (hdr->free)
-                                panic("double free");
+                                Panic::panic("double free");
 
                         hdr->free = true;
 

@@ -5,18 +5,15 @@
 #include <lib/logging.hpp>
 #include <cpu/cpu.hpp>
 #include <proc/scheduler.hpp>
+#include <panic/unwind.hpp>
 
-namespace Kiwi
+namespace Kiwi::Panic
 {
         constexpr Lib::usize PANIC_MESSAGE_SIZE = 512;
 
-        void *getReturnAddress(int i);
-        const char *lookupSymbol(Lib::uptr addr);
-        void dumpStackTrace(Lib::u8 depth);
-
-        /// This function should be called only if an unrecoverable error happened.
-        /// If there is a process running, then this process is immediately aborted.
-        /// Otherwise, the interrupts are canceled and the CPU is idling forever.
+        /* This function should be called only if an unrecoverable error happened.
+        * If there is a process running, then this process is immediately aborted.
+        * Otherwise, the interrupts are canceled and the CPU is idling forever. */
         template<typename... ARGS>
         void panic(Lib::String<PANIC_MESSAGE_SIZE> fmt, ARGS &&...args)
         {
@@ -25,12 +22,12 @@ namespace Kiwi
 
                 kcontext().logger.setContext("panic handler");
 
-                Lib::println<50>("\r\n==================== KERNEL PANIC ====================");
+                Lib::println<60>("\r\n==================== KERNEL PANIC ====================");
                 Lib::String<PANIC_MESSAGE_SIZE> msg = formatString<PANIC_MESSAGE_SIZE>(fmt, static_cast<ARGS &&>(args)...);
                 println<PANIC_MESSAGE_SIZE>("{}", msg);
 
                 Lib::println<50>("Stack trace:");
-                dumpStackTrace(15);
+                dumpStackTrace();
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
                 if (not curr_proc) {
@@ -56,11 +53,11 @@ namespace Kiwi
 
                 kcontext().logger.setContext("panic handler");
 
-                Lib::println<50>("\r\n==================== KERNEL PANIC ====================");
+                Lib::println<60>("\r\n==================== KERNEL PANIC ====================");
                 println<PANIC_MESSAGE_SIZE>("{}", fmt);
 
                 Lib::println<50>("Stack trace:");
-                dumpStackTrace(15);
+                dumpStackTrace();
 
                 Proc::Process *curr_proc = Proc::Scheduler::getCurrentProcess();
                 if (not curr_proc) {
@@ -77,4 +74,4 @@ namespace Kiwi
                 Proc::Scheduler::unlock();
                 Cpu::enableInterrupts();
         }
-} // namespace Kiwi
+} // namespace Kiwi::Panic

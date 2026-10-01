@@ -30,15 +30,15 @@ namespace Kiwi::Mem::Vmm
                         Lib::u64 virt_addr   = executable_virt;
 
                         for (Lib::u64 i = 0; i < ksize; i++) {
-                                pml4t->mapPage(virt_addr, phys_addr, PageFlag::ReadWriteUser);
+                                pml4t->mapPage(virt_addr, phys_addr, PageFlag::ReadWrite);
                                 phys_addr += PAGE_SIZE;
                                 virt_addr += PAGE_SIZE;
                         }
 
                         Lib::u64 stack_pages = KernelContext::STACK_SIZE / PAGE_SIZE;
                         virt_addr = KernelContext::STACK_BOTTOM;
-                        
-                        for (Lib::usize i = 0; i < stack_pages; i++) {
+
+			for (Lib::usize i = 0; i < stack_pages; i++) {
                                 pml4t->mapPage(virt_addr, Pmm::allocateFrame(), PageFlag::ReadWrite | PageFlag::NoExec);
                                 virt_addr += PAGE_SIZE;
                         }
@@ -60,9 +60,9 @@ namespace Kiwi::Mem::Vmm
                                         Lib::u64 section_size = pageDivUp(memmap_info.entries[index].length);
                                         Lib::u64 phys_addr = memmap_info.entries[index].base;
                                         Lib::u64 virt_addr = memmap_info.entries[index].base + hhdm;
-                                        
-                                        for (Lib::u64 i = 0; i < section_size; i++) {
-                                                pml4t->mapPage(virt_addr, phys_addr, PageFlag::ReadWriteUser);
+
+					for (Lib::u64 i = 0; i < section_size; i++) {
+                                                pml4t->mapPage(virt_addr, phys_addr, PageFlag::ReadWrite);
                                                 virt_addr += PAGE_SIZE;
                                                 phys_addr += PAGE_SIZE;
                                         }

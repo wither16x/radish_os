@@ -17,6 +17,7 @@ LIB_SUBDIR			= $(SOURCE_DIR)/lib
 MEM_SUBDIR			= $(SOURCE_DIR)/mem
 PROC_SUBDIR			= $(SOURCE_DIR)/proc
 BASE_SUBDIR			= $(SOURCE_DIR)/base
+PANIC_SUBDIR			= $(SOURCE_DIR)/panic
 
 # Target executable
 TARGET				= $(BINARIES_DIR)/kernel
@@ -49,6 +50,7 @@ nolink:
 	$(call log_note,* Linker: $(LINKER))
 	$(call log_note,* NASM: $(NASM))
 
+	@$(MAKE) -C $(PANIC_SUBDIR)
 	@$(MAKE) -C $(BOOT_SUBDIR)
 	@$(MAKE) -C $(CPU_SUBDIR)
 	@$(MAKE) -C $(DRIVERS_SUBDIR)
@@ -64,6 +66,7 @@ endif
 clean:
 	$(call log_info,Cleaning build...)
 
+	@$(MAKE) -C $(PANIC_SUBDIR) clean
 	@$(MAKE) -C $(BOOT_SUBDIR) clean
 	@$(MAKE) -C $(CPU_SUBDIR) clean
 	@$(MAKE) -C $(DRIVERS_SUBDIR) clean

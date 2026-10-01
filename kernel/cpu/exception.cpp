@@ -1,7 +1,7 @@
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
 #include <lib/print.hpp>
-#include <panic.hpp>
+#include <panic/panic.hpp>
 
 namespace Kiwi::Cpu
 {
@@ -42,7 +42,7 @@ namespace Kiwi::Cpu
         /// available information.
         extern "C" void exception_handler(CpuFrame *f)
         {
-                panic(
+                Panic::panic(
                         "CPU exception #{} with error code {}\r\n"
                         "RAX=0x{} RBX=0x{} RCX=0x{} RDX=0x{}\r\n"
                         "RDI=0x{} RSI=0x{}\r\n"

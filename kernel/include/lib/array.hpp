@@ -3,7 +3,7 @@
 #include <lib/typing.hpp>
 #include <lib/forward.hpp>
 #include <lib/alloc.hpp>
-#include <panic_simple.hpp>
+#include <panic/panic_simple.hpp>
 
 namespace Kiwi::Lib
 {
@@ -22,7 +22,7 @@ namespace Kiwi::Lib
                 {
                         for (usize i = 0; i < LENGTH; i++) {
                                 if (not this->construct(i, objects[i]))
-                                        panic_simple("failed to construct object");
+                                        Panic::panic_simple("failed to construct object");
                         }
                 }
 
@@ -55,7 +55,7 @@ namespace Kiwi::Lib
                 {
                         for (usize i = 0; i < LENGTH; i++) {
                                 if (not self.destroy(i))
-                                        panic_simple("failed to destroy object");
+                                        Panic::panic_simple("failed to destroy object");
                         }
                 }
 
@@ -134,7 +134,7 @@ namespace Kiwi::Lib
                 T &operator [](this Array<T, LENGTH> &self, usize index)
                 {
                         if (index >= LENGTH)
-                                panic_simple("index out of range");
+                                Panic::panic_simple("index out of range");
 
                         return self.data[index];
                 }
@@ -142,9 +142,9 @@ namespace Kiwi::Lib
                 const T &operator [](this const Array<T, LENGTH> &self, usize index)
                 {
                         if (index >= LENGTH)
-                                panic_simple("index out of range");
+                                Panic::panic_simple("index out of range");
 
-                        return self.data[index]; 
+                        return self.data[index];
                 }
         };
 } // namespace Kiwi::Lib

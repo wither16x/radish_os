@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/typing.hpp>
-#include <panic.hpp>
 
 namespace Kiwi::Lib
 {

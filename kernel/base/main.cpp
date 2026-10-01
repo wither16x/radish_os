@@ -1,5 +1,5 @@
 #include <kernel.hpp>
-#include <panic.hpp>
+#include <panic/panic.hpp>
 #include <boot/bootloaders/limine.hpp>
 #include <boot/requests.hpp>
 #include <cpu/assembly.hpp>
@@ -96,7 +96,7 @@ namespace Kiwi
         /// Idle.
         void kernelHang()
         {
-                panic_simple("nothing to do");
+                Panic::panic_simple("nothing to do");
         }
 
         /// Kernel entry point.
@@ -105,7 +105,7 @@ namespace Kiwi
                 kcontext().init();
 
                 if (not Drivers::Serial::initPort(Drivers::Serial::Port::SERIAL_COM1))
-                        panic_simple("no display device"); // so the message cannot be printed lol
+                        Panic::panic_simple("no display device"); // so the message cannot be printed lol
 
                 kcontext().logger.setContext("kernel");
 
@@ -156,14 +156,14 @@ namespace Kiwi
                 Cpu::enableSse2();
                 kcontext().logger.ok("enabled sse2");
 
-                #ifdef KIWI_BUILD_MODE_TEST
-                        Test::testLib();
-                #endif
+        #ifdef KIWI_BUILD_MODE_TEST
+                Test::testLib();
+        #endif
 
                 initConsole();
 
-                Proc::spawn("I:/bin/init");
-                
+        	Proc::spawn("I:/bin/init");
+
                 unmountInitrd();
                 Fs::Vfs::unmount('D');
 

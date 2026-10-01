@@ -16,7 +16,7 @@ namespace Kiwi::Test
                 {
                         Lib::String name = "Joe";
                         Lib::String s = Lib::formatString("Hello, my name is {}!", name);
-                
+
                         Lib::String<30> name2 = "Henry";
                         Lib::String<30> s2 = Lib::formatString<30>("And mine is {}!", name2);
 

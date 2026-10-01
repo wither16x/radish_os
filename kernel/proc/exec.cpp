@@ -11,7 +11,6 @@
 #include <proc/exec.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
-#include <panic.hpp>
 
 namespace Kiwi::Proc
 {

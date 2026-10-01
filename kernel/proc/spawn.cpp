@@ -9,7 +9,7 @@
 #include <lib/logging.hpp>
 #include <cpu/cpu.hpp>
 #include <cpu/userspace.hpp>
-#include <panic.hpp>
+#include <panic/panic.hpp>
 
 namespace Kiwi::Proc
 {
@@ -55,7 +55,7 @@ namespace Kiwi::Proc
                 p->loadPml4t();
 
                 if (not p->getEntry())
-                        panic("failed to spawn process: null entry point");
+                        Panic::panic("failed to spawn process: null entry point");
 
                 Cpu::enter_userspace(
                         reinterpret_cast<void *>(p->getStackFrame()->rip),

@@ -3,7 +3,7 @@
 #include <mem/allocators/allocator.hpp>
 #include <lib/bitmap.hpp>
 #include <lib/typing.hpp>
-#include <panic.hpp>
+#include <panic/panic.hpp>
 
 namespace Kiwi::Mem::Allocators
 {
@@ -35,7 +35,7 @@ namespace Kiwi::Mem::Allocators
                                 } while (this->last_allocated != start);
 
                                 if (not found)
-                                        panic("out of memory");
+                                        Panic::panic("out of memory");
 
                                 this->bitmap.set(this->last_allocated);
                         }
@@ -47,7 +47,7 @@ namespace Kiwi::Mem::Allocators
                 void free(T n) override
                 {
                         if (not this->bitmap.test(n))
-                                panic("double free");
+                                Panic::panic("double free");
 
                         this->bitmap.clear(n);
                 }

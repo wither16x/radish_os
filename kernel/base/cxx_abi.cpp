@@ -1,9 +1,9 @@
-#include <panic_simple.hpp>
+#include <panic/panic_simple.hpp>
 
 using namespace Kiwi;
 
-// The functions and variables below are required by the
-// Itanium C++ ABI.
+/* The functions and variables below are required by the
+* Itanium C++ ABI. */
 
 extern "C"
 {
@@ -14,7 +14,7 @@ extern "C"
 
         void __cxa_pure_virtual()
         {
-                panic_simple("call to pure virtual method");
+                Panic::panic_simple("call to pure virtual method");
         }
 
         int atexit()

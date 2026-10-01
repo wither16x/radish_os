@@ -15,7 +15,7 @@ namespace Kiwi::Mem
 
                 Lib::uptr frame = Pmm::allocateFrame();
                 self.raw_pml4t = reinterpret_cast<PageTable *>(frame + hhdm_offset);
-                Lib::memset(self.raw_pml4t, 0, PAGE_SIZE);     
+                Lib::memset(self.raw_pml4t, 0, PAGE_SIZE);
         }
 
         void PML4T::init(this PML4T &self, const PML4T &parent)

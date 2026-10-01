@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Kiwi
+namespace Kiwi::Panic
 {
         void panic_simple(const char *msg);
-} // namespace Kiwi
+} // namespace Kiwi::Panic
