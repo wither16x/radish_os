@@ -3,7 +3,7 @@
 #include <Tarwi.hpp>
 #include <TarwiGlobals.hpp>
 
-#include <Internal/Memory/CString.hpp>
+#include <internal/memory/cstring.hpp>
 
 namespace Melon::Test
 {

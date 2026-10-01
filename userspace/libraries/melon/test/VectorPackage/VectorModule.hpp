@@ -3,8 +3,8 @@
 #include <Tarwi.hpp>
 #include <TarwiGlobals.hpp>
 
-#include <Vector.hpp>
-#include <Typing.hpp>
+#include <vector.hpp>
+#include <typing.hpp>
 
 namespace Melon::Test
 {
@@ -15,7 +15,7 @@ namespace Melon::Test
                 TARWI_UNIT(unitCheckRaii)
                 {
                         Vector::Vector<Typing::Uint8> vec;
-                        
+
                         TARWI_EXPECT(
                                 vec.length() == 0
                                 and vec.capacity() == 1

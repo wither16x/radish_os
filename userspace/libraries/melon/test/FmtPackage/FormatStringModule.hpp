@@ -3,8 +3,8 @@
 #include <Tarwi.hpp>
 #include <TarwiGlobals.hpp>
 
-#include <String.hpp>
-#include <Fmt.hpp>
+#include <string.hpp>
+#include <fmt.hpp>
 #include <climits>
 
 namespace Melon::Test

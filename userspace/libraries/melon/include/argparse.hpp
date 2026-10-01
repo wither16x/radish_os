@@ -12,12 +12,15 @@ namespace Melon::Argparse
                 Vector::Vector<String::String> names;
                 String::String value;
                 Typing::Function<void(void)> callback;
+
+		Argument() = default;
         };
 
         class ArgumentParser
         {
                 Vector::Vector<String::String> raw_arguments;
                 Vector::Vector<Argument> arguments;
+		Argument default_arg;
                 String::String description;
 
         public:
@@ -27,6 +30,7 @@ namespace Melon::Argparse
                 void setArguments(this ArgumentParser &self, int argc, char **argv);
                 void run(this ArgumentParser &self);
                 void addArgument(this ArgumentParser &self, const Vector::Vector<String::String> &flags, const Typing::Function<void(void)> &callback);
+		void setDefaultArgument(this ArgumentParser &self, const Typing::Function<void(void)> &callback);
 
                 const Vector::Vector<String::String> &getArguments(this const ArgumentParser &self);
         };

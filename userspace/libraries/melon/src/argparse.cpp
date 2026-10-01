@@ -30,14 +30,18 @@ namespace Melon::Argparse
 
         void ArgumentParser::addArgument(this ArgumentParser &self, const Vector::Vector<String::String> &flags, const Typing::Function<void(void)> &callback)
         {
-                Argument arg = {
-                        .names = flags,
-                        .value = "",
-                        .callback = callback
-                };
-
+                Argument arg;
+		arg.names = flags;
+		arg.value = "";
+		arg.callback = callback;
                 self.arguments.pushBack(arg);
         }
+
+	void ArgumentParser::setDefaultArgument(this ArgumentParser &self, const Typing::Function<void ()> &callback)
+	{
+		self.default_arg.value = "";
+		self.default_arg.callback = callback;
+	}
 
         const Vector::Vector<String::String> &ArgumentParser::getArguments(this const ArgumentParser &self)
         {

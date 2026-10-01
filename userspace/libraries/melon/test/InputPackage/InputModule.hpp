@@ -3,7 +3,7 @@
 #include <Tarwi.hpp>
 #include <TarwiGlobals.hpp>
 
-#include <Input.hpp>
+#include <input.hpp>
 
 namespace Melon::Test
 {

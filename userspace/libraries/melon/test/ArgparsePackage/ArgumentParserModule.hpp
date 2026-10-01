@@ -28,7 +28,7 @@ namespace Melon::Test
                         strcpy(argv[0], "--flag");
                         strcpy(argv[1], "value");
                         int argc = 2;
-                
+
                         Argparse::ArgumentParser parser;
                         parser.setArguments(argc, argv);
 
@@ -55,7 +55,7 @@ namespace Melon::Test
                         strcpy(argv[0], "--flag");
                         strcpy(argv[1], "value");
                         int argc = 1;
-                
+
                         Argparse::ArgumentParser parser("Test parser.");
                         parser.addArgument({{"-f", "--flag"}}, callback0);
                         parser.setArguments(argc, argv);
@@ -64,7 +64,7 @@ namespace Melon::Test
                         delete[] argv[0];
                         delete[] argv[1];
                         delete[] argv;
-                        
+
                         TARWI_EXPECT(true);
                 }
 

@@ -56,6 +56,8 @@ namespace Melon::Typing
                 R (*fn)();
 
         public:
+		Function() = default;
+
                 Function(R (*f)())
                         : fn(f)
                 {}
@@ -70,8 +72,10 @@ namespace Melon::Typing
         class Function<R(A...)>
         {
                 R (*fn)(A...);
-        
-        public:
+
+	public:
+		Function() = default;
+
                 Function(R (*f)(A...))
                         : fn(f)
                 {}

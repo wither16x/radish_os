@@ -6,6 +6,6 @@ make clean
 make
 
 make -C test clean
-make -C Test
+make -C test
 
 ./test/tuild/test

@@ -4,8 +4,8 @@
 #include <Tarwi.hpp>
 #include <TarwiGlobals.hpp>
 
-#include <Internal/Memory/Buffer.hpp>
-#include <Exceptions.hpp>
+#include <internal/memory/buffer.hpp>
+#include <exceptions.hpp>
 
 namespace Melon::Test
 {

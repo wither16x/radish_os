@@ -1,6 +1,6 @@
 BUILD := build
 
-CXX := x86_64-radishos-clang++
+CXX := \$(HOME)/.local/radish-toolchain/bin/clang++
 CXXFLAGS := -fno-lto -fno-pic -fno-pie -std=c++23 -Wall -Wextra -I../include -I. -g
 
 SRCS := $(wildcard *.cpp)

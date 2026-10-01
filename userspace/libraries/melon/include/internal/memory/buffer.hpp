@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-namespace Melon::Memory 
+namespace Melon::Memory
 {
         /// @brief Container for raw memory.
         ///
