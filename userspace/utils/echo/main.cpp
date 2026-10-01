@@ -1,37 +1,45 @@
 #include <melon/print.hpp>
+#include <melon/command_line.hpp>
 
 using namespace Melon;
 
 int main(int argc, char **argv)
 {
-        if (argc < 2) {
-                Print::println("");
-                return 0;
-        }
+	CommandLine::Cli interface("echo -- display a message");
+	interface.setUsage("echo [arguments]");
+	interface.addOption({{"-h", "--help"}}, "display a help message");
+	interface.addOption({{"-n", "--no-newline"}}, "do not print a newline at the end");
+	interface.setArgs(argc, argv);
+
+	if (not interface.hasArguments()) {
+		Print::println("");
+		return 0;
+	}
+
+	const auto &args = interface.arguments();
+
+	for (const auto &arg : args) {
+		if (interface.tryHelp(arg))
+			return 0;
+	}
 
 	bool print_newline = true;
+	bool first = true;
 
-        for (int arg = 1; arg < argc; arg++) {
-		if (strcmp(argv[arg], "-h") == 0 or strcmp(argv[arg], "--help") == 0) {
-			Print::print(
-				"echo -- display a message\n\n"
-				"Usage: echo [arguments]\n"
-				"Options:\n"
-				"\t--help, -h: display this message\n"
-				"\t--no-newline, -n: do not print a newline at the end"
-			);
-		} else if (strcmp(argv[arg], "-n") == 0 or strcmp(argv[arg], "--no-newline") == 0) {
+	for (const auto &arg : args) {
+		if (arg == "-n" or arg == "--no-newline") {
 			print_newline = false;
-		} else {
-			Print::print("{}", argv[arg]);
-
-			if (arg < argc - 1)
-				Print::print(" ");
+			continue;
 		}
-        }
+
+		if (not first)
+			Print::print(" ");
+		Print::print("{}", arg);
+		first = false;
+	}
 
 	if (print_newline)
-        	Print::println("");
+		Print::println("");
 
-        return 0;
+	return 0;
 }
