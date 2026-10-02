@@ -1,6 +1,6 @@
-%define KERNEL_DS               0x10
-
 [bits 64]
+
+%include "segments.inc"
 
 section .text
 extern syscallHandler
@@ -37,7 +37,7 @@ syscall_common:
         mov bx, ds
         push rbx
 
-        mov bx, KERNEL_DS
+        mov bx, DATA_SEGMENT
         mov ds, bx
         mov es, bx
         mov fs, bx

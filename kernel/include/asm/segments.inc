@@ -1,0 +1,8 @@
+[bits 64]
+
+CODE_SEGMENT:		equ 0x8
+DATA_SEGMENT:		equ 0x10
+USER_STACK_SEGMENT:	equ 0x23
+USER_CODE_SEGMENT:	equ 0x1b
+
+TSS_SELECTOR:		equ 5 << 3

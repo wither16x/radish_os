@@ -1,7 +1,8 @@
 %define USER_CS                 0x1b
-%define USER_SS                 0x23
 
 [bits 64]
+
+%include "segments.inc"
 
 section .text
 global enter_userspace
@@ -13,7 +14,7 @@ enter_userspace:
 
         xor rax, rax
 
-        mov ax, USER_SS
+        mov ax, USER_STACK_SEGMENT
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -25,7 +26,7 @@ enter_userspace:
         pop rax
         or rax, 0x200
         push rax
-        push USER_CS
+        push USER_CODE_SEGMENT
         push rdi
 
         mov rbp, rsi

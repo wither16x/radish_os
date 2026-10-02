@@ -54,7 +54,7 @@ if [[ $component == "k" ]]; then
         echo "endif" >> $config_file
         echo "C_FLAGS = \$(COMMON_FLAGS) -std=c23 -fno-builtin -fvisibility=hidden" >> $config_file
         echo "CXX_FLAGS	= \$(COMMON_FLAGS) -std=c++23 -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-builtin -fvisibility=hidden -fno-sized-deallocation" >> $config_file
-        echo "NASM_FLAGS = -f elf64" >> $config_file
+        echo "NASM_FLAGS =  -I../../include/asm/ -f elf64" >> $config_file
         echo "LINKER_FLAGS = -static -nostdlib -Wl,--build-id=none -z max-page-size=0x1000 -T kernel.lds -fuse-ld=lld" >> $config_file
         echo "-> Wrote configuration to $config_file"
 elif [[ $component == "q" ]]; then

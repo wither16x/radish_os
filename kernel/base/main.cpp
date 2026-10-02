@@ -27,7 +27,7 @@
 #include <proc/scheduler.hpp>
 
 #ifdef KIWI_BUILD_MODE_TEST
-        #include <test.hpp>
+#include <test.hpp>
 #endif
 
 extern void (*__init_array[])();
@@ -146,7 +146,7 @@ namespace Kiwi
 
                 Drivers::Keyboard::init();
 
-                const Boot::ModuleRequest &req_module = kcontext().bootloader.request<Boot::ModuleRequest>();
+                auto &req_module = kcontext().bootloader.request<Boot::ModuleRequest>();
                 mountInitrd(req_module);
 
                 Drivers::Framebuffer::init();

@@ -1,7 +1,6 @@
-%define CODE_SEGMENT            0x08
-%define DATA_SEGMENT            0x10
-
 [bits 64]
+
+%include "segments.inc"
 
 section .text
 global __gdt_flush
@@ -12,7 +11,7 @@ __gdt_flush:
         push CODE_SEGMENT
         lea rax, [rel reload_cs]
         push rax
-        
+
         retfq
 
 ;; Reload the code segment.
