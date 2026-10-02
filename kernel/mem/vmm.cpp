@@ -23,8 +23,8 @@ namespace Kiwi::Mem::Vmm
                 /// Map the kernel in memory.
                 void map_kernel(PML4T *pml4t)
                 {
-                        Lib::u64 kstart      = reinterpret_cast<Lib::u64>(*&_lds_kernel_start);
-                        Lib::u64 kend        = reinterpret_cast<Lib::u64>(*&_lds_kernel_end);
+                        auto kstart      = reinterpret_cast<Lib::u64>(*&_lds_kernel_start);
+                        auto kend        = reinterpret_cast<Lib::u64>(*&_lds_kernel_end);
                         Lib::u64 ksize       = pageDivUp(kend - kstart);
                         Lib::u64 phys_addr   = executable_phys;
                         Lib::u64 virt_addr   = executable_virt;
@@ -75,7 +75,7 @@ namespace Kiwi::Mem::Vmm
         {
                 hhdm = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
 
-                const Boot::ExecutableAddressRequest &req_executable_address = kcontext().bootloader.request<Boot::ExecutableAddressRequest>();
+                auto &req_executable_address = kcontext().bootloader.request<Boot::ExecutableAddressRequest>();
                 executable_phys = req_executable_address.phys_base;
                 executable_virt = req_executable_address.virt_base;
 

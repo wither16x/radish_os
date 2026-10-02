@@ -55,18 +55,18 @@ namespace Kiwi::Proc::Elf
                 Fs::Vfs::closeFile(elf_file);
 
                 // parse the file
-                const Elf64Ehdr *hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());
+                auto hdr = reinterpret_cast<const Elf64Ehdr *>(buf.data());
                 int is_file_valid = elf_check(const_cast<Elf64Ehdr *>(hdr));
                 if (is_file_valid != 0) {
                         kcontext().logger.err("elf is not valid");
                         return -1;
                 }
 
-                Lib::uptr phdr_offset = reinterpret_cast<Lib::uptr>(hdr) + hdr->e_phoff;
+                auto phdr_offset = reinterpret_cast<Lib::uptr>(hdr) + hdr->e_phoff;
                 Lib::uptr highest_vaddr = 0;
 
                 for (elf64_half i = 0; i < hdr->e_phnum; i++) {
-                        Elf64Phdr *phdr = reinterpret_cast<Elf64Phdr *>(phdr_offset + i * hdr->e_phentsize);        
+                        auto phdr = reinterpret_cast<Elf64Phdr *>(phdr_offset + i * hdr->e_phentsize);
                         if (phdr->p_type != PhdrType::PhdrTypeLoad)
                                 continue;
 
@@ -102,7 +102,7 @@ namespace Kiwi::Proc::Elf
                                 } else {
                                         Lib::uptr rel_off = j * Mem::PAGE_SIZE - intra_offset;
                                         if (rel_off < phdr->p_filesz)
-                                                to_copy = Lib::min<Lib::usize>(Mem::PAGE_SIZE, phdr->p_filesz - rel_off);                                
+                                                to_copy = Lib::min<Lib::usize>(Mem::PAGE_SIZE, phdr->p_filesz - rel_off);
                                 }
 
                                 if (to_copy > 0) {

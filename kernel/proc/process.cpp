@@ -129,7 +129,7 @@ namespace Kiwi::Proc
                 user_stack(parent.user_stack, this->pml4t)
         {
                 Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
-                
+
                 this->id                = id;
                 this->cr3               = reinterpret_cast<Lib::u64>(this->pml4t.raw()) - hhdm_offset;
                 this->time              = 0;
@@ -144,8 +144,8 @@ namespace Kiwi::Proc
 
         void Process::initUserStack(this Process &self)
         {
-                Lib::uptr *envp_uaddrs = self.user_stack.push_string_array(self.envp, self.envc);
-                Lib::uptr *argv_uaddrs = self.user_stack.push_string_array(self.argv, self.argc);
+                Lib::uptr *envp_uaddrs = self.user_stack.pushStringArray(self.envp, self.envc);
+                Lib::uptr *argv_uaddrs = self.user_stack.pushStringArray(self.argv, self.argc);
 
                 self.user_stack.align(16);
 

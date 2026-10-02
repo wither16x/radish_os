@@ -92,11 +92,11 @@ namespace Kiwi::Mem
         {
                 Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
 
-                // create intermediate page tables containing informations
-                // that tell the CPU where the corresponding frame is
+                /* create intermediate page tables containing informations
+                * that tell the CPU where the corresponding frame is */
 
-                // split the virtual address to find the its indices in the
-                // page tables
+                /* split the virtual address to find the its indices in the
+                * page tables */
                 Lib::usize pml4t_idx = (vaddr >> 39) & 0x1ff;
                 Lib::usize pdpt_idx  = (vaddr >> 30) & 0x1ff;
                 Lib::usize pdt_idx   = (vaddr >> 21) & 0x1ff;
@@ -112,7 +112,7 @@ namespace Kiwi::Mem
                         );
                 }
 
-                PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdpt->entries[pdpt_idx] & PageFlag::Present)) {
                         pdpt->entries[pdpt_idx] = Pmm::allocateFrame() | PageFlag::ReadWriteUser;
                         Lib::memset(
@@ -122,7 +122,7 @@ namespace Kiwi::Mem
                         );
                 }
 
-                PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdt->entries[pdt_idx] & PageFlag::Present)) {
                         pdt->entries[pdt_idx] = Pmm::allocateFrame() | PageFlag::ReadWriteUser;
                         Lib::memset(
@@ -132,7 +132,7 @@ namespace Kiwi::Mem
                         );
                 }
 
-                PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pt->entries[pt_idx] & PageFlag::Present))
                         pt->entries[pt_idx] = paddr | flags;
         }
@@ -149,15 +149,15 @@ namespace Kiwi::Mem
                 if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                         return;
 
-                PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                         return;
 
-                PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                         return;
 
-                PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pt->entries[pt_idx] & PageFlag::Present))
                         return;
 
@@ -200,15 +200,15 @@ namespace Kiwi::Mem
                 if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                         return 0;
 
-                PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                         return 0;
 
-                PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                         return 0;
 
-                PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 return (pt->entries[pt_idx] & PHYS_ADDR_MASK) + (vaddr & 0xfff);
         }
 
@@ -224,15 +224,15 @@ namespace Kiwi::Mem
                 if (not (self.raw_pml4t->entries[pml4t_idx] & PageFlag::Present))
                         return false;
 
-                PageTable *pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdpt = reinterpret_cast<PageTable *>((self.raw_pml4t->entries[pml4t_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdpt->entries[pdpt_idx] & PageFlag::Present))
                         return false;
 
-                PageTable *pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pdt = reinterpret_cast<PageTable *>((pdpt->entries[pdpt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 if (not (pdt->entries[pdt_idx] & PageFlag::Present))
                         return false;
 
-                PageTable *pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
+                auto pt = reinterpret_cast<PageTable *>((pdt->entries[pdt_idx] & PHYS_ADDR_MASK) + hhdm_offset);
                 return (pt->entries[pt_idx] & PageFlag::Present) != 0;
         }
 

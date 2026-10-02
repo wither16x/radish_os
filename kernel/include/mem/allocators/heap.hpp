@@ -18,7 +18,7 @@ namespace Kiwi::Mem::Allocators
         template<typename T>
         class HeapAllocator : public Allocator<T>
         {
-                struct BlockHeader : public Lib::LinkedListHeader
+                struct BlockHeader : Lib::LinkedListHeader
                 {
                         Lib::usize bytes;
                         bool free;
@@ -38,7 +38,7 @@ namespace Kiwi::Mem::Allocators
                         kcontext().pml4t().mapPage(
                                 new_page,
                                 Pmm::allocateFrame(),
-                                PageFlag::ReadWriteUser | PageFlag::NoExec
+                                PageFlag::ReadWrite | PageFlag::NoExec
                         );
                         ++self.pages;
 
@@ -62,7 +62,7 @@ namespace Kiwi::Mem::Allocators
 
                         BlockHeader *curr = self.block_list.first();
                         while (curr) {
-                                Lib::uptr curr_addr = reinterpret_cast<Lib::uptr>(curr);
+                                auto curr_addr = reinterpret_cast<Lib::uptr>(curr);
                                 Lib::uptr curr_end = curr_addr + sizeof(BlockHeader) + curr->bytes;
 
                                 if (not curr->free and curr_end >= last_page)
@@ -75,7 +75,7 @@ namespace Kiwi::Mem::Allocators
                         if (not last_block->free)
                                 return false;
 
-                        Lib::uptr last_addr  = reinterpret_cast<Lib::uptr>(last_block);
+                        auto last_addr = reinterpret_cast<Lib::uptr>(last_block);
 
                         if (last_addr >= last_page) {
                                 if (last_block->prev)
@@ -91,7 +91,7 @@ namespace Kiwi::Mem::Allocators
 
                         kcontext().pml4t().unmapPage(last_page);
                         --self.pages;
-                        
+
                         return true;
                 }
 
@@ -101,7 +101,7 @@ namespace Kiwi::Mem::Allocators
                         Lib::usize rem = self.curr_block->bytes - base_size;        // remaining bytes
 
                         if (rem >= sizeof(BlockHeader) + self.alignment) {
-                                Lib::uptr block_base = reinterpret_cast<Lib::uptr>(reinterpret_cast<Lib::u8 *>(self.curr_block) + sizeof(BlockHeader) + base_size);
+                                auto block_base = reinterpret_cast<Lib::uptr>(reinterpret_cast<Lib::u8 *>(self.curr_block) + sizeof(BlockHeader) + base_size);
                                 BlockHeader *new_block = self.createBlock(block_base, rem, true, self.curr_block, static_cast<BlockHeader *>(self.curr_block->next));
 
                                 if (self.curr_block->next)
@@ -132,7 +132,7 @@ namespace Kiwi::Mem::Allocators
                 /// Create a new block.
                 BlockHeader *createBlock(Lib::uptr base, Lib::usize bytes, bool free, BlockHeader *prev, BlockHeader *next)
                 {
-                        BlockHeader *block = reinterpret_cast<BlockHeader *>(base);
+                        auto block = reinterpret_cast<BlockHeader *>(base);
                         block->bytes = bytes - sizeof(BlockHeader);
                         block->free = free;
                         block->prev = prev;
@@ -152,7 +152,7 @@ namespace Kiwi::Mem::Allocators
                         kcontext().pml4t().mapPage(
                                 self.base,
                                 Pmm::allocateFrame(),
-                                PageFlag::ReadWriteUser | PageFlag::NoExec
+                                PageFlag::ReadWrite | PageFlag::NoExec
                         );
                         self.pages = 1;
 
@@ -188,7 +188,7 @@ namespace Kiwi::Mem::Allocators
 
                 void free(T n) override
                 {
-                        BlockHeader *hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<Lib::u8 *>(n) - sizeof(BlockHeader));
+                        auto hdr = reinterpret_cast<BlockHeader *>(reinterpret_cast<Lib::u8 *>(n) - sizeof(BlockHeader));
 
                         if (hdr->free)
                                 Panic::panic("double free");

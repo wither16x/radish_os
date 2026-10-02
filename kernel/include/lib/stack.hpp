@@ -54,7 +54,7 @@ namespace Kiwi::Lib
                         *(--self.pointer) = value;
                 }
 
-                uptr *push_string_array(this Stack<T> &self, char **s, int count)
+                uptr *pushStringArray(this Stack<T> &self, char **s, int count)
                 {
                         if (not s)
                                 return nullptr;
@@ -66,7 +66,7 @@ namespace Kiwi::Lib
                                 self.grow(len);
 
                                 for (usize j = 0; j < len; j++) {
-                                        uptr uaddr = reinterpret_cast<uptr>(self.pointer) + j;
+                                        auto uaddr = reinterpret_cast<uptr>(self.pointer) + j;
                                         uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext().bootloader.request<Boot::HhdmRequest>().offset;
                                         *reinterpret_cast<char *>(kaddr) = s[i][j];
                                 }
@@ -80,7 +80,7 @@ namespace Kiwi::Lib
                 void push_qword(this Stack<T> &self, u64 value)
                 {
                         self.grow(sizeof(value));
-                        uptr uaddr = reinterpret_cast<uptr>(self.pointer);
+                        auto uaddr = reinterpret_cast<uptr>(self.pointer);
                         uptr kaddr = self.pml4t->virtToPhys(uaddr) + kcontext().bootloader.request<Boot::HhdmRequest>().offset;
                         *reinterpret_cast<u64 *>(kaddr) = value;
                 }
