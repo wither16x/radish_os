@@ -2,7 +2,7 @@
 
 #include <cpu/gdt.hpp>
 #include <cpu/irq.hpp>
-#include <cpu/syscall.hpp>
+#include <cpu/syscalls/syscalls.hpp>
 #include <lib/time.hpp>
 #include <lib/typing.hpp>
 #include <lib/vector.hpp>
@@ -67,8 +67,8 @@ namespace Kiwi::Proc
                 void loadPml4t(this Process &self);
                 void switchPml4t(this Process &self, const Mem::PML4T &pml4t);
                 void destroyPml4t(this Process &self);
-                void saveContext(this Process &self, Cpu::SyscallFrame &frame);
-                void loadContext(this Process &self, Cpu::SyscallFrame &frame);
+                void saveContext(this Process &self, Cpu::Syscalls::SyscallFrame &frame);
+                void loadContext(this Process &self, Cpu::Syscalls::SyscallFrame &frame);
                 void resetStack(this Process &self);
                 void resetHeap(this Process &self, Lib::uptr start);
                 void switchEntry(this Process &self, Elf::elf_entry_t entry);

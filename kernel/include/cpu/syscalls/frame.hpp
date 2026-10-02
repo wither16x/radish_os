@@ -2,10 +2,8 @@
 
 #include <lib/typing.hpp>
 
-namespace Kiwi::Cpu
+namespace Kiwi::Cpu::Syscalls
 {
-        /// Registers and values pushed before calling the syscall
-        /// handler.
         struct [[gnu::packed]] SyscallFrame
         {
                 Lib::u64 ds;
@@ -32,7 +30,4 @@ namespace Kiwi::Cpu
                 Lib::u64 rsp;
                 Lib::u64 ss;
         };
-
-        /// Execute the syscall corresponding to RAX.
-        extern "C" void syscallHandler(SyscallFrame &frame);
-} // namespace Kiwi::Cpu
+} // namespace Kiwi::Cpu::Syscalls

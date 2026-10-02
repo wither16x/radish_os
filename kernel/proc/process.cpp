@@ -3,7 +3,7 @@
 #include <kernel.hpp>
 #include <mem/pml4t.hpp>
 #include <cpu/irq.hpp>
-#include <cpu/syscall.hpp>
+#include <cpu/syscalls/syscalls.hpp>
 #include <cpu/userspace.hpp>
 #include <cpu/assembly.hpp>
 #include <lib/typing.hpp>
@@ -224,7 +224,7 @@ namespace Kiwi::Proc
                 self.pml4t.destroy();
         }
 
-        void Process::saveContext(this Process &self, Cpu::SyscallFrame &frame)
+        void Process::saveContext(this Process &self, Cpu::Syscalls::SyscallFrame &frame)
         {
                 __asm__ volatile (
                         "fxsave %0"
@@ -254,7 +254,7 @@ namespace Kiwi::Proc
                 self.cr3          = frame.cr3;
         }
 
-        void Process::loadContext(this Process &self, Cpu::SyscallFrame &frame)
+        void Process::loadContext(this Process &self, Cpu::Syscalls::SyscallFrame &frame)
         {
                 __asm__ volatile (
                         "fxrstor %0"
