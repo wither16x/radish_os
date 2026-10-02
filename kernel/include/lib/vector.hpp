@@ -103,7 +103,7 @@ namespace Kiwi::Lib
                         ++self.obj_count;
                 }
 
-                Result<T, bool> popBack(this Vector<T> &self)
+                T popBack(this Vector<T> &self)
                 {
                         if (self.obj_count > 0) {
                                 --self.obj_count;
@@ -111,7 +111,7 @@ namespace Kiwi::Lib
                                 self.buf.destroy(self.obj_count);
                                 return obj;
                         } else {
-                                return Error(false);
+                                return T{};
                         }
                 }
 

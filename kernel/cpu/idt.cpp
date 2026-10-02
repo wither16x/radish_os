@@ -1,3 +1,4 @@
+#include <panic/panic_simple.hpp>
 #include <cpu/idt.hpp>
 #include <lib/logging.hpp>
 #include <lib/typing.hpp>
@@ -59,6 +60,9 @@ namespace Kiwi::Cpu
 
         void Idt::setGate(this Idt &self, int vector, void (*isr)(), Lib::u8 flags)
         {
+		if (vector >= self.MAX_GATES)
+			Panic::panic_simple("Could not set IDT gate because vector is too big");
+
                 self.gates[vector].isr_low     = reinterpret_cast<Lib::u64>(isr) & 0xffff;
                 self.gates[vector].selector    = SEGMENT_SELECTOR;
                 self.gates[vector].ist         = 0;

@@ -20,7 +20,7 @@ if [[ $component == "k" ]]; then
 
         echo "-------------------- Kernel configuration --------------------"
         echo "Leave blank for default option."
-        
+
         read -p "C compiler [$opt_cc]: " input
         opt_cc=${input:-$opt_cc}
         read -p "C++ compiler [$opt_cxx]: " input

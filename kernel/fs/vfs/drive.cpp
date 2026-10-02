@@ -1,5 +1,6 @@
 #include <fs/vfs/drive.hpp>
 #include <fs/vfs/node.hpp>
+#include <kernel.hpp>
 
 namespace Kiwi::Fs::Vfs
 {
@@ -47,7 +48,11 @@ namespace Kiwi::Fs::Vfs
                 if (not drv.fs)
                         return Status::FsNotMounted;
 
-                drv.fs->unmount();
+                if (drv.fs->unmount().error() != Status::Success) {
+			kcontext().logger.err("failed to unmount drive {}", drive);
+			return Status::FsMounted;
+		}
+
                 delete drv.fs;
                 drv.fs = nullptr;
                 releaseNode(drv.root);

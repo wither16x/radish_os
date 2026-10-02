@@ -71,7 +71,7 @@ namespace Kiwi::Boot::Bootloaders
                 volatile limine_hhdm_request l_hhdm_info = {
                         .id = LIMINE_HHDM_REQUEST_ID,
                         .revision = 0,
-                        .response = nullptr      
+                        .response = nullptr
                 };
 
                 [[gnu::used, gnu::section(".limine_requests")]]
@@ -185,8 +185,6 @@ namespace Kiwi::Boot::Bootloaders
                 case RequestType::Framebuffer:
                         return self.req_framebuffer;
                 }
-
-                Panic::panic_simple("invalid request");
         }
 
         const LimineSpecific::RequestsStartMarker &Limine::requestsStart(this const Limine &self)

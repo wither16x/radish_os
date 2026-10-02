@@ -3,6 +3,7 @@
 #include <cpu/gdt.hpp>
 #include <kernel.hpp>
 #include <lib/logging.hpp>
+#include <panic/panic_simple.hpp>
 
 namespace Kiwi::Cpu
 {
@@ -41,15 +42,19 @@ namespace Kiwi::Cpu
                 kcontext().logger.ok("loaded gdt");
         }
 
-        void Gdt::setDescriptor(this Gdt &self, int n, Lib::u32 base, Lib::u32 limit, Lib::u8 access, Lib::u8 flags)
-        {
+	void Gdt::setDescriptor(this Gdt &self, int n, Lib::u32 base,
+		Lib::u32 limit, Lib::u8 access, Lib::u8 flags)
+	{
+		if (n >= self.MAX_DESCRIPTORS)
+			Panic::panic_simple("Could not set GDT descriptor because index is too big");
+
                 self.descriptors[n].limit_low        = limit & 0xffff;
                 self.descriptors[n].base_low         = base & 0xffff;
                 self.descriptors[n].base_middle      = (base >> 16) & 0xff;
                 self.descriptors[n].access           = access;
                 self.descriptors[n].limit_and_flags  = (flags & 0xf0) | ((limit >> 16) & 0x0f);
                 self.descriptors[n].base_high        = base >> 24;
-        }
+	}
 
         Tss &Gdt::getTss(this Gdt &self)
         {

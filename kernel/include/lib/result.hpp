@@ -196,4 +196,87 @@ namespace Kiwi::Lib
                         return self;
                 }
         };
+
+	// This specialization is experimental.
+        template<typename E>
+        class [[nodiscard("Handle the results!")]] Result<void, E>
+        {
+		E _error;
+                bool has_value;
+
+        public:
+                Result()
+                        : has_value(true)
+                {}
+
+                Result(Error<E> u)
+                        : _error(move(u.error)), has_value(false)
+                {}
+
+                Result(const Result<void, E> &other)
+                        : has_value(other.has_value)
+                {
+                        if (this->has_value)
+                                return;
+                        else
+                                new (&this->_error) E(other._error);
+                }
+
+                Result(Result<void, E> &&other) noexcept
+                        : has_value(other.has_value)
+                {
+                        if (this->has_value)
+                                return;
+                        else
+                                new (&this->_error) E(move(other._error));
+                }
+
+                ~Result()
+                {
+                        if (this->has_value)
+                                return;
+                        else
+                                _error.~E();
+                }
+
+                const E &error(this const Result<void, E> &self)
+                {
+                        if (self.has_value)
+                                Panic::panic_simple("Result::error() on success");
+
+                        return self._error;
+                }
+
+                Result& operator=(this Result<void, E> &self, const Result& other)
+                {
+                        if (&self == &other)
+                                return self;
+
+                        self.~Result();
+
+                        self.has_value = other.has_value;
+                        if (self.has_value)
+                                return self;
+                        else
+                                new (&self._error) E(other._error);
+
+                        return self;
+                }
+
+                Result& operator=(this Result<void, E> &self, Result&& other) noexcept
+                {
+                        if (&self == &other)
+                                return self;
+
+                        self.~Result();
+
+                        self.has_value = other.has_value;
+                        if (self.has_value)
+                                return self;
+                        else
+                                new (&self._error) E(move(other._error));
+
+                        return self;
+                }
+        };
 } // namespace Kiwi::Lib

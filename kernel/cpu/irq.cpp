@@ -9,6 +9,7 @@
 #include <lib/typing.hpp>
 #include <proc/process.hpp>
 #include <proc/scheduler.hpp>
+#include <panic/panic_simple.hpp>
 
 namespace Kiwi::Cpu
 {
@@ -21,6 +22,9 @@ namespace Kiwi::Cpu
 
         void registerIrq(int n, Lib::callable<void, IrqFrame &> handler)
         {
+		if (n >= MAX_IRQ_HANDLERS)
+			Panic::panic_simple("Could not register IRQ because index is too big");
+
                 handlers[n] = handler;
                 Drivers::Pic::irqUnmask(n);
         }
@@ -32,12 +36,12 @@ namespace Kiwi::Cpu
                         return;
                 }
 
-                void (*handler)(IrqFrame &) = handlers[f.irqno];
+		Lib::callable<void, IrqFrame &> handler = handlers[f.irqno];
                 if (not handler) {
                         kcontext().logger.err("no handler available for irq {}", f.irqno);
                         return;
                 }
-                
+
                 handler(f);
         }
 } // namespace Kiwi::Cpu
