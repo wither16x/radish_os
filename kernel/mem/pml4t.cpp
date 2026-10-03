@@ -15,7 +15,7 @@ namespace Kiwi::Mem
 		Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
 
                 if (not parent.isEntryPresent(idx)) {
-                        parent.at(idx) = Pmm::allocateFrame() | PageFlag::ReadWriteUser;
+			parent.set(idx, Pmm::allocateFrame() | PageFlag::ReadWriteUser);
                         Lib::memset(
                                 reinterpret_cast<Lib::u64 *>((parent.at(idx) & PHYS_ADDR_MASK) + hhdm_offset),
                                 0,
@@ -42,7 +42,7 @@ namespace Kiwi::Mem
                 self.init();
 
                 for (Lib::usize i = PAGE_TABLE_ENTRIES / 2; i < PAGE_TABLE_ENTRIES; i++)
-                        self.raw_pml4t->at(i) = parent.raw()->at(i);
+                        self.raw_pml4t->set(i, parent.raw()->at(i));
 
                 for (Lib::usize i = 0; i < PAGE_TABLE_ENTRIES / 2; i++) {
 			if (not parent.raw()->isEntryPresent(i))
@@ -51,9 +51,9 @@ namespace Kiwi::Mem
                         Lib::u64 flags = parent.raw()->at(i) & ~PHYS_ADDR_MASK;
                         Lib::uptr pdpt_phys = parent.raw()->at(i) & PHYS_ADDR_MASK;
                         auto &pdpt = *reinterpret_cast<PageTable *>(pdpt_phys + hhdm_offset);
-
                         Lib::uptr new_pdpt_phys = ptDeepCopy(pdpt, 3);
-                        self.raw_pml4t->at(i) = new_pdpt_phys | flags;
+
+			self.raw_pml4t->set(i, new_pdpt_phys | flags);
                 }
         }
 
@@ -116,7 +116,7 @@ namespace Kiwi::Mem
 		auto &pt = self.getOrCreateTable(pdt, pdt_idx);
 
 		if (not pt.isEntryPresent(pt_idx))
-			pt.at(pt_idx) = paddr | flags;
+			pt.set(pt_idx, paddr | flags);
         }
 
         void PML4T::unmapPage(this PML4T &self, Lib::uptr vaddr)
@@ -143,7 +143,7 @@ namespace Kiwi::Mem
                 if (not pt.isEntryPresent(pt_idx))
                         return;
 
-                pt.at(pt_idx) = 0;
+                pt.clear(pt_idx);
                 Cpu::invlpg(vaddr);
 
                 // A table must have no mapped entries to be deleted
@@ -153,21 +153,21 @@ namespace Kiwi::Mem
                                 return;
                 }
                 Pmm::freeFrame(pdt.at(pdt_idx) & PHYS_ADDR_MASK);
-                pdt.at(pdt_idx) = 0;
+                pdt.clear(pdt_idx);
 
                 for (Lib::u16 i = 0; i < PAGE_TABLE_ENTRIES; i++) {
                         if (pdt.isEntryPresent(i))
                                 return;
                 }
                 Pmm::freeFrame(pdpt.at(pdpt_idx) & PHYS_ADDR_MASK);
-                pdpt.at(pdpt_idx) = 0;
+                pdpt.clear(pdpt_idx);
 
                 for (Lib::u16 i = 0; i < PAGE_TABLE_ENTRIES; i++) {
                         if (pdpt.isEntryPresent(i))
                                 return;
                 }
                 Pmm::freeFrame(self.raw_pml4t->at(pml4t_idx) & PHYS_ADDR_MASK);
-                self.raw_pml4t->at(pml4t_idx) = 0;
+                self.raw_pml4t->clear(pml4t_idx);
         }
 
         Lib::uptr PML4T::virtToPhys(this const PML4T &self, Lib::uptr vaddr)

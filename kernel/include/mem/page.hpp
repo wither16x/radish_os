@@ -24,7 +24,9 @@ namespace Kiwi::Mem
                 Lib::u64 entries[PAGE_TABLE_ENTRIES];
 
 		bool isEntryPresent(this const PageTable &self, Lib::u64 idx);
-		Lib::u64 &at(this PageTable &self, Lib::u64 idx);;
+		Lib::u64 at(this const PageTable &self, Lib::u64 idx);
+		void set(this PageTable &self, Lib::u64 idx, Lib::u64 value);
+		void clear(this PageTable &self, Lib::u64 idx);
         };
 
         Lib::uptr ptDeepCopy(PageTable &src, int level);
