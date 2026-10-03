@@ -3,6 +3,7 @@
 
 namespace Kiwi::Panic
 {
+	[[noreturn]]
         void panic_simple(const char *msg)
         {
                 panic(Lib::String<PANIC_MESSAGE_SIZE>(msg));

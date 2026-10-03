@@ -15,6 +15,7 @@ namespace Kiwi::Panic
         * If there is a process running, then this process is immediately aborted.
         * Otherwise, the interrupts are canceled and the CPU is idling forever. */
         template<typename... ARGS>
+	[[noreturn]]
         void panic(Lib::String<PANIC_MESSAGE_SIZE> fmt, ARGS &&...args)
         {
                 Cpu::disableInterrupts();
@@ -43,10 +44,14 @@ namespace Kiwi::Panic
 
                 Proc::Scheduler::unlock();
                 Cpu::enableInterrupts();
+
+		while (true)
+			Cpu::idle();
         }
 
         template<>
-        inline void panic(Lib::String<PANIC_MESSAGE_SIZE> fmt)
+	[[noreturn]]
+	inline void panic(Lib::String<PANIC_MESSAGE_SIZE> fmt)
         {
                 Cpu::disableInterrupts();
                 Proc::Scheduler::lock();
@@ -73,5 +78,8 @@ namespace Kiwi::Panic
 
                 Proc::Scheduler::unlock();
                 Cpu::enableInterrupts();
+
+		while (true)
+			Cpu::idle();
         }
 } // namespace Kiwi::Panic
