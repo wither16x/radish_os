@@ -22,9 +22,12 @@ namespace Kiwi::Mem
         struct [[gnu::packed]] PageTable
         {
                 Lib::u64 entries[PAGE_TABLE_ENTRIES];
+
+		bool isEntryPresent(this const PageTable &self, Lib::u64 idx);
+		Lib::u64 &at(this PageTable &self, Lib::u64 idx);;
         };
 
-        Lib::uptr ptDeepCopy(PageTable *src, int level);
+        Lib::uptr ptDeepCopy(PageTable &src, int level);
 
         inline Lib::uptr pageAlignDown(Lib::uptr base)
         {

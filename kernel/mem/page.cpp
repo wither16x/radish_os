@@ -3,10 +3,27 @@
 #include <mem/pmm.hpp>
 #include <lib/typing.hpp>
 #include <lib/memory.hpp>
+#include <panic/panic_simple.hpp>
 
 namespace Kiwi::Mem
 {
-        Lib::uptr ptDeepCopy(PageTable *src, int level)
+	bool PageTable::isEntryPresent(this const PageTable &self, Lib::u64 idx)
+	{
+		if (idx >= PAGE_TABLE_ENTRIES)
+			Panic::panic_simple("page table entry too high");
+
+		return self.entries[idx] & PageFlag::Present;
+	}
+
+	Lib::u64 &PageTable::at(this PageTable &self, Lib::u64 idx)
+	{
+		if (idx >= PAGE_TABLE_ENTRIES)
+			Panic::panic_simple("page table entry too high");
+
+		return self.entries[idx];
+	}
+
+        Lib::uptr ptDeepCopy(PageTable &src, int level)
         {
                 Lib::uptr hhdm_offset = kcontext().bootloader.request<Boot::HhdmRequest>().offset;
 
@@ -15,7 +32,7 @@ namespace Kiwi::Mem
                 Lib::memset(new_pt, 0, PAGE_SIZE);
 
                 for (Lib::usize i = 0; i < PAGE_TABLE_ENTRIES; i++) {
-                        Lib::u64 entry = src->entries[i];
+                        Lib::u64 entry = src.entries[i];
                         if (not (entry & PageFlag::Present))
                                 continue;
 
@@ -29,7 +46,7 @@ namespace Kiwi::Mem
                                 Lib::memcpy(dest_page, src_page, PAGE_SIZE);
                                 new_pt->entries[i] = frame | flags;
                         } else {
-                                PageTable *child_pt = reinterpret_cast<PageTable *>(child_paddr + hhdm_offset);
+                                PageTable &child_pt = *reinterpret_cast<PageTable *>(child_paddr + hhdm_offset);
                                 Lib::uptr child_paddr = ptDeepCopy(child_pt, level - 1);
                                 new_pt->entries[i] = child_paddr | flags;
                         }
